@@ -19,10 +19,9 @@ exports.getAff = Controller(async(req, res) => {
                 Authorization: userPass
             }
         })
-        console.log(affiliateResponse)
+        res.status(200).send({success: true, data: affiliateResponse.data})
     } catch(err) {
         console.error(err)
+        res.send(StatusError.badRequest)
     }
-
-    res.status(200).send({"affiliateResponse": "some"})
 })
