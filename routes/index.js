@@ -12,6 +12,6 @@ router.get('/users', controllers.getUserDetails)
 
 router.get('/api/v1/ads', controllers.getAds)
 
-router.get('/token', controllers.getToken)
+router.get('/token', controllers.getSite)
 
 module.exports = router

@@ -4,7 +4,9 @@ const StatusError = require('../helper/StatusError')
 const axios = require('axios')
 const FormData = require('form-data')
 const request = require('request')
+const jwt = require('jsonwebtoken')
 const util = require('util')
+const init = require('./affiliate')
 
 exports.getAds = Controller(async(req, res) => {
     // Disable SSL certificate
@@ -41,8 +43,37 @@ exports.getAds = Controller(async(req, res) => {
         // console.log(response)
     console.log(util.inspect(response.data, false, null, true))
 
-    
 
+    init.getAff.then(async function(creds){
+
+    const affiliateEndpoint = `${conf.get('accesstrade_endpoint')}/v1/publishers/me/sites`
+    //This endpoint is for testing, needs to be replaces with the one to request the similar items
+    const token = jwt.sign(
+        { sub: creds.userUid},
+        creds.secretKey,
+        {
+          algorithm: "HS256"
+        }
+      )
+
+    try{
+        const affiliateResponse = await axios.get(affiliateEndpoint, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'X-Accesstrade-User-Type': 'publisher'
+            }
+        })
+        // Success response for requesting the affiliate API
+        console.log(affiliateResponse.data)
+    } catch(err) {
+        // Error handler after the request to the API
+        console.error(err)
+    }
+
+	console.log('Ready to be used')
+    }).catch((err)=>{console.error(err)})
+
+    //This response needs to be changed inside of the request for the affiliate API.
     res.status(200).send({
         results: [{
             adsinfo: [{

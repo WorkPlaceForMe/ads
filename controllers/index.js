@@ -1,9 +1,9 @@
 const { getAds } = require('./ads')
 const { getUserDetails } = require('./get-user-details')
-const { getToken } = require('./token')
+const { getSite } = require('./getSites')
 
 module.exports = {
 	getAds,
 	getUserDetails,
-	getToken
+	getSite
 }
