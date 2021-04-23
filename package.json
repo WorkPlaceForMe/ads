@@ -16,6 +16,7 @@
     "form-data": "^4.0.0",
     "http-errors": "~1.6.3",
     "jade": "~1.11.0",
+    "jsonwebtoken": "^8.5.1",
     "morgan": "~1.9.1",
     "properties-reader": "^2.2.0",
     "request": "^2.88.2",

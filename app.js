@@ -3,12 +3,15 @@ const path = require('path')
 const cookieParser = require('cookie-parser')
 const logger = require('morgan')
 const handleError = require('./helper/handle-error')
+const init = require('./controllers/affiliate')
 
 const routers = require('./routes')
 const cors = require('cors')
 
 const app = express()
 const port = 3310
+
+let credsAffiliate = {}
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
@@ -23,6 +26,10 @@ app.use(express.static(path.join(__dirname, 'public')))
 
 // initialize routers
 app.use(routers)
+
+init.getAff.then(function(res){
+	credsAffiliate = res
+}).catch((err)=>{console.error(err)})
 
 // global error handling
 app.use(handleError)

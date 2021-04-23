@@ -5,7 +5,6 @@ const axios = require('axios')
 const FormData = require('form-data')
 const request = require('request')
 const util = require('util')
-var CryptoJS = require("crypto-js");
 
 exports.getAds = Controller(async(req, res) => {
     // Disable SSL certificate
@@ -42,20 +41,7 @@ exports.getAds = Controller(async(req, res) => {
         // console.log(response)
     console.log(util.inspect(response.data, false, null, true))
 
-    const userAffiliate = conf.get('accesstrade_user')
-    const passAffiliate = conf.get('accesstrade_pass')
-    const affiliateEndpoint = `${conf.get('accesstrade_endpoint')}/publishers/auth/${userAffiliate}`
-
-    var userPass = CryptoJS.SHA256(`${userAffiliate}:${CryptoJS.MD5(passAffiliate)}`)
-    // console.log(userPass)
-
-    const affiliateResponse = await axios.get(affiliateEndpoint, {
-        headers: {
-            userPass
-        }
-    })
-
-    console.log(affiliateResponse,'================================')
+    
 
     res.status(200).send({
         results: [{
