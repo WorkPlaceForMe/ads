@@ -12,4 +12,6 @@ router.get('/users', controllers.getUserDetails)
 
 router.get('/api/v1/ads', controllers.getAds)
 
+router.get('/testAffiliate', controllers.getAff)
+
 module.exports = router
