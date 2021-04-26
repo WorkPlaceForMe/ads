@@ -37,16 +37,17 @@ exports.getAds = Controller(async(req, res) => {
         },
         data: formData
     }
+    console.log("Sending request")
+
     const response = await axios(request_config)
 
     console.log('=====================> VISTA RESPONSE <========================')
         // console.log(response)
     console.log(util.inspect(response.data, false, null, true))
 
-
     init.getAff.then(async function(creds){
 
-    const affiliateEndpoint = `${conf.get('accesstrade_endpoint')}/v1/publishers/me/sites`
+    const affiliateEndpoint = `${conf.get('accesstrade_endpoint')}/v1/publishers/me/reports/conversion`
     //This endpoint is for testing, needs to be replaces with the one to request the similar items
     const token = jwt.sign(
         { sub: creds.userUid},
