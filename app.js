@@ -20,6 +20,8 @@ app.set('view engine', 'jade')
 app.use(logger('dev'))
 app.use(express.static(path.join(__dirname, 'public')))
 
+app.use('/api/pictures', express.static('./public/pictures'))
+
 // initialize routers
 app.use(routers)
 

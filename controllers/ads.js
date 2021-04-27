@@ -23,7 +23,8 @@ exports.getAds = Controller(async(req, res) => {
     const { ad_type, ad_width, ad_height, ad_format, media_type, url } = req.query
     let formData = new FormData()
     formData.append('upload', request(url))
-    formData.append('subscriptions', 'Object,themes,food,tags,face,fashion')
+    // formData.append('subscriptions', 'Object,themes,food,tags,face,fashion')
+    formData.append('subscriptions', 'Object')
 
     const request_config = {
         method: 'post',
@@ -39,11 +40,21 @@ exports.getAds = Controller(async(req, res) => {
     }
     console.log("Sending request")
 
-    const response = await axios(request_config)
+    const response = await axios(request_config).catch((err)=>{console.error(err)})
 
     console.log('=====================> VISTA RESPONSE <========================')
-        // console.log(response)
-    console.log(util.inspect(response.data, false, null, true))
+        // console.log(response.data.results)
+    // console.log(util.inspect(response.data, false, null, true))
+    let resultsVista = []
+    if(response.data){
+        for(const obj of response.data.results.Object){
+            if(obj.class != 'person'){
+                resultsVista.push(obj)
+            }
+        }
+    }
+
+    console.log(resultsVista)
 
     init.getAff.then(async function(creds){
 
