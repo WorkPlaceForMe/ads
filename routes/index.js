@@ -14,4 +14,6 @@ router.get('/api/v1/ads', controllers.getAds)
 
 router.get('/token', controllers.getSite)
 
+router.get('/campaigns', controllers.getCampaign)
+
 module.exports = router
