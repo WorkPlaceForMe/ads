@@ -25,7 +25,7 @@ exports.getAds = Controller(async(req, res) => {
     let formData = new FormData()
     formData.append('upload', request(url))
     // formData.append('subscriptions', 'Object,themes,food,tags,face,fashion')
-    formData.append('subscriptions', 'Object')
+    formData.append('subscriptions', 'Object,fashion')
 
     const request_config = {
         method: 'post',
@@ -48,9 +48,11 @@ exports.getAds = Controller(async(req, res) => {
     // console.log(util.inspect(response.data, false, null, true))
     let resultsVista = []
     if(response.data){
-        for(const obj of response.data.results.Object){
-            if(obj.class != 'person'){
-                resultsVista.push(obj)
+        for(const algo in response.data.results){
+            for(const obj of response.data.results[algo]){
+                if(obj.class != 'person'){
+                    resultsVista.push(obj)
+                }
             }
         }
     }
