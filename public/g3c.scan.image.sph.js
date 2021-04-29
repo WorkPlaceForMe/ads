@@ -59,7 +59,7 @@ $(document).ready(function () {
 			var i = document.createElement('div')
 			;(i.innerHTML = g.iframe), (i.id = 'mark_point_' + E++), (i.className = 'wrapper')
 			var j =
-				'position:absolute;zIndex:100;clear:both;width:240px;height:95px;padding:0.2em;background-color:#FFFFFF;display:none;border: 1px solid gray;-webkit-border-radius: 6px;-moz-border-radius: 6px;border-radius: 6px;-webkit-box-shadow: 0 2px 5px;-moz-box-shadow: 0 2px 5px;box-shadow: 0 2px 5px;'
+				'position:absolute;zIndex:50;clear:both;width:340px;height:410px;padding:0.2em;background-color:#FFFFFF;display:none;border: 1px solid gray;-webkit-border-radius: 6px;-moz-border-radius: 6px;border-radius: 6px;-webkit-box-shadow: 0 2px 5px;-moz-box-shadow: 0 2px 5px;box-shadow: 0 2px 5px;'
 			i.style.cssText = j
 			var k = a(e).width()
 			i.style.top = c.my - 20 + 'px'
@@ -77,7 +77,7 @@ $(document).ready(function () {
 					'url(http://scripts.graymatics.com/images/circle.png) no-repeat 50% 50%'
 				),
 					a('.wrapper').css('z-index', '50'),
-					a('.mark').css('z-index', '60'),
+					a('.mark').css('z-index', '200'),
 					a(this).css('z-index', '200'),
 					a('#' + b).css('z-index', '100'),
 					a('#' + b).css('display', '')
