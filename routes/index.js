@@ -16,4 +16,6 @@ router.get('/token', controllers.getSite)
 
 router.get('/campaigns', controllers.getCampaign)
 
+router.get('/quicklinks', controllers.getQuickLink)
+
 module.exports = router

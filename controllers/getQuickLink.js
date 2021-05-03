@@ -6,7 +6,7 @@ const cred = require('./affiliate')
 
 exports.getQuickLink = Controller(async(req, res) => {
     const siteId = 48475; //TODO: Change this hardcoded site ID to automatically fetching later on
-    const campaignId = 660; //TODO: Change this hardcoded campaign ID to automatically fetching later on
+    const campaignId = 675; //TODO: Change this hardcoded campaign ID to automatically fetching later on
     const affiliateEndpoint = `${conf.get('accesstrade_endpoint')}/v1/publishers/me/sites/${siteId}/campaigns/${campaignId}/creatives/quicklink`
     cred.getAff.then(async function(credentials){
     const token = jwt.sign(
