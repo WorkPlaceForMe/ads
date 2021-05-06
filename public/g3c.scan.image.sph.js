@@ -59,7 +59,7 @@ $(document).ready(function () {
 			var i = document.createElement('div')
 			;(i.innerHTML = g.iframe), (i.id = 'mark_point_' + E++), (i.className = 'wrapper')
 			var j =
-				'position:absolute;zIndex:50;clear:both;width:340px;height:410px;padding:0.2em;background-color:#FFFFFF;display:none;border: 1px solid gray;-webkit-border-radius: 6px;-moz-border-radius: 6px;border-radius: 6px;-webkit-box-shadow: 0 2px 5px;-moz-box-shadow: 0 2px 5px;box-shadow: 0 2px 5px;'
+				'position:absolute;zIndex:50;clear:both;width:350px;height:550px;padding:0.2em;background-color:#FFFFFF;display:none;border: 1px solid gray;-webkit-border-radius: 6px;-moz-border-radius: 6px;border-radius: 6px;-webkit-box-shadow: 0 2px 5px;-moz-box-shadow: 0 2px 5px;box-shadow: 0 2px 5px;'
 			i.style.cssText = j
 			var k = a(e).width()
 			i.style.top = c.my - 20 + 'px'
