@@ -62,7 +62,7 @@ exports.getAds = Controller(async(req, res) => {
     let resultsAffiliate = []
     for(const obj of resultsVista){
         await init.getAff.then(async function(creds){
-        
+
         // const affiliateEndpoint = `${conf.get('accesstrade_endpoint')}/v1/publishers/me/reports/conversion`
         // const siteId = 48475
         // const campaignId = 520
@@ -99,24 +99,20 @@ exports.getAds = Controller(async(req, res) => {
         //     resultsAffiliate.push(obj)
         //     console.error(err.response.data)
         // }
-
+            // console.log(obj.class)
         await readCsv.readCsv.then(async function(results){
             for(const resCsv of results){
-                if(resCsv['Category Name'] == obj.class){
-                    resultsAffiliate.push(resCsv)
+                if(resCsv['Merchant Product Name'].includes(obj.class)){
+                    resultsAffiliate.push({vista: obj, affiliate: resCsv})
                     break;
                 }
             }
-            // console.log(results[0], obj)
         })
-        // console.log('Ready to be used')
         }).catch((err)=>{console.error(err.data)})
     }
-    console.log(resultsAffiliate)
-    
+
     sendingResults = convert(resultsAffiliate)
 
-    //This response needs to be changed inside of the request for the affiliate API.
     res.status(200).send({
         results: sendingResults
     })
