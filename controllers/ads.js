@@ -69,7 +69,26 @@ exports.getAds = Controller(async(req, res) => {
         // const ids = {
         //     lazada : 520,
         //     trueShopping : 594,
-        //     shopee : 677
+        //     shopee : 677,
+        //     rabbitFinanceA: 720,
+        //     kkpPersonalLoan: 710,
+        //     rabbitFinanceB: 708,
+        //     nanmeeBooks: 692,
+        //     fitbit: 687,
+        //     taradDotCom: 675,
+        //     zwizAI: 638,
+        //     promotionsMoney: 709,
+        //     jorakayOnline: 645,
+        //     agoda: 721,
+        //     newTopsOnline: 704,
+        //     gscAsset: 701,
+        //     monteCarloTailors: 700,
+        //     cignaSmartHealth: 685,
+        //     cignaPA: 684,
+        //     cignaSuperPlan: 683,
+        //     allAboutYou: 666,
+        //     tripDotCom: 535,
+        //     accessTrade: 660
         // }
         // const affiliateEndpoint = `${conf.get('accesstrade_endpoint')}/v1/publishers/me/sites/${siteId}/campaigns/${ids.shopee}/productfeed/url`
         // const affiliateEndpoint = `${conf.get('accesstrade_endpoint')}/v1/publishers/me/sites/${siteId}/campaigns/affiliated`
