@@ -8,6 +8,7 @@ exports.convert = (arr) => {
     for(const obj of arr){
         const x = obj.boundingBox.left 
         const y =  obj.boundingBox.top - 150
+        console.log(obj,'===================')
         const adsinfo = [{
             focal_point: [x,y],
             description: 'WenVen Boys & Girls Cotton Jackets with Removable Hood',
