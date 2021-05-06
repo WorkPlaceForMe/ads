@@ -7,6 +7,7 @@ const request = require('request')
 const jwt = require('jsonwebtoken')
 const util = require('util')
 const init = require('./affiliate')
+const readCsv = require('./readCsv')
 const convert = require('../helper/convertObject').convert
 
 exports.getAds = Controller(async(req, res) => {
@@ -49,9 +50,11 @@ exports.getAds = Controller(async(req, res) => {
     let resultsVista = []
     if(response.data){
         for(const algo in response.data.results){
-            for(const obj of response.data.results[algo]){
-                if(obj.class != 'person'){
-                    resultsVista.push(obj)
+            if(response.data.results[algo] != {}){
+                for(const obj of response.data.results[algo]){
+                    if(obj.class != 'person'){
+                        resultsVista.push(obj)
+                    }
                 }
             }
         }
@@ -59,36 +62,57 @@ exports.getAds = Controller(async(req, res) => {
     let resultsAffiliate = []
     for(const obj of resultsVista){
         await init.getAff.then(async function(creds){
-
-        const affiliateEndpoint = `${conf.get('accesstrade_endpoint')}/v1/publishers/me/reports/conversion`
+        
+        // const affiliateEndpoint = `${conf.get('accesstrade_endpoint')}/v1/publishers/me/reports/conversion`
+        // const siteId = 48475
+        // const campaignId = 520
+        // const ids = {
+        //     lazada : 520,
+        //     trueShopping : 594,
+        //     shopee : 677
+        // }
+        // const affiliateEndpoint = `${conf.get('accesstrade_endpoint')}/v1/publishers/me/sites/${siteId}/campaigns/${ids.shopee}/productfeed/url`
+        // const affiliateEndpoint = `${conf.get('accesstrade_endpoint')}/v1/publishers/me/sites/${siteId}/campaigns/affiliated`
+        
         //This endpoint is for testing, needs to be replaces with the one to request the similar items
-        const token = jwt.sign(
-            { sub: creds.userUid},
-            creds.secretKey,
-            {
-            algorithm: "HS256"
-            }
-        )
+        // const token = jwt.sign(
+        //     { sub: creds.userUid},
+        //     creds.secretKey,
+        //     {
+        //     algorithm: "HS256"
+        //     }
+        // )
 
-        try{
-            const affiliateResponse = await axios.get(affiliateEndpoint, {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'X-Accesstrade-User-Type': 'publisher'
+        // try{
+        //     const affiliateResponse = await axios.get(affiliateEndpoint, {
+        //         headers: {
+        //             'Authorization': `Bearer ${token}`,
+        //             'X-Accesstrade-User-Type': 'publisher'
+        //         }
+        //     })
+        //     // Success response for requesting the affiliate API
+        //     console.log(affiliateResponse.data)
+        //     resultsAffiliate.push(obj)
+
+        // } catch(err) {
+        //     // Error handler after the request to the API
+        //     resultsAffiliate.push(obj)
+        //     console.error(err.response.data)
+        // }
+
+        await readCsv.readCsv.then(async function(results){
+            for(const resCsv of results){
+                if(resCsv['Category Name'] == obj.class){
+                    resultsAffiliate.push(resCsv)
+                    break;
                 }
-            })
-            // Success response for requesting the affiliate API
-            console.log(affiliateResponse.data)
-            resultsAffiliate.push(obj)
-
-        } catch(err) {
-            // Error handler after the request to the API
-            console.error(err)
-        }
-
-        console.log('Ready to be used')
-        }).catch((err)=>{console.error(err)})
+            }
+            // console.log(results[0], obj)
+        })
+        // console.log('Ready to be used')
+        }).catch((err)=>{console.error(err.data)})
     }
+    console.log(resultsAffiliate)
     
     sendingResults = convert(resultsAffiliate)
 
