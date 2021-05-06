@@ -60,21 +60,41 @@ exports.getAds = Controller(async(req, res) => {
         }
     }
     let resultsAffiliate = []
+
     for(const obj of resultsVista){
         await init.getAff.then(async function(creds){
         
         // const affiliateEndpoint = `${conf.get('accesstrade_endpoint')}/v1/publishers/me/reports/conversion`
-        // const siteId = 48475
+       
+        // const affiliateEndpoint = `${conf.get('accesstrade_endpoint')}/v1/publishers/me/sites/${siteId}/campaigns/affiliated`
+        // This endpoint is for testing, needs to be replaces with the one to request the similar items
         // const campaignId = 520
+        // const siteId = 48475
         // const ids = {
         //     lazada : 520,
         //     trueShopping : 594,
-        //     shopee : 677
+        //     shopee : 677,
+        //     rabbitFinanceA: 720,
+        //     kkpPersonalLoan: 710,
+        //     rabbitFinanceB: 708,
+        //     nanmeeBooks: 692,
+        //     fitbit: 687,
+        //     taradDotCom: 675,
+        //     zwizAI: 638,
+        //     promotionsMoney: 709,
+        //     jorakayOnline: 645,
+        //     agoda: 721,
+        //     newTopsOnline: 704,
+        //     gscAsset: 701,
+        //     monteCarloTailors: 700,
+        //     cignaSmartHealth: 685,
+        //     cignaPA: 684,
+        //     cignaSuperPlan: 683,
+        //     allAboutYou: 666,
+        //     tripDotCom: 535,
+        //     accessTrade: 660
         // }
-        // const affiliateEndpoint = `${conf.get('accesstrade_endpoint')}/v1/publishers/me/sites/${siteId}/campaigns/${ids.shopee}/productfeed/url`
-        // const affiliateEndpoint = `${conf.get('accesstrade_endpoint')}/v1/publishers/me/sites/${siteId}/campaigns/affiliated`
-        
-        //This endpoint is for testing, needs to be replaces with the one to request the similar items
+        // const affiliateEndpoint = `${conf.get('accesstrade_endpoint')}/v1/publishers/me/sites/${siteId}/campaigns/${ids.lazada}/productfeed/url`
         // const token = jwt.sign(
         //     { sub: creds.userUid},
         //     creds.secretKey,
@@ -100,6 +120,7 @@ exports.getAds = Controller(async(req, res) => {
         //     console.error(err.response.data)
         // }
 
+        mergeCsv();
         await readCsv.readCsv.then(async function(results){
             for(const resCsv of results){
                 if(resCsv['Category Name'] == obj.class){
@@ -120,4 +141,62 @@ exports.getAds = Controller(async(req, res) => {
     res.status(200).send({
         results: sendingResults
     })
+
+    function mergeCsv() {
+        let csvFiles = [];
+        const siteId = 48475
+        const ids = {
+            lazada : 520,
+            trueShopping : 594,
+            shopee : 677,
+            rabbitFinanceA: 720,
+            kkpPersonalLoan: 710,
+            rabbitFinanceB: 708,
+            nanmeeBooks: 692,
+            fitbit: 687,
+            taradDotCom: 675,
+            zwizAI: 638,
+            promotionsMoney: 709,
+            jorakayOnline: 645,
+            agoda: 721,
+            newTopsOnline: 704,
+            gscAsset: 701,
+            monteCarloTailors: 700,
+            cignaSmartHealth: 685,
+            cignaPA: 684,
+            cignaSuperPlan: 683,
+            allAboutYou: 666,
+            tripDotCom: 535,
+            accessTrade: 660
+        }
+
+        ids.forEach((affId)=> {
+            const affiliateEndpoint = `${conf.get('accesstrade_endpoint')}/v1/publishers/me/sites/${siteId}/campaigns/${affId}/productfeed/url`
+            const token = jwt.sign(
+                { sub: creds.userUid},
+                creds.secretKey,
+                {
+                algorithm: "HS256"
+                }
+            )
+    
+            try{
+                const affiliateResponse = await axios.get(affiliateEndpoint, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'X-Accesstrade-User-Type': 'publisher'
+                    }
+                })
+                // Success response for requesting the affiliate API
+                console.log(affiliateResponse.data.baseUrl)
+                resultsAffiliate.push(obj)
+    
+            } catch(err) {
+                // Error handler after the request to the API
+                resultsAffiliate.push(obj)
+                console.error(err.response.data)
+            }
+        })
+        
+    }
 })
