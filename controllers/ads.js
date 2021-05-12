@@ -50,9 +50,14 @@ exports.getAds = Controller(async(req, res) => {
     let resultsVista = []
     if(response.data){
         for(const algo in response.data.results){
+            // console.log(response.data.results)
+            // console.log(util.inspect(response.data.results, false, null, true))
             if(response.data.results[algo] != {}){
                 for(const obj of response.data.results[algo]){
-                    if(obj.class != 'person'){
+                    if(algo == 'Object' && obj.class != 'person'){
+                        resultsVista.push(obj)
+                    }
+                    if(algo == 'fashion'){
                         resultsVista.push(obj)
                     }
                 }
@@ -120,14 +125,43 @@ exports.getAds = Controller(async(req, res) => {
         // }
             // console.log(obj.class)
         await readCsv.readCsv.then(async function(results){
+
+            let compare;
+            if(obj.class != 'person'){
+                compare = obj.class;
+            }else{
+                // console.log(util.inspect(obj, false, null, true))
+                let item
+                const fashion = {
+                    color: obj.deep_fashion_color.color[0].label,
+                    pattern: obj.deep_fashion_pattern.pattern[0].label,
+                    neck_design: obj.deep_fashion_tf.neck_design[0].label,
+                    coat_length: obj.deep_fashion_tf.coat_length[0].label,
+                    sleeve_length: obj.deep_fashion_tf.sleeve_length[0].label,
+                    neckline_design: obj.deep_fashion_tf.neckline_design[0].label,
+                    collar_design: obj.deep_fashion_tf.collar_design[0].label,
+                    pant_length: obj.deep_fashion_tf.pant_length[0].label,
+                    skirt_length: obj.deep_fashion_tf.skirt_length[0].label,
+                    lapel_design: obj.deep_fashion_tf.lapel_design[0].label,
+                }
+                if(fashion.pant_length != 'Invisible'){
+                    item = 'pants'
+                }                
+                if(fashion.lapel_design != 'Invisible'){
+                    item = 'tuxedo'
+                }
+                compare = `${fashion.color} ${item}`
+            }
+            console.log(compare)
             for(const resCsv of results){
-                if(resCsv['Merchant Product Name'].includes(obj.class)){
+                if(resCsv['Merchant Product Name'].includes(compare)){
+                    console.log(resCsv['Merchant Product Name'])
                     resultsAffiliate.push({vista: obj, affiliate: resCsv})
                     break;
                 }
             }
         })
-        }).catch((err)=>{console.error(err.data)})
+        }).catch((err)=>{console.error(err)})
     }
 
     sendingResults = convert(resultsAffiliate)
