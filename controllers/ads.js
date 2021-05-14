@@ -130,7 +130,7 @@ exports.getAds = Controller(async(req, res) => {
             if(obj.class != 'person'){
                 compare = obj.class;
             }else{
-                // console.log(util.inspect(obj, false, null, true))
+                console.log(util.inspect(obj, false, null, true))
                 let item
                 const fashion = {
                     color: obj.deep_fashion_color.color[0].label,
@@ -146,16 +146,24 @@ exports.getAds = Controller(async(req, res) => {
                 }
                 if(fashion.pant_length != 'Invisible'){
                     item = 'pants'
-                }                
-                if(fashion.lapel_design != 'Invisible'){
-                    item = 'tuxedo'
+                    if(fashion.pant_length != 'ShortPant'){
+                        item = 'shorts'
+                    }
                 }
+                if(fashion.neckline_design != 'Invisible'){
+                    item = 'shirt'
+                    if(fashion.lapel_design != 'Invisible'){
+                    item = 'jacket'
+                }
+
+                }
+
                 compare = `${fashion.color} ${item}`
             }
             console.log(compare)
             for(const resCsv of results){
                 if(resCsv['Merchant Product Name'].includes(compare)){
-                    console.log(resCsv['Merchant Product Name'])
+                    // console.log(resCsv['Merchant Product Name'])
                     resultsAffiliate.push({vista: obj, affiliate: resCsv})
                     break;
                 }
