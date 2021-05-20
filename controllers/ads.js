@@ -66,7 +66,7 @@ exports.getAds = Controller(async(req, res) => {
     }
     let resultsAffiliate = []
     for(const obj of resultsVista){
-        await init.getAff.then(async function(creds){
+        // await init.getAff.then(async function(creds){
 
         // const affiliateEndpoint = `${conf.get('accesstrade_endpoint')}/v1/publishers/me/reports/conversion`
         // const siteId = 48475
@@ -191,14 +191,14 @@ exports.getAds = Controller(async(req, res) => {
             }
             console.log(compare)
             for(const resCsv of results){
-                if(resCsv['Merchant Product Name'].includes(compare)){
+                if(resCsv['Description'].includes(compare)){
                     // console.log(resCsv['Merchant Product Name'])
                     resultsAffiliate.push({vista: obj, affiliate: resCsv})
                     break;
                 }
             }
         })
-        }).catch((err)=>{console.error(err)})
+        // }).catch((err)=>{console.error(err)})
     }
 
     sendingResults = convert(resultsAffiliate)
