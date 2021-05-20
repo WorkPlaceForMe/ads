@@ -6,7 +6,7 @@ exports.readCsv = new Promise(async (resolve, reject) =>{
 
     const results = [];
 
-    fs.createReadStream('./csv/520.CSV')
+    fs.createReadStream('./csv/677.CSV')
       .pipe(csv())
       .on('data', (data) => results.push(data))
       .on('end', () => {

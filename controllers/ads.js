@@ -129,6 +129,7 @@ exports.getAds = Controller(async(req, res) => {
             let compare;
             if(obj.class != 'person'){
                 compare = obj.class;
+                console.log(util.inspect(obj, false, null, true))
             }else{
                 console.log(util.inspect(obj, false, null, true))
                 let item
@@ -146,19 +147,47 @@ exports.getAds = Controller(async(req, res) => {
                 }
                 if(fashion.pant_length != 'Invisible'){
                     item = 'pants'
+                    item = 'กางเกง'
                     if(fashion.pant_length != 'ShortPant'){
                         item = 'shorts'
+                        item = 'กางเกงขาสั้น'
                     }
                 }
                 if(fashion.neckline_design != 'Invisible'){
                     item = 'shirt'
+                    item = 'เสื้อ'
                     if(fashion.lapel_design != 'Invisible'){
                     item = 'jacket'
+                    item = 'แจ็คเก็ต'
+                }
+                }
+                let color;
+                if(fashion.color == 'black'){
+                    color = 'ดำ'
+                }
+                if(fashion.color == 'blue'){
+                    color = 'สีน้ำเงิน'
+                }
+                if(fashion.color == 'red'){
+                    color = 'สีแดง'
+                }
+                if(fashion.color == 'yellow'){
+                    color = 'สีเหลือง'
+                }
+                if(fashion.color == 'brown'){
+                    color = 'น้ำตาล'
+                }
+                if(fashion.color == 'purple'){
+                    color = 'สีม่วง'
+                }
+                if(fashion.color == 'green'){
+                    color = 'สีเขียว'
+                }
+                if(fashion.color == 'white'){
+                    color = 'ขาว'
                 }
 
-                }
-
-                compare = `${fashion.color} ${item}`
+                compare = `${item}${color}`
             }
             console.log(compare)
             for(const resCsv of results){
