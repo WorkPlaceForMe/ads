@@ -1,12 +1,14 @@
-loadjscssfile('//code.jquery.com/ui/1.11.3/themes/smoothness/jquery-ui.css', 'css') //dynamically load and add this .js file
+loadjscssfile('https://code.jquery.com/ui/1.11.3/themes/smoothness/jquery-ui.css', 'css') //dynamically load and add this .js file
 var styleEl = document.createElement('style')
 styleEl.innerHTML =
 	'.ui-tooltip-graymatics{background-color: #000033 !important;background:url("");font-size: 14px;font-weight: bold;opacity:0.8; color:#ffffff}'
 document.head.appendChild(styleEl)
 
 document.writeln(
-	"<script type='text/javascript' src='//code.jquery.com/ui/1.11.3/jquery-ui.js'></script>"
+	"<script type='text/javascript' src='https://code.jquery.com/ui/1.11.3/jquery-ui.js'></script>"
 )
+
+const uuid = new Date().getTime()
 
 $(document).ready(function () {
 	$(document).tooltip({
@@ -18,6 +20,51 @@ $(document).ready(function () {
 		disabled: true
 	})
 })
+
+$(document).on('mousedown', 'a.but1', function (e) {
+	if(e.button == 0 || e.button == 1){
+		const data = {
+			time: new Date(),
+			url: window.location.href,
+			type: 1,
+			idItem: e.currentTarget.id,
+			img: e.originalEvent.path[3].children[0].currentSrc
+		}
+			$.ajax({
+			url: `http://localhost:3310/api/data`,
+			type: 'POST',
+			data: data,
+			dataType: 'json',
+			success: function (a) {
+				
+			},
+			error: function (e) {console.error(e)}
+		})
+	}
+});
+
+$(document).on('mousedown', 'a.but2', function (e) {
+	if(e.button == 0 || e.button == 1){
+		const data = {
+			time: new Date(),
+			url: window.location.href,
+			type: 2,
+			idItem: e.originalEvent.path[7].childNodes[1].id,
+			img: e.originalEvent.path[7].childNodes[0].currentSrc
+		}
+			$.ajax({
+			url: `http://localhost:3310/api/data`,
+			type: 'POST',
+			data: data,
+			dataType: 'json',
+			success: function (a) {
+				
+			},
+			error: function (e) {console.error(e)}
+		})
+	}
+});
+
 
 //jQuery plugin to analyse images on website and show context connect ads automatically.|Copyright (c) 2013 GRAYMATICS SG PTE LTD (www.graymatics.com). All rights reserved.|version 0.7
 ;(function (a, b) {
@@ -42,19 +89,20 @@ $(document).ready(function () {
 				product_price: f.product_price,
 				product_url: f.product_url,
 				object: f.object,
-				iframe: f.iframe
+				iframe: f.iframe,
+				id: f.id
 			}
 		if ('indoorroom' != g.object && 'person' != g.object && f.keywords != ' ') {
 			var topvl = c.my - 50
 			var leftvl = c.mx - 30
 			var h =
-				"<a title='SHOP NOW!'><div class='mark' style='padding:50px; position:absolute;top:" +
+				"<a title='SHOP NOW!'class='but1' id ='"+ g.id +"'><div class='mark' style='padding:50px; position:absolute;top:" +
 				topvl +
 				'px;left:' +
 				leftvl +
 				"px;width:24px;height:24px;'><span name='mark_point_" +
 				E +
-				"' style='background:url(http://scripts.graymatics.com/images/cart-icon.png) no-repeat 50% 50%;padding: 0 8px;cursor: pointer;'>&nbsp;</span></div></a>"
+				"' class='but' style='background:url(http://scripts.graymatics.com/images/cart-icon.png) no-repeat 50% 50%;padding: 0 8px;cursor: pointer;'>&nbsp;</span></div></a>"
 			a(e).append(h)
 			var i = document.createElement('div')
 			;(i.innerHTML = g.iframe), (i.id = 'mark_point_' + E++), (i.className = 'wrapper')
@@ -67,6 +115,8 @@ $(document).ready(function () {
 			;(i.style.left = c.mx - 120 + 'px'), a(e).append(i)
 		}
 	}
+
+
 	function e() {
 		a('.mark span').toggle(
 			function () {
@@ -206,8 +256,16 @@ $(document).ready(function () {
 					var j = r(this.celement)
 					j || (j = '')
 					var k = g(this.celement),
-						l = this.imgsrc,
-						m =
+						l = this.imgsrc
+					if(l.split('/')[0] == 'http:' || l.split('/')[0] == 'https:'){
+						l = this.imgsrc
+					}else{
+						let sitee = window.location.href
+						let a = sitee.split('/')
+						a.pop()
+						l = `${a.join('/')}/${this.imgsrc}`
+					}
+					var m =
 							'ad_type=' +
 							z +
 							'&ad_width=' +
@@ -219,7 +277,11 @@ $(document).ready(function () {
 							'&media_type=' +
 							w +
 							'&url=' +
-							l
+							l +
+							'&site=' +
+							pe + 
+							'&uid=' +
+							uuid
 					a.ajax({
 						url: v,
 						type: 'GET',
@@ -293,6 +355,7 @@ $(document).ready(function () {
 		B = 95,
 		C = '240x95_as',
 		E = 0
+		pe = window.location.href
 	window.onload = function () {
 		var b = []
 		for (

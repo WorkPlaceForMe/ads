@@ -18,5 +18,9 @@ router.get('/campaigns', controllers.getCampaign)
 
 router.get('/links', controllers.getQuickLink)
 
+router.post('/api/data', controllers.postData)
+
+router.get('/api/stats', controllers.getStats)
+
 
 module.exports = router
