@@ -9,6 +9,7 @@ document.writeln(
 )
 
 const uuid = new Date().getTime()
+const serv = 'localhost'
 
 $(document).ready(function () {
 	$(document).tooltip({
@@ -31,7 +32,7 @@ $(document).on('mousedown', 'a.but1', function (e) {
 			img: e.originalEvent.path[3].children[0].currentSrc
 		}
 			$.ajax({
-			url: `http://localhost:3310/api/data`,
+			url: `http://${serv}:3310/api/data`,
 			type: 'POST',
 			data: data,
 			dataType: 'json',
@@ -53,7 +54,7 @@ $(document).on('mousedown', 'a.but2', function (e) {
 			img: e.originalEvent.path[7].childNodes[0].currentSrc
 		}
 			$.ajax({
-			url: `http://localhost:3310/api/data`,
+			url: `http://${serv}:3310/api/data`,
 			type: 'POST',
 			data: data,
 			dataType: 'json',
@@ -102,7 +103,7 @@ $(document).on('mousedown', 'a.but2', function (e) {
 				leftvl +
 				"px;width:24px;height:24px;'><span name='mark_point_" +
 				E +
-				"' class='but' style='background:url(http://scripts.graymatics.com/images/cart-icon.png) no-repeat 50% 50%;padding: 0 8px;cursor: pointer;'>&nbsp;</span></div></a>"
+				"' class='but' style='background:url(http://scripts.graymatics.com/images/cart-icon.png) no-repeat 50% 50%;padding: 0 8px;cursor: pointer; '>&nbsp;</span></div></a>"
 			a(e).append(h)
 			var i = document.createElement('div')
 			;(i.innerHTML = g.iframe), (i.id = 'mark_point_' + E++), (i.className = 'wrapper')
@@ -348,7 +349,7 @@ $(document).on('mousedown', 'a.but2', function (e) {
 					  this.addGroup('suits,suit,tuxedo,tuxedos'),
 					  this.addGroup('coat,coats'))
 		},
-		v = api_url + '/api/v1/ads',
+		v = `http://${serv}:3310/api/v1/ads`,
 		w = 'image',
 		z = 'image',
 		A = 240,

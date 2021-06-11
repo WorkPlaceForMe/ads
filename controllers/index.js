@@ -5,7 +5,7 @@ const { getCampaign } = require('./getCampaign')
 const { getQuickLink } = require('./getQuickLink')
 const { postData } = require('./postData')
 const { readCsv } = require('./readCsv')
-const { getStats } = require('./getStats')
+const { getStats, getStatsUrl, getStatsImg, getStatsAd } = require('./getStats')
 
 module.exports = {
 	getAds,
@@ -15,5 +15,8 @@ module.exports = {
 	getQuickLink,
 	readCsv,
 	postData,
-	getStats
+	getStats,
+	getStatsUrl,
+	getStatsImg,
+	getStatsAd
 }

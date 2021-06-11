@@ -32,10 +32,10 @@ app.use(cors())
 app.set('views', path.join(__dirname, 'views'))
 app.set('view engine', 'jade')
 app.use(logger('dev'))
-app.use('/test',express.static(path.join(__dirname, 'public')))
+app.use(express.static(path.join(__dirname, 'public')))
 
 // client side
-app.use(express.static(conf.get('dashboard')));
+app.use('/dashboard',express.static(conf.get('dashboard')));
 
 app.use('/api/pictures', express.static('./public/pictures'))
 

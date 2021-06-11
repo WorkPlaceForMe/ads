@@ -22,5 +22,10 @@ router.post('/api/data', controllers.postData)
 
 router.get('/api/stats', controllers.getStats)
 
+router.get('/api/stats/url', controllers.getStatsUrl)
+
+router.get('/api/stats/url/img', controllers.getStatsImg)
+
+router.get('/api/stats/url/img/ad', controllers.getStatsAd)
 
 module.exports = router
