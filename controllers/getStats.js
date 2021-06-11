@@ -68,10 +68,10 @@ exports.getStats = Controller(async(req, res) => {
                                 }
                                 adsGrouped[url] = (adsGrouped[url]  || 0) + ads[ad]
                             }
-                            console.table(imgsGrouped)
-                            console.table(clicksGrouped)
-                            console.table(viewsGrouped)
-                            console.table(adsGrouped)
+                            // console.table(imgsGrouped)
+                            // console.table(clicksGrouped)
+                            // console.table(viewsGrouped)
+                            // console.table(adsGrouped)
                             let table = []
                             for(let i = 0; i < Object.keys(imgsGrouped).length; i++){
                                 // const url = Object.keys(imgsGrouped)[i].split('/')[2]
@@ -118,7 +118,7 @@ exports.getStats = Controller(async(req, res) => {
                                     views: viewsGrouped[Object.keys(imgsGrouped)[i]] 
                                 }
                             }
-                            console.table(table)
+                            // console.table(table)
                             res.status(200).json({success: true, table: table});
                         }
                     })
@@ -131,7 +131,7 @@ exports.getStats = Controller(async(req, res) => {
 
 exports.getStatsUrl = Controller(async(req, res) => {
     const urlQuery = req.query.url
-    console.log(urlQuery)
+    // console.log(urlQuery)
     let ads = {},
     clicks = {},
     views = {},
@@ -329,7 +329,7 @@ exports.getStatsImg = Controller(async(req, res) => {
 
 exports.getStatsAd = Controller(async(req, res) => {
     const urlQuery = req.query
-    console.log(urlQuery)
+    // console.log(urlQuery)
     let clicks = {},
     views = {}
     ads = []
