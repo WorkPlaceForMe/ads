@@ -9,7 +9,7 @@ document.writeln(
 )
 
 const uuid = new Date().getTime()
-const serv = 'localhost'
+const serv = document.currentScript.getAttribute('api_ip')
 
 $(document).ready(function () {
 	$(document).tooltip({
@@ -19,6 +19,17 @@ $(document).ready(function () {
 
 	$('.mark').tooltip({
 		disabled: true
+	})
+
+	$.ajax({
+		url: `http://${serv}/api/check`,
+		type: 'GET',
+		data: `site=${window.location.href}`,
+		dataType: 'json',
+		success: function (a) {
+			
+		},
+		error: function (e) {console.error(e)}
 	})
 })
 
@@ -32,7 +43,7 @@ $(document).on('mousedown', 'a.but1', function (e) {
 			img: e.originalEvent.path[3].children[0].currentSrc
 		}
 			$.ajax({
-			url: `http://${serv}:3310/api/data`,
+			url: `http://${serv}/api/data`,
 			type: 'POST',
 			data: data,
 			dataType: 'json',
@@ -54,7 +65,7 @@ $(document).on('mousedown', 'a.but2', function (e) {
 			img: e.originalEvent.path[7].childNodes[0].currentSrc
 		}
 			$.ajax({
-			url: `http://${serv}:3310/api/data`,
+			url: `http://${serv}/api/data`,
 			type: 'POST',
 			data: data,
 			dataType: 'json',
@@ -103,7 +114,7 @@ $(document).on('mousedown', 'a.but2', function (e) {
 				leftvl +
 				"px;width:24px;height:24px;'><span name='mark_point_" +
 				E +
-				"' class='but' style='background:url(http://scripts.graymatics.com/images/cart-icon.png) no-repeat 50% 50%;padding: 0 8px;cursor: pointer; '>&nbsp;</span></div></a>"
+				"' class='but' style='background:url(http://" + serv + "/api/pictures/Than-tag.gif) no-repeat 50% 50%;background-size: 20px;padding: 0 8px;cursor: pointer; '>&nbsp;</span></div></a>"
 			a(e).append(h)
 			var i = document.createElement('div')
 			;(i.innerHTML = g.iframe), (i.id = 'mark_point_' + E++), (i.className = 'wrapper')
@@ -125,7 +136,11 @@ $(document).on('mousedown', 'a.but2', function (e) {
 				$('.ui-corner-all').hide()
 				a(this).css(
 					'background',
-					'url(http://scripts.graymatics.com/images/circle.png) no-repeat 50% 50%'
+					'url(http://' + serv + '/api/pictures/Than-wave.gif) no-repeat 50% 50%'
+				),				
+				a(this).css(
+					'background-size',
+					'20px'
 				),
 					a('.wrapper').css('z-index', '50'),
 					a('.mark').css('z-index', '200'),
@@ -137,7 +152,11 @@ $(document).on('mousedown', 'a.but2', function (e) {
 				var b = a(this).attr('name')
 				a(this).css(
 					'background',
-					'url(http://scripts.graymatics.com/images/cart-icon.png) no-repeat 50% 50%'
+					'url(http://' + serv + '/api/pictures/Than-tag.gif) no-repeat 50% 50%'
+				),
+				a(this).css(
+					'background-size',
+					'20px'
 				),
 					a('#' + b).css('display', 'none')
 			}
@@ -349,7 +368,7 @@ $(document).on('mousedown', 'a.but2', function (e) {
 					  this.addGroup('suits,suit,tuxedo,tuxedos'),
 					  this.addGroup('coat,coats'))
 		},
-		v = `http://${serv}:3310/api/v1/ads`,
+		v = `http://${serv}/api/v1/ads`,
 		w = 'image',
 		z = 'image',
 		A = 240,

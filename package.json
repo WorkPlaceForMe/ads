@@ -1,6 +1,6 @@
 {
-  "name": "graymatics-adds",
-  "version": "0.0.0",
+  "name": "graymatics-adscape",
+  "version": "2.1.1",
   "private": true,
   "scripts": {
     "start": "node app.js",
@@ -12,6 +12,7 @@
     "cors": "^2.8.5",
     "crypto-js": "^4.0.0",
     "csv-parser": "^3.0.0",
+    "csv-writer": "^1.6.0",
     "dateformat": "^4.5.1",
     "debug": "~2.6.9",
     "express": "~4.16.1",
@@ -22,8 +23,10 @@
     "jsonwebtoken": "^8.5.1",
     "morgan": "~1.9.1",
     "mysql": "^2.18.1",
+    "mysql2": "^2.2.5",
     "properties-reader": "^2.2.0",
     "request": "^2.88.2",
+    "shelljs": "^0.8.4",
     "util": "^0.12.3",
     "uuid": "^3.4.0"
   },

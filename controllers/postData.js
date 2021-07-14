@@ -1,6 +1,6 @@
 const Controller = require('../helper/controller')
 const db = require('../helper/dbconnection')
-var dateFormat = require('dateformat');
+const dateFormat = require('dateformat');
 
 exports.postData = Controller(async(req, res) => {
 
@@ -18,6 +18,5 @@ exports.postData = Controller(async(req, res) => {
 })
 
 function add(type,date,url,id,img,callback){
-    console.log(type,date,url,id,img)
     return db.query(`INSERT INTO impressions values (0,${type},'${date}','${url}','${id}','${img}')`,callback)
 }
