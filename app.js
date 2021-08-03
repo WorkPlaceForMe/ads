@@ -50,14 +50,18 @@ if (conf.get('install') == true) {
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'))
-app.set('view engine', 'jade')
+app.set('view engine', 'pug')
 app.use(logger('dev'))
 app.use('/system',express.static(path.join(__dirname, 'public')))
 
 // client side
 app.use('/management',express.static(conf.get('dashboardAis')));
 
-app.use('/client',express.static(conf.get('dashboardClient')));
+app.use(express.static(conf.get('dashboardClient')));
+
+app.get('/client', (req, res) => {
+    res.sendFile('index.html',{root:path.join(__dirname, 'distAis')})
+});
 
 app.use('/api/pictures', express.static('./public/pictures'))
 

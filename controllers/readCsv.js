@@ -2,6 +2,8 @@ const axios = require('axios')
 const aff = require('../helper/affiliate')
 const jwt = require('jsonwebtoken')
 const conf = require('../middleware/prop')
+const fs = require('fs');
+const csv = require('csv-parser')
 
 exports.readCsv = async function(idPbl){
   return new Promise(function(resolve, reject){
@@ -51,6 +53,15 @@ exports.readCsv = async function(idPbl){
         }).catch((err)=>{console.error(err)})
       })
 }
+// exports.readCsv = new Promise(async (resolve, reject) =>{
+// const results = [];
+// fs.createReadStream('./csv/data.csv')
+//       .pipe(csv())
+//       .on('data', (data) => results.push(data))
+//       .on('end', () => {
+//         resolve(results)
+//       });
+// }) 
 
 async function csvToArray(str, delimiter = ",") {
   const headers = str.slice(0, str.indexOf("\n")).split(delimiter);
