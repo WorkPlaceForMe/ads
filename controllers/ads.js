@@ -267,13 +267,22 @@ exports.getAds = Controller(async(req, res) => {
                         }
                         // console.log(results,'=================')
                         for(const resCsv of results){
-                            if(resCsv['Description'].includes(compare)){
-                                // console.log(resCsv['Merchant Product Name'],resCsv)
-                                resultsAffiliate.push({vista: obj, affiliate: resCsv})
-                                // console.log(resCsv['Merchant Product ID'],site, dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"),url,uid)
-                                    addAd(parseInt(Object.values(resCsv)[0]),site, dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"),url,uid,function(err,rows){
-                                    })
-                                break;
+                            if(resCsv['Description'] != ''){
+                                if(resCsv['Description'].includes(compare)){
+                                    // console.log(resCsv['Merchant Product Name'],resCsv)
+                                    resultsAffiliate.push({vista: obj, affiliate: resCsv})
+                                    // console.log(resCsv['Merchant Product ID'],site, dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"),url,uid)
+                                        addAd(parseInt(Object.values(resCsv)[0]),site, dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"),url,uid,function(err,rows){
+                                        })
+                                    break;
+                                }
+                            }else{
+                                if(resCsv['Merchant Product Name'].includes(compare)){
+                                    resultsAffiliate.push({vista: obj, affiliate: resCsv})
+                                        addAd(parseInt(Object.values(resCsv)[0]),site, dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"),url,uid,function(err,rows){
+                                        })
+                                    break;
+                                }
                             }
                         }
                 }
