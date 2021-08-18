@@ -5,8 +5,7 @@ const jwt = require('jsonwebtoken')
 const db = require('./dbconnection')
 
 exports.create = async function(id,site,term){
-    console.log('creating new website')
-    return new Promise(async (resolve, reject) =>{
+    return new Promise((resolve, reject) =>{
 
     const affiliateEndpoint = `${conf.get('accesstrade_endpoint')}/v1/publishers/me/sites`
     const affiliateEndpointCampaings = `${conf.get('accesstrade_endpoint')}/v1/campaigns/affiliate`

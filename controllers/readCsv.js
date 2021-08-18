@@ -45,12 +45,12 @@ exports.readCsv = async function(idPbl){
                 }
 
             } catch(err) {
-                console.error(err)
+                // console.error(err)
                 continue;
             }}
 
             resolve(result)
-        }).catch((err)=>{console.error(err)})
+        }).catch((err)=>{reject(err)})
       })
 }
 // exports.readCsv = new Promise(async (resolve, reject) =>{

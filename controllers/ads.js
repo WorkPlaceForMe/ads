@@ -8,7 +8,7 @@ const convert = require('../helper/convertObject').convert
 const db = require('../helper/dbconnection')
 const dateFormat = require('dateformat');
 const auth = require('../helper/auth')
-
+const util = require('util')
 
 exports.getAds = Controller(async(req, res) => {
     // Disable SSL certificate
@@ -54,7 +54,7 @@ exports.getAds = Controller(async(req, res) => {
 
                 console.log('=====================> VISTA RESPONSE <========================')
                 //     console.log(response.data.results)
-                // console.log(util.inspect(response.data, false, null, true))
+                console.log(util.inspect(response.data, false, null, true))
                 let resultsVista = []
                 if(response.data){
                     for(const algo in response.data.results){
@@ -89,7 +89,7 @@ exports.getAds = Controller(async(req, res) => {
                             }
                             if(obj.class == 'upper'){
                             const fashion = {
-                                color:obj.deep_fashion_pattern.color[0].label ,
+                                color:obj.deep_fashion_pattern.color[0].label,
                                 pattern: obj.deep_fashion_tf.pattern[0].label,
                                 neck_design: obj.deep_fashion_neckline.neckline[0].label,
                                 coat_length: obj.deep_fashion_color.coat_length[0].label,
@@ -231,9 +231,9 @@ exports.getAds = Controller(async(req, res) => {
                                 item = 'shirt'
                                 itemThai = 'เสื้อ'
                                 if(fashion.lapel_design != 'Invisible'){
-                                item = 'jacket'
-                                itemThai = 'แจ็คเก็ต'
-                            }
+                                    item = 'jacket'
+                                    itemThai = 'แจ็คเก็ต'
+                                }
                             }
                             if(fashion.color == 'black'){
                                 color = 'ดำ'
@@ -265,13 +265,11 @@ exports.getAds = Controller(async(req, res) => {
 
                             compare = `${itemThai}${color}`
                         }
-                        // console.log(results,'=================')
                         for(const resCsv of results){
                             if(resCsv['Description'] != ''){
                                 if(resCsv['Description'].includes(compare)){
                                     // console.log(resCsv['Merchant Product Name'],resCsv)
                                     resultsAffiliate.push({vista: obj, affiliate: resCsv})
-                                    // console.log(resCsv['Merchant Product ID'],site, dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"),url,uid)
                                         addAd(parseInt(Object.values(resCsv)[0]),site, dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"),url,uid,function(err,rows){
                                         })
                                     break;
@@ -287,7 +285,7 @@ exports.getAds = Controller(async(req, res) => {
                         }
                 }
 
-                sendingResults = convert(resultsAffiliate)
+                const sendingResults = convert(resultsAffiliate)
 
                 res.status(200).send({
                     results: sendingResults
@@ -295,7 +293,6 @@ exports.getAds = Controller(async(req, res) => {
             }
         }
     })
-
 })
 
 function addAd(name,site,time,imgName,idGeneration,callback){

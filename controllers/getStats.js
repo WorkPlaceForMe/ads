@@ -351,7 +351,7 @@ exports.getStatsAd = Controller(async(req, res) => {
     const urlQuery = req.query
     // console.log(urlQuery)
     let clicks = {},
-    views = {}
+    views = {},
     ads = []
     getAdsClicksAndViews(urlQuery.ad,urlQuery.url,async function(err,rows){
         if(err){
