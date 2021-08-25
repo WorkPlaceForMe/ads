@@ -34,7 +34,7 @@ exports.getAds = Controller(async(req, res) => {
                 let formData = new FormData()
                 formData.append('upload', request(url))
                 // formData.append('subscriptions', 'Object,themes,food,tags,face,fashion')
-                formData.append('subscriptions', 'Object,fashion')
+                formData.append('subscriptions', 'Object,fashion,face')
                 const request_config = {
                     method: 'post',
                     url: vista_url + apiEndpoint,

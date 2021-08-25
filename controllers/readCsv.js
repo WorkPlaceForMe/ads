@@ -8,8 +8,8 @@ const csv = require('csv-parser')
 exports.readCsv = async function(idPbl){
   return new Promise(function(resolve, reject){
     const ids = {
-        lazada : 520,
-        trueShopping : 594,
+        //lazada : 520,
+        //trueShopping : 594,
         shopee : 677
     }
     let result = []

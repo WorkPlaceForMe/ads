@@ -35,8 +35,8 @@ exports.report = async function(init,fin,siteId,){
                             'X-Accesstrade-User-Type': 'publisher'
                         }
                     })
-                    rewards['totalReward'] = (rewards['totalReward']  || 0) + (affiliateResponse.data[0].totalReward || 0)
-                    rewards['totalConversionsCount'] = (rewards['totalConversionsCount']  || 0) + (affiliateResponse.data[0].totalConversionsCount || 0)
+                    rewards['totalReward'] = (rewards['totalReward']  || 0) + (affiliateResponse.data.totalReward || 0)
+                    rewards['totalConversionsCount'] = (rewards['totalConversionsCount']  || 0) + (affiliateResponse.data.totalConversionsCount || 0)
 
                 } catch(err) {
                     console.error(err)

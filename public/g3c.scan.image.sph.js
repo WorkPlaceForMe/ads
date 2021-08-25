@@ -12,15 +12,6 @@ const uuid = new Date().getTime()
 const serv = document.currentScript.getAttribute('api_ip')
 
 $(document).ready(function () {
-	$(document).tooltip({
-		track: true,
-		tooltipClass: 'ui-tooltip-graymatics'
-	})
-
-	$('.mark').tooltip({
-		disabled: true
-	})
-
 	$.ajax({
 		url: `http://${serv}/api/check`,
 		type: 'GET',

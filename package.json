@@ -3,7 +3,7 @@
   "version": "2.1.1",
   "private": true,
   "scripts": {
-    "start": "node app.js",
+    "start": "node -max-old-space-size=4096 app.js",
     "dev": "nodemon app.js"
   },
   "dependencies": {
