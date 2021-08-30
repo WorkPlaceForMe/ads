@@ -22,7 +22,6 @@ exports.readCsv = async function(idPbl){
         shopee : 677
     }
     let result = []
-
         aff.getAff.then(async function(credentials){
             const token = jwt.sign(
                 { sub: credentials.userUid},

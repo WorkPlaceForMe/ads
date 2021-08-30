@@ -4,7 +4,6 @@ exports.convert = (arr) => {
     if(arr == []){
         return;
     }
-
     let arrResult = [];
     for(const obj of arr){
         addAd(obj.add.id,obj.add.site, obj.add.date,obj.add.url,obj.add.uid,function(err,rows){
