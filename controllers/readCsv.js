@@ -6,6 +6,15 @@ const fs = require('fs');
 const csv = require('csv-parser')
 
 exports.readCsv = async function(idPbl){
+  if (fs.existsSync(`./csv/${idPbl}.json`)){
+    return new Promise( (resolve, reject) =>{
+      fs.readFile(`./csv/${idPbl}.json`, (err, data) => {
+        if (err) throw err;
+        const results = JSON.parse(data);
+        resolve(results)
+      });
+    }) 
+  }
   return new Promise(function(resolve, reject){
     const ids = {
         //lazada : 520,
@@ -48,7 +57,7 @@ exports.readCsv = async function(idPbl){
                 // console.error(err)
                 continue;
             }}
-
+            fs.promises.writeFile(`./csv/${idPbl}.json`, JSON.stringify(result, null, 2) , 'utf-8');
             resolve(result)
         }).catch((err)=>{reject(err)})
       })

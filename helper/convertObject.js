@@ -1,3 +1,5 @@
+const db = require('./dbconnection')
+
 exports.convert = (arr) => {
     if(arr == []){
         return;
@@ -5,6 +7,8 @@ exports.convert = (arr) => {
 
     let arrResult = [];
     for(const obj of arr){
+        addAd(obj.add.id,obj.add.site, obj.add.date,obj.add.url,obj.add.uid,function(err,rows){
+        })
         let item = {
             name: obj.affiliate['Merchant Product Name'],
             x: obj.vista.boundingBox.left + obj.vista.boundingBox.width/2,
@@ -32,3 +36,7 @@ exports.convert = (arr) => {
     }
     return arrResult
 };
+
+function addAd(name,site,time,imgName,idGeneration,callback){
+    return db.query(`INSERT INTO adsPage values (0,'${name}','${site}','${time}','${imgName}','${idGeneration}')`,callback)
+}

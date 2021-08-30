@@ -48,13 +48,13 @@ exports.getAds = Controller(async(req, res) => {
                     data: formData
                 }
                 console.log("Sending request")
+                try{
+                    const response = await axios(request_config)
 
-                const response = await axios(request_config)
-                // .catch((err)=>{console.error(err)})
 
                 console.log('=====================> VISTA RESPONSE <========================')
                 //     console.log(response.data.results)
-                console.log(util.inspect(response.data, false, null, true))
+                //console.log(util.inspect(response.data, false, null, true))
                 let resultsVista = []
                 if(response.data){
                     for(const algo in response.data.results){
@@ -269,16 +269,14 @@ exports.getAds = Controller(async(req, res) => {
                             if(resCsv['Description'] != ''){
                                 if(resCsv['Description'].includes(compare)){
                                     // console.log(resCsv['Merchant Product Name'],resCsv)
-                                    resultsAffiliate.push({vista: obj, affiliate: resCsv})
-                                        addAd(parseInt(Object.values(resCsv)[0]),site, dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"),url,uid,function(err,rows){
-                                        })
+                                    resultsAffiliate.push({vista: obj, affiliate: resCsv, add: {id: parseInt(Object.values(resCsv)[0]), site: site, date:  dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url:url, uid: uid}})
+                                
                                     break;
                                 }
                             }else{
                                 if(resCsv['Merchant Product Name'].includes(compare)){
-                                    resultsAffiliate.push({vista: obj, affiliate: resCsv})
-                                        addAd(parseInt(Object.values(resCsv)[0]),site, dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"),url,uid,function(err,rows){
-                                        })
+                                    resultsAffiliate.push({vista: obj, affiliate: resCsv, add: {id: parseInt(Object.values(resCsv)[0]), site: site, date:  dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url:url, uid: uid}})
+                                        
                                     break;
                                 }
                             }
@@ -290,6 +288,9 @@ exports.getAds = Controller(async(req, res) => {
                 res.status(200).send({
                     results: sendingResults
                 })
+                }catch(err){
+                    return res.status(500).json({success: false, message: "Vista Image failled"}) 
+                }
             }
         }
     })
