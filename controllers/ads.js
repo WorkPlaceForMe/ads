@@ -58,7 +58,7 @@ exports.getAds = Controller(async(req, res) => {
                 try{
                     const response = await axios(request_config)
 
-                console.log('=====================> VISTA RESPONSE <========================')
+                console.log('=====================> VISTA sdfsdfdRESPONSE <========================')
                 //     console.log(response.data.results)
                 //console.log(util.inspect(response.data, false, null, true))
                 let resultsVista = []
