@@ -9,6 +9,7 @@ const db = require('../helper/dbconnection')
 const dateFormat = require('dateformat');
 const auth = require('../helper/auth')
 const util = require('util')
+const cache = require('../helper/cacheManager')
 
 exports.getAds = Controller(async(req, res) => {
     // Disable SSL certificate
@@ -23,6 +24,12 @@ exports.getAds = Controller(async(req, res) => {
 
     // getting query strings
     const { ad_type, ad_width, ad_height, ad_format, media_type, url, site, uid } = req.query
+
+    let cachedImg = await cache.getAsync(url);
+    if(cachedImg)
+        return res.status(200).send({
+                    results: JSON.parse(cachedImg)
+                })
 
     await addImg(dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"),url,uid,site, async function(err,rows){
         if(rows){
@@ -283,7 +290,8 @@ exports.getAds = Controller(async(req, res) => {
                 }
 
                 const sendingResults = convert(resultsAffiliate)
-
+                let cacheResponse = await cache.setAsync(url, JSON.stringify(sendingResults));
+                console.log("Cache", cacheResponse);
                 res.status(200).send({
                     results: sendingResults
                 })

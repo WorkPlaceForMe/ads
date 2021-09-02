@@ -25,6 +25,7 @@
     "mysql": "^2.18.1",
     "mysql2": "^2.2.5",
     "properties-reader": "^2.2.0",
+    "redis": "^3.1.2",
     "request": "^2.88.2",
     "shelljs": "^0.8.4",
     "util": "^0.12.3",
