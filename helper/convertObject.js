@@ -11,7 +11,7 @@ exports.convert = (arr) => {
         let item = {
             name: obj.affiliate['Merchant Product Name'],
             x: obj.vista.boundingBox.left + obj.vista.boundingBox.width/2,
-            y: obj.vista.boundingBox.top - 150,
+            y: obj.vista.boundingBox.top,
             image: obj.affiliate['Image URL'],
             url: obj.affiliate['Product URL Web (encoded)'],
             price: obj.affiliate['Price'],

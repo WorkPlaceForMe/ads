@@ -26,10 +26,10 @@ exports.getAds = Controller(async(req, res) => {
     const { ad_type, ad_width, ad_height, ad_format, media_type, url, site, uid } = req.query
 
     let cachedImg = await cache.getAsync(url);
-    if(cachedImg)
-        return res.status(200).send({
-                    results: JSON.parse(cachedImg)
-                })
+    // if(cachedImg)
+    //     return res.status(200).send({
+    //                 results: JSON.parse(cachedImg)
+    //             })
 
     await addImg(dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"),url,uid,site, async function(err,rows){
         if(rows){
@@ -60,7 +60,7 @@ exports.getAds = Controller(async(req, res) => {
 
                 console.log('=====================> VISTA RESPONSE <========================')
                 //     console.log(response.data.results)
-                //console.log(util.inspect(response.data, false, null, true))
+                // console.log(util.inspect(response.data, false, null, true))
                 let resultsVista = []
                 if(response.data){
                     for(const algo in response.data.results){
@@ -71,9 +71,15 @@ exports.getAds = Controller(async(req, res) => {
                                 // console.log(util.inspect(obj, false, null, true),'+++++', algo)
                                 if(algo == 'Object' && obj.class != 'person'){
                                     resultsVista.push(obj)
+                                    if(resultsVista.length == 2){
+                                        break;
+                                    }
                                 }
                                 if(algo == 'fashion' && obj.class != 'person'){
                                     resultsVista.push(obj)
+                                    if(resultsVista.length == 2){
+                                        break;
+                                    }
                                 }
                             }
                         }
@@ -81,8 +87,6 @@ exports.getAds = Controller(async(req, res) => {
                 }
                 let resultsAffiliate = []
                 for(const obj of resultsVista){
-                    const results = await readCsv.readCsv(aut['idP'])
-
                         let compare, color, item, itemThai;
                         if(obj.class != 'person'){
                             // console.log(util.inspect(obj, false, null, true),'============')
@@ -271,41 +275,47 @@ exports.getAds = Controller(async(req, res) => {
 
                             compare = `${itemThai}${color}`
                         }
-                        for(const resCsv of results){
-                            if(resCsv['Description'] != ''){
-                                if(resCsv['Description'].includes(compare)){
-                                    // console.log(resCsv['Merchant Product Name'],resCsv)
-                                    resultsAffiliate.push({vista: obj, affiliate: resCsv, add: {id: parseInt(Object.values(resCsv)[0]), site: site, date:  dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url:url, uid: uid}})
-                                
-                                    break;
-                                }
-                            }else{
-                                if(resCsv['Merchant Product Name'].includes(compare)){
-                                    resultsAffiliate.push({vista: obj, affiliate: resCsv, add: {id: parseInt(Object.values(resCsv)[0]), site: site, date:  dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url:url, uid: uid}})
-                                        
-                                    break;
-                                }
-                            }
+                        const results = await readCsv.readCsv(aut['idP'])
+                        console.log(results[obj.class], item)
+                        if(obj.class == 'upper'){
+                            console.log(obj)
                         }
+                        if(obj.class == 'lower'){
+                            console.log(obj)
+                        }
+
+                        // for(const resCsv of results){
+                        //     if(resCsv['Description'] != ''){
+                        //         if(resCsv['Description'].includes(compare)){
+                        //             console.log(resCsv)
+                        //             resultsAffiliate.push({vista: obj, affiliate: resCsv, add: {id: parseInt(Object.values(resCsv)[0]), site: site, date:  dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url:url, uid: uid}})
+                        //             break;
+                        //         }
+                        //     }else{
+                        //         console.log(resCsv, '------')
+                        //         if(resCsv['Merchant Product Name'].includes(compare)){
+                        //             resultsAffiliate.push({vista: obj, affiliate: resCsv, add: {id: parseInt(Object.values(resCsv)[0]), site: site, date:  dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url:url, uid: uid}})
+                        //             break;
+                        //         }
+                        //     }
+                        // }
                 }
 
                 const sendingResults = convert(resultsAffiliate)
-                let cacheResponse = await cache.setAsync(url, JSON.stringify(sendingResults));
-                console.log("Cache", cacheResponse);
+                await cache.setAsync(url, JSON.stringify(sendingResults));
+                // console.log("Cache", cacheResponse);
                 res.status(200).send({
                     results: sendingResults
                 })
                 }catch(err){
+                    // console.log(err)
+                    // console.log(util.inspect(err, false, null, true))
                     return res.status(500).json({success: false, message: "Vista Image failled"}) 
                 }
             }
         }
     })
 })
-
-function addAd(name,site,time,imgName,idGeneration,callback){
-    return db.query(`INSERT INTO adsPage values (0,'${name}','${site}','${time}','${imgName}','${idGeneration}')`,callback)
-}
 
 async function addImg(time,imgName,idGeneration,site,callback){
     return db.query(`INSERT INTO imgsPage values (0,'${time}','${imgName}','${idGeneration}','${site}')`,callback)
