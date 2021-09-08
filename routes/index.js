@@ -26,7 +26,7 @@ router.get('/api/log/:id', controllers.auth)
 
 // router.get('/api/aff', controllers.getQuickLink)
 
-// router.get('/test', controllers.getUserDetails)
+router.get('/test', controllers.getUserDetails)
 
 router.get('/api/check', controllers.check)
 

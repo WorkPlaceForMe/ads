@@ -9,16 +9,16 @@ exports.convert = (arr) => {
         addAd(obj.add.id,obj.add.site, obj.add.date,obj.add.url,obj.add.uid,function(err,rows){
         })
         let item = {
-            name: obj.affiliate['Merchant Product Name'],
+            name: obj.affiliate[1],
             x: obj.vista.boundingBox.left + obj.vista.boundingBox.width/2,
-            y: obj.vista.boundingBox.top - 150,
-            image: obj.affiliate['Image URL'],
-            url: obj.affiliate['Product URL Web (encoded)'],
-            price: obj.affiliate['Price'],
-            discounted_price: obj.affiliate['Discounted Price'],
-            description: obj.affiliate['Description'],
-            unit: obj.affiliate['Price Unit'],
-            stock: obj.affiliate['Available']
+            y: obj.vista.boundingBox.top,
+            image: obj.affiliate[2],
+            url: obj.affiliate[4],
+            price: obj.affiliate[7],
+            discounted_price: obj.affiliate[8],
+            description: obj.affiliate[6],
+            unit: obj.affiliate[18],
+            stock: obj.affiliate[9]
         }
         const adsinfo = [{
             focal_point: [item.x,item.y],

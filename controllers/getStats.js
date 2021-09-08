@@ -3,6 +3,7 @@ const db = require('../helper/dbconnection')
 const readCsv = require('./readCsv')
 const reportAff = require('../helper/reportAff')
 const dateFormat = require('dateformat');
+const auth = require('../helper/auth')
 
 exports.getStats = Controller(async(req, res) => {
     let ads = {},
@@ -349,10 +350,10 @@ exports.getStatsImg = Controller(async(req, res) => {
 
 exports.getStatsAd = Controller(async(req, res) => {
     const urlQuery = req.query
-    // console.log(urlQuery)
     let clicks = {},
     views = {},
     ads = []
+    const aut = await auth(urlQuery.url.split('/')[2],urlQuery.url.split('/')[0])
     getAdsClicksAndViews(urlQuery.ad,urlQuery.url,async function(err,rows){
         if(err){
             res.status(500).json(err);
@@ -368,26 +369,25 @@ exports.getStatsAd = Controller(async(req, res) => {
                     }
                 else{
                     for(let i = 0; i<rows.length; i++){
-                        await readCsv.readCsv.then(async function(results){
-                                for(const resCsv of results){
-                                    if(parseInt(Object.values(resCsv)[0]) == rows[i].idItem){
-                                        let click = clicks[rows[i].idItem]
-                                        if(click == undefined){
-                                            click = 0
-                                        }
-                                        let view = views[rows[i].idItem]
-                                        if(view == undefined){
-                                            view = 0
-                                        }
-                                        let ctr = Math.round((click / view) * 100) / 100
-                                        if(Number.isNaN(ctr)){
-                                            ctr = 0
-                                        }
-                                        ads.push({img: resCsv['Image URL'], title: resCsv['Merchant Product Name'], affiliate: resCsv['Product URL Web (encoded)'], views: view, clicks: click, ctr: ctr})
-                                        break;
-                                    }
+                        const results = await readCsv.readCsv(aut['idP'])
+                        for(const resCsv of results){
+                            if(parseInt(Object.values(resCsv)[0]) == rows[i].idItem){
+                                let click = clicks[rows[i].idItem]
+                                if(click == undefined){
+                                    click = 0
                                 }
-                        })
+                                let view = views[rows[i].idItem]
+                                if(view == undefined){
+                                    view = 0
+                                }
+                                let ctr = Math.round((click / view) * 100) / 100
+                                if(Number.isNaN(ctr)){
+                                    ctr = 0
+                                }
+                                ads.push({img: resCsv['Image URL'], title: resCsv['Merchant Product Name'], affiliate: resCsv['Product URL Web (encoded)'], views: view, clicks: click, ctr: ctr})
+                                break;
+                            }
+                        }
                         if(rows[i].idGeneration != rows[i + 1].idGeneration){
                             break;
                         }
