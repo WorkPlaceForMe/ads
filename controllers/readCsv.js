@@ -9,9 +9,12 @@ const { parse } = require('url')
 const parseCsv = require('csv-parse');
 const objetos = require('../csv/objetos2.json');
 const e = require('express');
-const arrObjetos = Object.keys(objetos)
+const { mset } = require('../helper/cacheManager');
+const arrObjetos = Object.keys(objetos[0])
+const arrPrendas = Object.keys(objetos[1])
 
 
+console.log(objetos[1])
 exports.readCsv = async function(idPbl){
   if (fs.existsSync(`./csv/${idPbl}.csv`)){
     //const results = await readCsv(`./csv/${idPbl}.csv`,idPbl)
@@ -161,26 +164,34 @@ async function download(url, path) {
 
 async function readCsv(path,id){
   return new Promise( (resolve, reject) =>{
-  var csvData=[];
+  
   fs.createReadStream(path)
       .pipe(parseCsv({delimiter: ','}))
       .on('data', function(csvrow) {
-        
+
         // aqui mandar a vista cada row
         for(const element of arrObjetos){
           if(csvrow[15].toLowerCase().includes(" "+element) || csvrow[15].toLowerCase().includes(element)){
-            objetos[element].push(csvrow)
+            objetos[0][element].push(csvrow)
         }else if(csvrow[17].toLowerCase().includes(" "+element) || csvrow[15].toLowerCase().includes(element)){
-          objetos[element].push(csvrow)
+          objetos[0][element].push(csvrow)
         }else if(csvrow[13].toLowerCase().includes(" "+element) || csvrow[15].toLowerCase().includes(element)){
-          objetos[element].push(csvrow)
+          objetos[0][element].push(csvrow)
         }
       }
-        csvData.push(csvrow);
+      for(const element of arrPrendas){
+        if(csvrow[15].toLowerCase().includes(" "+element) || csvrow[15].toLowerCase().includes(element)){
+          objetos[1][element].push(csvrow)
+      }else if(csvrow[17].toLowerCase().includes(" "+element) || csvrow[15].toLowerCase().includes(element)){
+        objetos[1][element].push(csvrow)
+      }else if(csvrow[13].toLowerCase().includes(" "+element) || csvrow[15].toLowerCase().includes(element)){
+        objetos[1][element].push(csvrow)
+      } 
+      }
       })
       .on('end', async function() {
         await fs.promises.writeFile(`./csv/${id}.json`, JSON.stringify(objetos, null, 2) , 'utf-8');
-        resolve(objetos)
+        resolve(objetos[0])
       });
   })
 }

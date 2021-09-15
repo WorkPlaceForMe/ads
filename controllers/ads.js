@@ -88,20 +88,33 @@ exports.getAds = Controller(async(req, res) => {
                     }
                 }
                 const objetos = await readCsv.readCsv(aut['idP'])
-                console.log('se crearon los objetoooooooooooos')
                 const resultsAffiliate = []
                 for(const obj of resultsVista){
                     console.log(obj.class)
-                        if(objetos[obj.class] != undefined){
+                        if(objetos[0][obj.class] != undefined){
+                        let int = Math.floor(Math.random() * 100)
                         console.log("entreeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
-                    resultsAffiliate.push({vista: obj, affiliate: objetos[obj.class][0],
-                         add: {id: parseInt(objetos[obj.class][0][0]), site: site, date:  dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url:url, uid: uid}})
+                    resultsAffiliate.push({vista: obj, affiliate: objetos[0][obj.class][int],
+                         add: {id: parseInt(objetos[0][obj.class][0][0]), site: site, date:  dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url:url, uid: uid}})
                     }
+                   else if(obj.class == 'upper'){
+                        // console.log("entruuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu")
+                        let int = Math.floor(Math.random() * 100)
+                        resultsAffiliate.push({vista: obj, affiliate: objetos[1]['shirt'][int],
+                            add: {id: parseInt(objetos[1]['shirt'][0][0]), site: site, date:  dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url:url, uid: uid}})   
+                    }
+                    if(obj.class == 'lower'){
+                        console.log("entraaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+                        let int = Math.floor(Math.random() * 100)
+                        resultsAffiliate.push({vista: obj, affiliate: objetos[1]['pants'][int],
+                            add: {id: parseInt(objetos[1]['pants'][0][0]), site: site, date:  dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url:url, uid: uid}})  
+                    }
+
                 }
 
                 const sendingResults = convert(resultsAffiliate)
                 // await cache.setAsync(url, JSON.stringify(sendingResults));
-                console.log(sendingResults,typeof(sendingResults));
+                console.log(sendingResults,'######################################################################')
                 res.status(200).send({
                     results: sendingResults
                 })
