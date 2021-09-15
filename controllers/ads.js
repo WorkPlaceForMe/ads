@@ -11,7 +11,7 @@ const auth = require('../helper/auth')
 const util = require('util')
 const cache = require('../helper/cacheManager')
 // const objetos = require('/home/rodrigo/Documents/ads-Thai-Affiliate/csv/59183.json');
-const resultsAffiliate = []
+
 
 exports.getAds = Controller(async(req, res) => {
     // Disable SSL certificate
@@ -89,20 +89,19 @@ exports.getAds = Controller(async(req, res) => {
                 }
                 const objetos = await readCsv.readCsv(aut['idP'])
                 console.log('se crearon los objetoooooooooooos')
+                const resultsAffiliate = []
                 for(const obj of resultsVista){
                     console.log(obj.class)
                         if(objetos[obj.class] != undefined){
                         console.log("entreeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
                     resultsAffiliate.push({vista: obj, affiliate: objetos[obj.class][0],
                          add: {id: parseInt(objetos[obj.class][0][0]), site: site, date:  dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url:url, uid: uid}})
-                    console.log(resultsAffiliate)
                     }
                 }
 
                 const sendingResults = convert(resultsAffiliate)
-                console.log(resultsAffiliate)
-                await cache.setAsync(url, JSON.stringify(sendingResults));
-                // console.log("Cache", cacheResponse);
+                // await cache.setAsync(url, JSON.stringify(sendingResults));
+                console.log(sendingResults,typeof(sendingResults));
                 res.status(200).send({
                     results: sendingResults
                 })

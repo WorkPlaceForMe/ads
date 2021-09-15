@@ -168,11 +168,11 @@ async function readCsv(path,id){
         
         // aqui mandar a vista cada row
         for(const element of arrObjetos){
-          if(csvrow[15].toLowerCase().includes(" "+element) || csvrow[15].toLowerCase().includes(element) || csvrow[15].toLowerCase().includes(element.split('_').join(' '))){
+          if(csvrow[15].toLowerCase().includes(" "+element) || csvrow[15].toLowerCase().includes(element)){
             objetos[element].push(csvrow)
-        }else if(csvrow[17].toLowerCase().includes(" "+element) || csvrow[15].toLowerCase().includes(element) || csvrow[17].toLowerCase().includes(element.split('_').join(' '))){
+        }else if(csvrow[17].toLowerCase().includes(" "+element) || csvrow[15].toLowerCase().includes(element)){
           objetos[element].push(csvrow)
-        }else if(csvrow[13].toLowerCase().includes(" "+element) || csvrow[15].toLowerCase().includes(element) || csvrow[13].toLowerCase().includes(element.split('_').join(' '))){
+        }else if(csvrow[13].toLowerCase().includes(" "+element) || csvrow[15].toLowerCase().includes(element)){
           objetos[element].push(csvrow)
         }
       }
