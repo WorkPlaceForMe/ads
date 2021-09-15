@@ -1,12 +1,7 @@
-loadjscssfile('https://code.jquery.com/ui/1.11.3/themes/smoothness/jquery-ui.css', 'css') //dynamically load and add this .js file
 var styleEl = document.createElement('style')
 styleEl.innerHTML =
-	'.ui-tooltip-graymatics{background-color: #000033 !important;background:url("");font-size: 14px;font-weight: bold;opacity:0.8; color:#ffffff}'
+	'.ui-tooltip-graymatics{background-color: #000033 !important;background:url("");font-size: 14px;font-weight: bold;opacity:0.8; color:#ffffff};'
 document.head.appendChild(styleEl)
-
-document.writeln(
-	"<script type='text/javascript' src='https://code.jquery.com/ui/1.11.3/jquery-ui.js'></script>"
-)
 
 const uuid = new Date().getTime()
 const serv = document.currentScript.getAttribute('api_ip')
@@ -52,8 +47,8 @@ $(document).on('mousedown', 'a.but2', function (e) {
 			time: new Date(),
 			url: window.location.href,
 			type: 2,
-			idItem: e.originalEvent.path[7].childNodes[1].id,
-			img: e.originalEvent.path[7].childNodes[0].currentSrc
+			idItem: parseInt(decodeURI(e.originalEvent.path[2].href).split('id=')[1]) || parseInt(decodeURI(e.originalEvent.path[1].href).split('id=')[1]),
+			img: e.originalEvent.path[5].children[0].currentSrc || e.originalEvent.path[6].children[0].currentSrc
 		}
 			$.ajax({
 			url: `http://${serv}/api/data`,
@@ -103,53 +98,61 @@ $(document).on('mousedown', 'a.but2', function (e) {
 				topvl +
 				'px;left:' +
 				leftvl +
-				"px;width:24px;height:24px;'><span name='mark_point_" +
+				"px;'><span name='mark_point_" +
 				E +
-				"' class='but' style='background:url(http://" + serv + "/api/pictures/Than-tag.gif) no-repeat 50% 50%;background-size: 20px;padding: 0 8px;cursor: pointer; '>&nbsp;</span></div></a>"
+				"' class='but' style='background:url(http://" + serv + "/api/pictures/iconNoShadow.gif) no-repeat 50% 50%;background-size: 80px;padding: 60px 60px;cursor: pointer;'>&nbsp;</span></div></a>"
 			a(e).append(h)
 			var i = document.createElement('div')
 			;(i.innerHTML = g.iframe), (i.id = 'mark_point_' + E++), (i.className = 'wrapper')
 			var j =
-				'position:absolute;zIndex:50;clear:both;width:350px;height:550px;padding:0.2em;background-color:#FFFFFF;display:none;border: 1px solid gray;-webkit-border-radius: 6px;-moz-border-radius: 6px;border-radius: 6px;-webkit-box-shadow: 0 2px 5px;-moz-box-shadow: 0 2px 5px;box-shadow: 0 2px 5px;'
+				'position:absolute;zIndex:50;clear:both;width:350px;height:450px;padding:0.2em;background-color:#FFFFFF;display:none;border: 1px solid gray;-webkit-border-radius: 6px;-moz-border-radius: 6px;border-radius: 6px;-webkit-box-shadow: 0 2px 5px;-moz-box-shadow: 0 2px 5px;box-shadow: 0 2px 5px; font: DB Heavent'
 			i.style.cssText = j
 			var k = a(e).width()
-			i.style.top = c.my - 20 + 'px'
+			i.style.top = c.my - 80 + 'px'
 			//k / 2 > c.mx ? i.style.left = c.mx - 240 + "px" : i.style.right = k - c.mx - 17 + "px", a(e).append(i);
 			;(i.style.left = c.mx - 120 + 'px'), a(e).append(i)
 		}
 	}
 
-
 	function e() {
-		a('.mark span').toggle(
-			function () {
-				var b = a(this).attr('name')
-				$('.ui-corner-all').hide()
+		a('.but').mouseenter( 
+			function(){
+				var b = a(this).attr('name')		
 				a(this).css(
+					'background-size',
+					'0px'
+				),
+				a('.wrapper').css('z-index', '50'),
+				a('.mark').css('z-index', '200'),
+				a(this).css('z-index', '200'),
+				a('#' + b).css('z-index', '100'),
+				a('#' + b).css('display', '')
+			}
+		)
+		a('.wrapper').mouseleave(
+			function () {
+				var b = a(this)[0].id
+				a('.but').css(
 					'background',
-					'url(http://' + serv + '/api/pictures/Than-wave.gif) no-repeat 50% 50%'
+					'url(http://' + serv + '/api/pictures/iconNoShadow.gif) no-repeat 50% 50%'
+				),
+				a('.but').css(
+					'background-size',
+					'80px'
+				),
+				a(this).css(
+					'background-color',
+					'#FFFFFF'
+				),
+				a('.but').css(
+					'padding',
+					'60px 60px'
+				),
+				a(this).css(
+					'cursor',
+					'pointer'
 				),				
-				a(this).css(
-					'background-size',
-					'20px'
-				),
-					a('.wrapper').css('z-index', '50'),
-					a('.mark').css('z-index', '200'),
-					a(this).css('z-index', '200'),
-					a('#' + b).css('z-index', '100'),
-					a('#' + b).css('display', '')
-			},
-			function () {
-				var b = a(this).attr('name')
-				a(this).css(
-					'background',
-					'url(http://' + serv + '/api/pictures/Than-tag.gif) no-repeat 50% 50%'
-				),
-				a(this).css(
-					'background-size',
-					'20px'
-				),
-					a('#' + b).css('display', 'none')
+				a('#' + b).css('display', 'none')
 			}
 		)
 	}

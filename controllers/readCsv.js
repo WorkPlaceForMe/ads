@@ -11,19 +11,10 @@ const objetos = require('../csv/objetos2.json');
 
 exports.readCsv = async function(idPbl){
   if (fs.existsSync(`./csv/${idPbl}.csv`)){
-    const results = await readCsv(`./csv/${idPbl}.csv`,idPbl)
 
     return new Promise( (resolve, reject) =>{
-    // let res = require(`../csv/${idPbl}.json`);
-    // resolve(res)
-      resolve(results)
-
-      // fs.readFile(`./csv/${idPbl}.csv`, async (err, data) => {
-      //   if (err) throw err;
-      //   const arr = await csvToArray(data)
-      //   const results = JSON.parse(arr);
-      //   resolve(results)
-      // });
+    let res = require(`../csv/${idPbl}.json`);
+    resolve(res)
     }) 
   }
   let cachedDown = await cache.getAsync(`downloading-${idPbl}`);
@@ -97,23 +88,6 @@ exports.readCsv = async function(idPbl){
   }
 }
 
-async function csvToArray(str, delimiter = ",") {
-  const headers = str.slice(0, str.indexOf("\n")).split(delimiter);
-
-  const rows = str.slice(str.indexOf("\n") + 1).split("\n");
-
-  const arr = rows.map(function (row) {
-    const values = row.split(delimiter);
-    const el = headers.reduce(function (object, header, index) {
-      object[header] = values[index];
-      return object;
-    }, {});
-    return el;
-  });
-
-  return arr;
-}
-
 async function download(url, path) {
   const TIMEOUT = 100000
   const uri = parse(url)
@@ -164,7 +138,6 @@ async function readCsv(path,id){
       .on('data', function(csvrow) {
         
         if(!csvrow[15].toLowerCase().includes(' ' + getKeyByValue(objetos, objetos[csvrow[15].toLowerCase()]))){
-          console.log('===========================================')
           objetos[csvrow[15].toLowerCase()].push(csvrow)
         }
 
