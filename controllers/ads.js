@@ -10,6 +10,8 @@ const dateFormat = require('dateformat');
 const auth = require('../helper/auth')
 const util = require('util')
 const cache = require('../helper/cacheManager')
+// const objetos = require('/home/rodrigo/Documents/ads-Thai-Affiliate/csv/59183.json');
+
 
 exports.getAds = Controller(async(req, res) => {
     // Disable SSL certificate
@@ -85,225 +87,35 @@ exports.getAds = Controller(async(req, res) => {
                         }
                     }
                 }
-                let resultsAffiliate = []
+                const objetos = await readCsv.readCsv(aut['idP'])
+                const resultsAffiliate = []
                 for(const obj of resultsVista){
-                        let compare, color, item, itemThai;
-                        if(obj.class != 'person'){
-                            // console.log(util.inspect(obj, false, null, true),'============')
-                            compare = obj.class;
-                            if(obj.class == 'cell_phone'){
-                                compare = 'โทรศัพท์'
-                            }
-                            if(obj.class == 'tie'){
-                                compare = 'ผูก'
-                            }
-                            if(obj.class == 'upper'){
-                            const fashion = {
-                                color:obj.deep_fashion_pattern.color[0].label,
-                                pattern: obj.deep_fashion_tf.pattern[0].label,
-                                neck_design: obj.deep_fashion_neckline.neckline[0].label,
-                                coat_length: obj.deep_fashion_color.coat_length[0].label,
-                                sleeve_length: obj.deep_fashion_color.sleeve_length[0].label,
-                                neckline_design: obj.deep_fashion_color.neckline_design[0].label,
-                                collar_design: obj.deep_fashion_color.collar_design[0].label,
-                                // pant_length: obj.deep_fashion_color.pant_length[0].label,
-                                // skirt_length: obj.deep_fashion_color.skirt_length[0].label,
-                                lapel_design: obj.deep_fashion_color.lapel_design[0].label,
-                            }
-                            
-                            if(fashion.neckline_design != 'Invisible'){
-                                item = 'shirt'
-                                itemThai = 'เสื้อ'
-                                if(fashion.lapel_design != 'Invisible'){
-                                    item = 'jacket'
-                                    itemThai = 'แจ็คเก็ต'
-                                }
-                            }
-                            if(fashion.sleeve_length == 'ExtraLongSleeves'){
-                                item = 'jacket'
-                                itemThai = 'แจ็คเก็ต'
-                            }
-                            if(fashion.neck_design == 'hoodie'){
-                                item = 'hoodie'
-                                itemThai = 'หมวก'
-                            }                
-                            if(fashion.color == 'black'){
-                                color = 'ดำ'
-                            }
-                            if(fashion.color == 'blue'){
-                                color = 'สีน้ำเงิน'
-                            }
-                            if(fashion.color == 'red'){
-                                color = 'สีแดง'
-                            }
-                            if(fashion.color == 'yellow'){
-                                color = 'สีเหลือง'
-                            }
-                            if(fashion.color == 'brown'){
-                                color = 'น้ำตาล'
-                            }
-                            if(fashion.color == 'purple'){
-                                color = 'สีม่วง'
-                            }
-                            if(fashion.color == 'green'){
-                                color = 'สีเขียว'
-                            }
-                            if(fashion.color == 'white'){
-                                color = 'ขาว'
-                            }
-                            if(fashion.color == 'grey'){
-                                color = 'สีเทา'
-                            }
 
-                            compare = `${itemThai}${color}`
-        
-                            }
-                            if(obj.class == 'lower'){
-                            const fashion = {
-                                color:obj.deep_fashion_pattern.color[0].label ,
-                                pattern: obj.deep_fashion_tf.pattern[0].label,
-                                // neck_design: obj.deep_fashion_neckline.neckline[0].label,
-                                // coat_length: obj.deep_fashion_color.coat_length[0].label,
-                                // sleeve_length: obj.deep_fashion_color.sleeve_length[0].label,
-                                // neckline_design: obj.deep_fashion_color.neckline_design[0].label,
-                                // collar_design: obj.deep_fashion_color.collar_design[0].label,
-                                pant_length: obj.deep_fashion_color.pant_length[0].label,
-                                skirt_length: obj.deep_fashion_color.skirt_length[0].label,
-                                // lapel_design: obj.deep_fashion_color.lapel_design[0].label,
-                            }
-                            // console.log(fashion)
-                            if(fashion.pant_length != 'Invisible'){
-                                item = 'pants'
-                                itemThai = 'กางเกง'
-                                // if(fashion.pant_length != 'ShortPant'){
-                                //     item = 'shorts'
-                                //     itemThai = 'กางเกงขาสั้น'
-                                // }
-                            }
-                            if(fashion.skirt_length != 'Invisible'){
-                                item = 'skirt'
-                                itemThai = 'กระโปรง'
-                            }
-                            if(fashion.color == 'black'){
-                                color = 'ดำ'
-                            }
-                            if(fashion.color == 'blue'){
-                                color = 'สีน้ำเงิน'
-                            }
-                            if(fashion.color == 'red'){
-                                color = 'สีแดง'
-                            }
-                            if(fashion.color == 'yellow'){
-                                color = 'สีเหลือง'
-                            }
-                            if(fashion.color == 'brown'){
-                                color = 'น้ำตาล'
-                            }
-                            if(fashion.color == 'purple'){
-                                color = 'สีม่วง'
-                            }
-                            if(fashion.color == 'green'){
-                                color = 'สีเขียว'
-                            }
-                            if(fashion.color == 'white'){
-                                color = 'ขาว'
-                            }
-                            if(fashion.color == 'grey'){
-                                color = 'สีเทา'
-                            }
+                        if(objetos[0][obj.class] != undefined){
+                        let int = Math.floor(Math.random() * 100)
+                        console.log("entreeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+                    resultsAffiliate.push({vista: obj, affiliate: objetos[0][obj.class][int],
+                         add: {id: parseInt(objetos[0][obj.class][0][0]), site: site, date:  dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url:url, uid: uid}})
+                    }
+                   else if(obj.class == 'upper'){
+                        // console.log("entruuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu")
+                        let int = Math.floor(Math.random() * 100)
+                        resultsAffiliate.push({vista: obj, affiliate: objetos[1]['shirt'][int],
+                            add: {id: parseInt(objetos[1]['shirt'][0][0]), site: site, date:  dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url:url, uid: uid}})   
+                    }
+                    if(obj.class == 'lower'){
+                        console.log("entraaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+                        let int = Math.floor(Math.random() * 100)
+                        resultsAffiliate.push({vista: obj, affiliate: objetos[1]['pants'][int],
+                            add: {id: parseInt(objetos[1]['pants'][0][0]), site: site, date:  dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url:url, uid: uid}})  
+                    }
 
-                            compare = `${itemThai}${color}`
-                            }
-                            // console.log(util.inspect(obj, false, null, true))
-                        }else{
-                            // console.log(util.inspect(obj, false, null, true),'============')
-                            const fashion = {
-                                color:obj.deep_fashion_pattern.color[0].label ,
-                                pattern: obj.deep_fashion_tf.pattern[0].label,
-                                neck_design: obj.deep_fashion_neckline.neckline[0].label,
-                                coat_length: obj.deep_fashion_color.coat_length[0].label,
-                                sleeve_length: obj.deep_fashion_color.sleeve_length[0].label,
-                                neckline_design: obj.deep_fashion_color.neckline_design[0].label,
-                                collar_design: obj.deep_fashion_color.collar_design[0].label,
-                                pant_length: obj.deep_fashion_color.pant_length[0].label,
-                                skirt_length: obj.deep_fashion_color.skirt_length[0].label,
-                                lapel_design: obj.deep_fashion_color.lapel_design[0].label,
-                            }
-                            if(fashion.pant_length != 'Invisible'){
-                                item = 'pants'
-                                itemThai = 'กางเกง'
-                                if(fashion.pant_length != 'ShortPant'){
-                                    item = 'shorts'
-                                    itemThai = 'กางเกงขาสั้น'
-                                }
-                            }
-                            if(fashion.neckline_design != 'Invisible'){
-                                item = 'shirt'
-                                itemThai = 'เสื้อ'
-                                if(fashion.lapel_design != 'Invisible'){
-                                    item = 'jacket'
-                                    itemThai = 'แจ็คเก็ต'
-                                }
-                            }
-                            if(fashion.color == 'black'){
-                                color = 'ดำ'
-                            }
-                            if(fashion.color == 'blue'){
-                                color = 'สีน้ำเงิน'
-                            }
-                            if(fashion.color == 'red'){
-                                color = 'สีแดง'
-                            }
-                            if(fashion.color == 'yellow'){
-                                color = 'สีเหลือง'
-                            }
-                            if(fashion.color == 'brown'){
-                                color = 'น้ำตาล'
-                            }
-                            if(fashion.color == 'purple'){
-                                color = 'สีม่วง'
-                            }
-                            if(fashion.color == 'green'){
-                                color = 'สีเขียว'
-                            }
-                            if(fashion.color == 'white'){
-                                color = 'ขาว'
-                            }
-                            if(fashion.color == 'grey'){
-                                color = 'สีเทา'
-                            }
-
-                            compare = `${itemThai}${color}`
-                        }
-                        const results = await readCsv.readCsv(aut['idP'])
-                        console.log(results[obj.class], item)
-                        if(obj.class == 'upper'){
-                            console.log(obj)
-                        }
-                        if(obj.class == 'lower'){
-                            console.log(obj)
-                        }
-
-                        // for(const resCsv of results){
-                        //     if(resCsv['Description'] != ''){
-                        //         if(resCsv['Description'].includes(compare)){
-                        //             console.log(resCsv)
-                        //             resultsAffiliate.push({vista: obj, affiliate: resCsv, add: {id: parseInt(Object.values(resCsv)[0]), site: site, date:  dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url:url, uid: uid}})
-                        //             break;
-                        //         }
-                        //     }else{
-                        //         console.log(resCsv, '------')
-                        //         if(resCsv['Merchant Product Name'].includes(compare)){
-                        //             resultsAffiliate.push({vista: obj, affiliate: resCsv, add: {id: parseInt(Object.values(resCsv)[0]), site: site, date:  dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url:url, uid: uid}})
-                        //             break;
-                        //         }
-                        //     }
-                        // }
                 }
 
                 const sendingResults = convert(resultsAffiliate)
-                await cache.setAsync(url, JSON.stringify(sendingResults));
-                // console.log("Cache", cacheResponse);
+                // await cache.setAsync(url, JSON.stringify(sendingResults));
+                console.log(sendingResults,'######################################################################')
+
                 res.status(200).send({
                     results: sendingResults
                 })

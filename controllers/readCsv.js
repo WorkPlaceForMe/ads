@@ -9,6 +9,9 @@ const { parse } = require('url')
 const parseCsv = require('csv-parse');
 const objetos = require('../csv/objetos2.json');
 
+const arrObjetos = Object.keys(objetos[0])
+const arrPrendas = Object.keys(objetos[1])
+
 exports.readCsv = async function(idPbl){
   if (fs.existsSync(`./csv/${idPbl}.csv`)){
 
@@ -41,14 +44,6 @@ exports.readCsv = async function(idPbl){
 
                 try{
                     console.log(`Downloading shopee`)
-
-                    // const affiliateResponse = await axios.get(affiliateEndpoint, {
-                    //         headers: {
-                    //             'Authorization': `Bearer ${token}`,
-                    //             'X-Accesstrade-User-Type': 'publisher'
-                    //         }
-                    // })
-
                     await download(affiliateEndpoint,idPbl)
                     
                     await cache.setAsync(`downloading-${idPbl}`, false);
@@ -86,6 +81,9 @@ exports.readCsv = async function(idPbl){
       // });
     }) 
   }
+}
+
+  return arr;
 }
 
 async function download(url, path) {
@@ -132,33 +130,34 @@ async function download(url, path) {
 
 async function readCsv(path,id){
   return new Promise( (resolve, reject) =>{
-  var csvData=[];
+  
   fs.createReadStream(path)
       .pipe(parseCsv({delimiter: ','}))
       .on('data', function(csvrow) {
-        
-        if(!csvrow[15].toLowerCase().includes(' ' + getKeyByValue(objetos, objetos[csvrow[15].toLowerCase()]))){
-          objetos[csvrow[15].toLowerCase()].push(csvrow)
-        }
 
-        //aqui mandar a vista cada row
-
-        if(objetos[csvrow[15].toLowerCase()]){
-          console.log(' ' + getKeyByValue(objetos, objetos[csvrow[15].toLowerCase()]));
-          // console.log(csvrow[15].toLowerCase())
-          objetos[csvrow[15].toLowerCase()].push(csvrow)
-        }else if(objetos[csvrow[17].toLowerCase()]){
-          // console.log(csvrow[17].toLowerCase())
-          objetos[csvrow[17].toLowerCase()].push(csvrow)
-        }else if(objetos[csvrow[13].toLowerCase()]){
-          // console.log(csvrow[13].toLowerCase())
-          objetos[csvrow[13].toLowerCase()].push(csvrow)
+        // aqui mandar a vista cada row
+        for(const element of arrObjetos){
+          if(csvrow[15].toLowerCase().includes(" "+element) || csvrow[15].toLowerCase().includes(element)){
+            objetos[0][element].push(csvrow)
+        }else if(csvrow[17].toLowerCase().includes(" "+element) || csvrow[15].toLowerCase().includes(element)){
+          objetos[0][element].push(csvrow)
+        }else if(csvrow[13].toLowerCase().includes(" "+element) || csvrow[15].toLowerCase().includes(element)){
+          objetos[0][element].push(csvrow)
         }
-        csvData.push(csvrow);
+      }
+      for(const element of arrPrendas){
+        if(csvrow[15].toLowerCase().includes(" "+element) || csvrow[15].toLowerCase().includes(element)){
+          objetos[1][element].push(csvrow)
+      }else if(csvrow[17].toLowerCase().includes(" "+element) || csvrow[15].toLowerCase().includes(element)){
+        objetos[1][element].push(csvrow)
+      }else if(csvrow[13].toLowerCase().includes(" "+element) || csvrow[15].toLowerCase().includes(element)){
+        objetos[1][element].push(csvrow)
+      } 
+      }
       })
       .on('end', async function() {
         await fs.promises.writeFile(`./csv/${id}.json`, JSON.stringify(objetos, null, 2) , 'utf-8');
-        resolve(objetos)
+        resolve(objetos[0])
       });
   })
 }
