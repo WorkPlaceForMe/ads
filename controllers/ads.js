@@ -90,7 +90,7 @@ exports.getAds = Controller(async(req, res) => {
                 const objetos = await readCsv.readCsv(aut['idP'])
                 const resultsAffiliate = []
                 for(const obj of resultsVista){
-                    console.log(obj.class)
+
                         if(objetos[0][obj.class] != undefined){
                         let int = Math.floor(Math.random() * 100)
                         console.log("entreeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
@@ -115,6 +115,7 @@ exports.getAds = Controller(async(req, res) => {
                 const sendingResults = convert(resultsAffiliate)
                 // await cache.setAsync(url, JSON.stringify(sendingResults));
                 console.log(sendingResults,'######################################################################')
+
                 res.status(200).send({
                     results: sendingResults
                 })

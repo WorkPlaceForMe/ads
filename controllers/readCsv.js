@@ -8,28 +8,16 @@ const http = require('http');
 const { parse } = require('url')
 const parseCsv = require('csv-parse');
 const objetos = require('../csv/objetos2.json');
-const e = require('express');
-const { mset } = require('../helper/cacheManager');
+
 const arrObjetos = Object.keys(objetos[0])
 const arrPrendas = Object.keys(objetos[1])
 
-
-console.log(objetos[1])
 exports.readCsv = async function(idPbl){
   if (fs.existsSync(`./csv/${idPbl}.csv`)){
-    //const results = await readCsv(`./csv/${idPbl}.csv`,idPbl)
 
     return new Promise( (resolve, reject) =>{
     let res = require(`../csv/${idPbl}.json`);
     resolve(res)
-      //resolve(results)
-
-      // fs.readFile(`./csv/${idPbl}.csv`, async (err, data) => {
-      //   if (err) throw err;
-      //   const arr = await csvToArray(data)
-      //   const results = JSON.parse(arr);
-      //   resolve(results)
-      // });
     }) 
   }
   let cachedDown = await cache.getAsync(`downloading-${idPbl}`);
@@ -56,14 +44,6 @@ exports.readCsv = async function(idPbl){
 
                 try{
                     console.log(`Downloading shopee`)
-
-                    // const affiliateResponse = await axios.get(affiliateEndpoint, {
-                    //         headers: {
-                    //             'Authorization': `Bearer ${token}`,
-                    //             'X-Accesstrade-User-Type': 'publisher'
-                    //         }
-                    // })
-
                     await download(affiliateEndpoint,idPbl)
                     
                     await cache.setAsync(`downloading-${idPbl}`, false);
@@ -102,20 +82,6 @@ exports.readCsv = async function(idPbl){
     }) 
   }
 }
-
-async function csvToArray(str, delimiter = ",") {
-  const headers = str.slice(0, str.indexOf("\n")).split(delimiter);
-
-  const rows = str.slice(str.indexOf("\n") + 1).split("\n");
-
-  const arr = rows.map(function (row) {
-    const values = row.split(delimiter);
-    const el = headers.reduce(function (object, header, index) {
-      object[header] = values[index];
-      return object;
-    }, {});
-    return el;
-  });
 
   return arr;
 }
@@ -194,4 +160,8 @@ async function readCsv(path,id){
         resolve(objetos[0])
       });
   })
+}
+
+function getKeyByValue(object, value) {
+  return Object.keys(object).find(key => object[key] === value);
 }
