@@ -1,6 +1,7 @@
+/* eslint-disable no-mixed-spaces-and-tabs */
 var styleEl = document.createElement('style')
 styleEl.innerHTML =
-	'.ui-tooltip-graymatics{background-color: #000033 !important;background:url("");font-size: 14px;font-weight: bold;opacity:0.8; color:#ffffff};'
+	'.ui-tooltip-graymatics{background-color: #000033 !important;background:url("");font-size: 14px;font-weight: bold;opacity:0.8; color:#ffffff}; '
 document.head.appendChild(styleEl)
 
 const uuid = new Date().getTime()
@@ -43,12 +44,20 @@ $(document).on('mousedown', 'a.but1', function (e) {
 
 $(document).on('mousedown', 'a.but2', function (e) {
 	if(e.button == 0 || e.button == 1){
+		let idItem, img;
+		if(navigator.userAgent.indexOf("Firefox") != -1 ) {
+			idItem = e.srcElement.parentNode.parentNode.parentNode.parentNode.parentNode.childNodes[1].id;
+			img = e.srcElement.parentNode.parentNode.parentNode.parentNode.parentNode.childNodes[0].currentSrc;
+		}else{
+			idItem = parseInt(decodeURI(e.originalEvent.path[2].href).split('id=')[1]) || parseInt(decodeURI(e.originalEvent.path[1].href).split('id=')[1]);
+			img = e.originalEvent.path[5].children[0].currentSrc || e.originalEvent.path[6].children[0].currentSrc;
+		}
 		const data = {
 			time: new Date(),
 			url: window.location.href,
 			type: 2,
-			idItem: parseInt(decodeURI(e.originalEvent.path[2].href).split('id=')[1]) || parseInt(decodeURI(e.originalEvent.path[1].href).split('id=')[1]),
-			img: e.originalEvent.path[5].children[0].currentSrc || e.originalEvent.path[6].children[0].currentSrc
+			idItem: idItem,
+			img: img
 		}
 			$.ajax({
 			url: `http://${serv}/api/data`,
@@ -91,70 +100,142 @@ $(document).on('mousedown', 'a.but2', function (e) {
 				id: f.id
 			}
 		if ('indoorroom' != g.object && 'person' != g.object && f.keywords != ' ') {
-			var topvl = c.my - 50
-			var leftvl = c.mx - 30
+			if(c.my<55){
+				c.my = 55
+			}
+			if(c.mx<55){
+				c.mx = 55
+			}
+			var topvl = c.my
+			var leftvl = c.mx
 			var h =
-				"<a title='SHOP NOW!'class='but1' id ='"+ g.id +"'><div class='mark' style='padding:50px; position:absolute;top:" +
+				"<a title='SHOP NOW!'class='but1' id ='"+ g.id +"'><div class='mark' style='position:absolute;top:" +
 				topvl +
 				'px;left:' +
 				leftvl +
 				"px;'><span name='mark_point_" +
 				E +
-				"' class='but' style='background:url(http://" + serv + "/api/pictures/iconNoShadow.gif) no-repeat 50% 50%;background-size: 80px;padding: 60px 60px;cursor: pointer;'>&nbsp;</span></div></a>"
+				"' class='but' style='background:url(http://" + serv + "/api/pictures/"
+			if(E == 0){
+				h = h + iconAndSize('iconNoShadow.gif', false) + "padding: 60px 60px;cursor: pointer;'>&nbsp;</span></div></a>"
+			}else if(E == 1){
+				h = h + iconAndSize('iconShadow.gif', true) + "padding: 60px 60px;cursor: pointer;'>&nbsp;</span></div></a>"
+			}else if(E == 2){
+				h = h + iconAndSize('iconShadow.gif', false) + "padding: 60px 60px;cursor: pointer;'>&nbsp;</span></div></a>"
+			}else if(E == 3){
+				h = h + iconAndSize('iconNoShadow.gif', true) + "padding: 60px 60px;cursor: pointer;'>&nbsp;</span></div></a>"
+			}else{
+				h = h + iconAndSize('iconNoShadow.gif', false) + "padding: 60px 60px;cursor: pointer;'>&nbsp;</span></div></a>"
+			}
 			a(e).append(h)
 			var i = document.createElement('div')
 			;(i.innerHTML = g.iframe), (i.id = 'mark_point_' + E++), (i.className = 'wrapper')
 			var j =
-				'position:absolute;zIndex:50;clear:both;width:350px;height:450px;padding:0.2em;background-color:#FFFFFF;display:none;border: 1px solid gray;-webkit-border-radius: 6px;-moz-border-radius: 6px;border-radius: 6px;-webkit-box-shadow: 0 2px 5px;-moz-box-shadow: 0 2px 5px;box-shadow: 0 2px 5px; font: DB Heavent'
+				'position:absolute;zIndex:50;clear:both;width:350px;padding:0.2em;background-color:#FFFFFF;display:none;border: 1px solid gray;-webkit-border-radius: 6px;-moz-border-radius: 6px;border-radius: 6px;-webkit-box-shadow: 0 2px 5px;-moz-box-shadow: 0 2px 5px;box-shadow: 0 2px 5px;'
 			i.style.cssText = j
 			var k = a(e).width()
-			i.style.top = c.my - 80 + 'px'
+			i.style.top = c.my - 60 + 'px'
 			//k / 2 > c.mx ? i.style.left = c.mx - 240 + "px" : i.style.right = k - c.mx - 17 + "px", a(e).append(i);
 			;(i.style.left = c.mx - 120 + 'px'), a(e).append(i)
 		}
 	}
-
+	let sending = false;
 	function e() {
-		a('.but').mouseenter( 
-			function(){
-				var b = a(this).attr('name')		
-				a(this).css(
-					'background-size',
-					'0px'
-				),
-				a('.wrapper').css('z-index', '50'),
-				a('.mark').css('z-index', '200'),
-				a(this).css('z-index', '200'),
-				a('#' + b).css('z-index', '100'),
-				a('#' + b).css('display', '')
-			}
-		)
-		a('.wrapper').mouseleave(
-			function () {
-				var b = a(this)[0].id
-				a('.but').css(
-					'background',
-					'url(http://' + serv + '/api/pictures/iconNoShadow.gif) no-repeat 50% 50%'
-				),
-				a('.but').css(
-					'background-size',
-					'80px'
-				),
-				a(this).css(
-					'background-color',
-					'#FFFFFF'
-				),
-				a('.but').css(
-					'padding',
-					'60px 60px'
-				),
-				a(this).css(
-					'cursor',
-					'pointer'
-				),				
-				a('#' + b).css('display', 'none')
-			}
-		)
+		if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
+			a('.mark span').toggle(
+				function () {
+					var b = a(this).attr('name')
+					$('.ui-corner-all').hide()
+					a(this).css(
+						'background',
+						'url(http://' + serv + '/api/pictures/iconNoShadow.gif) no-repeat 40% 40%'
+					),				
+					a(this).css(
+						'background-size',
+						'60px'
+					),
+						a('.wrapper').css('z-index', '50'),
+						a('.mark').css('z-index', '200'),
+						a(this).css('z-index', '200'),
+						a('#' + b).css('z-index', '100'),
+						a('#' + b).css('display', '')
+				},
+				function () {
+					var b = a(this).attr('name')
+					a(this).css(
+						'background',
+						'url(http://' + serv + '/api/pictures/iconNoShadow.gif) no-repeat 40% 40%'
+					),
+					a(this).css(
+						'background-size',
+						'60px'
+					),
+						a('#' + b).css('display', 'none')
+				}
+			)
+		}else{
+			a('.but').mouseenter(
+				function(e){
+					const data = {
+						time: new Date(),
+						url: window.location.href,
+						type: 1,
+						idItem: e.srcElement.parentNode.parentNode.id,
+						img: e.srcElement.parentNode.parentNode.parentNode.children[0].currentSrc
+					}
+
+					if(sending == false){
+						sending = true;
+						$.ajax({
+						url: `http://${serv}/api/data`,
+						type: 'POST',
+						data: data,
+						dataType: 'json',
+						success: function (a) {
+							sending = false;
+						},
+						error: function (e) {console.error(e)}
+						})
+					}
+					var b = a(this).attr('name')		
+					a(this).css(
+						'background-size',
+						'0px'
+					),
+					a('.wrapper').css('z-index', '250'),
+					a('.mark').css('z-index', '200'),
+					a(this).css('z-index', '200'),
+					a('#' + b).css('z-index', '250'),
+					a('#' + b).css('display', '')
+				}
+			)
+			a('.wrapper').mouseleave(
+				function () {
+					var b = a(this)[0].id
+					a('.but').css(
+						'background',
+						'url(http://' + serv + '/api/pictures/iconNoShadow.gif) no-repeat 40% 40%'
+					),
+					a('.but').css(
+						'background-size',
+						'60px'
+					),
+					a(this).css(
+						'background-color',
+						'#FFFFFF'
+					),
+					a('.but').css(
+						'padding',
+						'60px 60px'
+					),
+					a(this).css(
+						'cursor',
+						'pointer'
+					),				
+					a('#' + b).css('display', 'none')
+				}
+			)
+		}
 	}
 	function f(a, c, e) {
 		for (var f = a, g = 0; f.length > g; g++)
@@ -166,7 +247,7 @@ $(document).on('mousedown', 'a.but2', function (e) {
 						l = f[g].adsinfo[h]
 					l.focal_point !== b
 						? ((i = (l.focal_point[0] * c.cur_width) / c.ori_width),
-						  (j = l.focal_point[1] * (c.cur_height / c.ori_height) + 150),
+						  (j = l.focal_point[1] * (c.cur_height / c.ori_height)),
 						  (k = !0))
 						: ((i = c.cur_width - 20 * (h + 1)), (j = 130), (k = !1)),
 						(c.mx = i),
@@ -295,7 +376,9 @@ $(document).on('mousedown', 'a.but2', function (e) {
 							'&site=' +
 							pe + 
 							'&uid=' +
-							uuid
+							uuid + 
+							'&serv=' +
+							serv
 					a.ajax({
 						url: v,
 						type: 'GET',
@@ -368,7 +451,7 @@ $(document).on('mousedown', 'a.but2', function (e) {
 		A = 240,
 		B = 95,
 		C = '240x95_as',
-		E = 0
+		E = 0,
 		pe = window.location.href
 	window.onload = function () {
 		var b = []
@@ -384,21 +467,38 @@ $(document).on('mousedown', 'a.but2', function (e) {
 	}
 })(jQuery)
 
-function loadjscssfile(filename, filetype) {
-	if (filetype == 'js') {
-		//if filename is a external JavaScript file
-		var fileref = document.createElement('script')
-		fileref.setAttribute('type', 'text/javascript')
-		fileref.setAttribute('src', filename)
-	} else if (filetype == 'css') {
-		//if filename is an external CSS file
-		var fileref = document.createElement('link')
-		fileref.setAttribute('rel', 'stylesheet')
-		fileref.setAttribute('type', 'text/css')
-		fileref.setAttribute('href', filename)
+// function loadjscssfile(filename, filetype) {
+// 	if (filetype == 'js') {
+// 		//if filename is a external JavaScript file
+// 		var fileref = document.createElement('script')
+// 		fileref.setAttribute('type', 'text/javascript')
+// 		fileref.setAttribute('src', filename)
+// 	} else if (filetype == 'css') {
+// 		//if filename is an external CSS file
+// 		var fileref = document.createElement('link')
+// 		fileref.setAttribute('rel', 'stylesheet')
+// 		fileref.setAttribute('type', 'text/css')
+// 		fileref.setAttribute('href', filename)
+// 	}
+// 	if (typeof fileref != 'undefined') {
+// 		if (filetype == 'js') $('head').append(fileref)
+// 		if (filetype == 'css') $('head').append(fileref)
+// 	}
+// }
+
+function iconAndSize(file, big){
+	let size, rep;
+	if(big == true){
+		size = 80;
+		rep = 50
+		if(file == 'iconShadow.gif'){
+			size = 100;
+			rep = 70
+		}
+	}else{
+		size = 60;
+		rep = 40;
 	}
-	if (typeof fileref != 'undefined') {
-		if (filetype == 'js') $('head').append(fileref)
-		if (filetype == 'css') $('head').append(fileref)
-	}
+	const str = `${file}) no-repeat ${rep}% ${rep}%;background-size: ${size}px;`
+	return str
 }

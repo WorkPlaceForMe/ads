@@ -14,7 +14,6 @@ const arrPrendas = Object.keys(objetos[1])
 
 exports.readCsv = async function(idPbl){
   if (fs.existsSync(`./csv/${idPbl}.csv`)){
-
     return new Promise( (resolve, reject) =>{
     let res = require(`../csv/${idPbl}.json`);
     resolve(res)
@@ -45,9 +44,6 @@ exports.readCsv = async function(idPbl){
                 try{
                     console.log(`Downloading shopee`)
                     await download(affiliateEndpoint,idPbl)
-                    
-                    await cache.setAsync(`downloading-${idPbl}`, false);
-                    console.log(`Done with shopee`)
 
                     const results = await readCsv(`./csv/${idPbl}.csv`,idPbl)
 
@@ -73,18 +69,10 @@ exports.readCsv = async function(idPbl){
     return new Promise( (resolve, reject) =>{
       let res = require(`../csv/${idPbl}.json`);
       resolve(res)
-      // fs.readFile(`./csv/${idPbl}.csv`, async (err, data) => {
-      //   if (err) throw err;
-      //   const arr = await csvToArray(data)
-      //   const results = JSON.parse(arr);
-      //   resolve(results)
-      // });
     }) 
   }
 }
 
-  return arr;
-}
 
 async function download(url, path) {
   const TIMEOUT = 100000
@@ -145,6 +133,14 @@ async function readCsv(path,id){
           objetos[0][element].push(csvrow)
         }
       }
+       if(csvrow[15].includes("Mobile & Gadgets") || csvrow[15]=='Mobile & Gadgets'){
+        objetos[0]['cell_phone'].push(csvrow)
+      }else if(csvrow[17].includes("Mobile & Gadgets")|| csvrow[17]=='Mobile & Gadgets'){
+        objetos[0]['cell_phone'].push(csvrow)
+      }else if(csvrow[13].includes("Mobile & Gadgets")|| csvrow[13]=='Mobile & Gadgets'){
+        objetos[0]['cell_phone'].push(csvrow)
+
+      }
       for(const element of arrPrendas){
         if(csvrow[15].toLowerCase().includes(" "+element) || csvrow[15].toLowerCase().includes(element)){
           objetos[1][element].push(csvrow)
@@ -157,11 +153,9 @@ async function readCsv(path,id){
       })
       .on('end', async function() {
         await fs.promises.writeFile(`./csv/${id}.json`, JSON.stringify(objetos, null, 2) , 'utf-8');
-        resolve(objetos[0])
+        await cache.setAsync(`downloading-${id}`, false);
+        console.log(`Done with shopee`)
+        resolve(objetos)
       });
   })
-}
-
-function getKeyByValue(object, value) {
-  return Object.keys(object).find(key => object[key] === value);
 }

@@ -10,7 +10,6 @@ const dateFormat = require('dateformat');
 const auth = require('../helper/auth')
 const util = require('util')
 const cache = require('../helper/cacheManager')
-// const objetos = require('/home/rodrigo/Documents/ads-Thai-Affiliate/csv/59183.json');
 
 
 exports.getAds = Controller(async(req, res) => {
@@ -25,13 +24,13 @@ exports.getAds = Controller(async(req, res) => {
     const apiEndpoint = '/api/v1/sync'
 
     // getting query strings
-    const { ad_type, ad_width, ad_height, ad_format, media_type, url, site, uid } = req.query
+    const { ad_type, ad_width, ad_height, ad_format, media_type, url, site, uid, serv } = req.query
 
     let cachedImg = await cache.getAsync(url);
-    // if(cachedImg)
-    //     return res.status(200).send({
-    //                 results: JSON.parse(cachedImg)
-    //             })
+    if(cachedImg)
+        return res.status(200).send({
+                    results: JSON.parse(cachedImg)
+                })
 
     await addImg(dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"),url,uid,site, async function(err,rows){
         if(rows){
@@ -61,60 +60,56 @@ exports.getAds = Controller(async(req, res) => {
                     const response = await axios(request_config)
 
                 console.log('=====================> VISTA RESPONSE <========================')
-                //     console.log(response.data.results)
-                // console.log(util.inspect(response.data, false, null, true))
+
                 let resultsVista = []
                 if(response.data){
                     for(const algo in response.data.results){
-                        // console.log(response.data.results)
-                        // console.log(util.inspect(response.data.results, false, null, true))
                         if(response.data.results[algo] != {}){
                             for(const obj of response.data.results[algo]){
-                                // console.log(util.inspect(obj, false, null, true),'+++++', algo)
-                                if(algo == 'Object' && obj.class != 'person'){
-                                    resultsVista.push(obj)
+                                if(algo == 'Object' && obj.class != 'person' && obj.confidence > 0.6){
                                     if(resultsVista.length == 2){
                                         break;
                                     }
+                                    resultsVista.push(obj)
                                 }
-                                if(algo == 'fashion' && obj.class != 'person'){
-                                    resultsVista.push(obj)
+                                if(algo == 'fashion' && obj.class != 'person' && obj.confidence > 0.6){
                                     if(resultsVista.length == 2){
                                         break;
                                     }
+                                    resultsVista.push(obj)
                                 }
                             }
                         }
                     }
                 }
+
                 const objetos = await readCsv.readCsv(aut['idP'])
                 const resultsAffiliate = []
                 for(const obj of resultsVista){
 
                         if(objetos[0][obj.class] != undefined){
-                        let int = Math.floor(Math.random() * 100)
-                        console.log("entreeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+                        let int = Math.floor(Math.random() * 70)
                     resultsAffiliate.push({vista: obj, affiliate: objetos[0][obj.class][int],
-                         add: {id: parseInt(objetos[0][obj.class][0][0]), site: site, date:  dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url:url, uid: uid}})
+                         add: {id: parseInt(objetos[0][obj.class][int][0]), site: site, date:  dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url:url, uid: uid},
+                        serv: serv})
                     }
-                   else if(obj.class == 'upper'){
-                        // console.log("entruuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu")
-                        let int = Math.floor(Math.random() * 100)
+                   else if(obj.class == 'upper' && obj.confidence > 0.8){
+                        let int = Math.floor(Math.random() * 70)
                         resultsAffiliate.push({vista: obj, affiliate: objetos[1]['shirt'][int],
-                            add: {id: parseInt(objetos[1]['shirt'][0][0]), site: site, date:  dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url:url, uid: uid}})   
+                            add: {id: parseInt(objetos[1]['shirt'][int][0]), site: site, date:  dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url:url, uid: uid},
+                        serv: serv})   
                     }
-                    if(obj.class == 'lower'){
-                        console.log("entraaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
-                        let int = Math.floor(Math.random() * 100)
+                    if(obj.class == 'lower' && obj.confidence > 0.8){
+                        let int = Math.floor(Math.random() * 70)
                         resultsAffiliate.push({vista: obj, affiliate: objetos[1]['pants'][int],
-                            add: {id: parseInt(objetos[1]['pants'][0][0]), site: site, date:  dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url:url, uid: uid}})  
+                            add: {id: parseInt(objetos[1]['pants'][int][0]), site: site, date:  dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url:url, uid: uid},
+                        serv: serv})  
                     }
 
                 }
 
                 const sendingResults = convert(resultsAffiliate)
-                // await cache.setAsync(url, JSON.stringify(sendingResults));
-                console.log(sendingResults,'######################################################################')
+                await cache.setAsync(url, JSON.stringify(sendingResults));
 
                 res.status(200).send({
                     results: sendingResults
@@ -122,6 +117,7 @@ exports.getAds = Controller(async(req, res) => {
                 }catch(err){
                     // console.log(err)
                     // console.log(util.inspect(err, false, null, true))
+                    await cache.setAsync(url, JSON.stringify({}));
                     return res.status(500).json({success: false, message: "Vista Image failled"}) 
                 }
             }
