@@ -7,6 +7,7 @@ document.head.appendChild(styleEl)
 const uuid = new Date().getTime()
 const serv = document.currentScript.getAttribute('api_ip')
 
+
 $(document).ready(function () {
 	$.ajax({
 		url: `http://${serv}/api/check`,
@@ -29,6 +30,8 @@ $(document).on('mousedown', 'a.but1', function (e) {
 			idItem: e.currentTarget.id,
 			img: e.originalEvent.path[3].children[0].currentSrc
 		}
+		
+		// dataLayer.push(data)
 			$.ajax({
 			url: `http://${serv}/api/data`,
 			type: 'POST',
@@ -119,11 +122,9 @@ $(document).on('mousedown', 'a.but2', function (e) {
 			if(E == 0){
 				h = h + iconAndSize('iconNoShadow.gif', false) + "padding: 60px 60px;cursor: pointer;'>&nbsp;</span></div></a>"
 			}else if(E == 1){
-				h = h + iconAndSize('iconShadow.gif', true) + "padding: 60px 60px;cursor: pointer;'>&nbsp;</span></div></a>"
+				h = h + iconAndSize('iconBorder.gif', true) + "padding: 60px 60px;cursor: pointer;'>&nbsp;</span></div></a>"
 			}else if(E == 2){
-				h = h + iconAndSize('iconShadow.gif', false) + "padding: 60px 60px;cursor: pointer;'>&nbsp;</span></div></a>"
-			}else if(E == 3){
-				h = h + iconAndSize('iconNoShadow.gif', true) + "padding: 60px 60px;cursor: pointer;'>&nbsp;</span></div></a>"
+				h = h + iconAndSize('iconBorder.gif', false) + "padding: 60px 60px;cursor: pointer;'>&nbsp;</span></div></a>"
 			}else{
 				h = h + iconAndSize('iconNoShadow.gif', false) + "padding: 60px 60px;cursor: pointer;'>&nbsp;</span></div></a>"
 			}

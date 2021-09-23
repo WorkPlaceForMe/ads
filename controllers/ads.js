@@ -42,7 +42,7 @@ exports.getAds = Controller(async(req, res) => {
                 let formData = new FormData()
                 formData.append('upload', request(url))
                 // formData.append('subscriptions', 'Object,themes,food,tags,face,fashion')
-                formData.append('subscriptions', 'Object,fashion,face')
+                formData.append('subscriptions', 'fashion,Object,face')
                 const request_config = {
                     method: 'post',
                     url: vista_url + apiEndpoint,
@@ -93,13 +93,13 @@ exports.getAds = Controller(async(req, res) => {
                          add: {id: parseInt(objetos[0][obj.class][int][0]), site: site, date:  dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url:url, uid: uid},
                         serv: serv})
                     }
-                   else if(obj.class == 'upper' && obj.confidence > 0.8){
+                   else if(obj.class == 'upper'){
                         let int = Math.floor(Math.random() * 70)
                         resultsAffiliate.push({vista: obj, affiliate: objetos[1]['shirt'][int],
                             add: {id: parseInt(objetos[1]['shirt'][int][0]), site: site, date:  dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url:url, uid: uid},
                         serv: serv})   
                     }
-                    if(obj.class == 'lower' && obj.confidence > 0.8){
+                    if(obj.class == 'lower'){
                         let int = Math.floor(Math.random() * 70)
                         resultsAffiliate.push({vista: obj, affiliate: objetos[1]['pants'][int],
                             add: {id: parseInt(objetos[1]['pants'][int][0]), site: site, date:  dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url:url, uid: uid},

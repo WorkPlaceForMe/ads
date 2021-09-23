@@ -2,7 +2,6 @@ const Controller = require('../helper/controller')
 const db = require('../helper/dbconnection')
 const readCsv = require('./readCsv')
 const reportAff = require('../helper/reportAff')
-const dateFormat = require('dateformat');
 const auth = require('../helper/auth')
 
 exports.getStats = Controller(async(req, res) => {
@@ -111,13 +110,18 @@ exports.getStats = Controller(async(req, res) => {
                                 const ids = await getPublisherId(Object.keys(imgsGrouped)[i])
                                 const init = new Date(req.query.init).toISOString()
                                 const fin = new Date(req.query.fin).toISOString()
-                                const rewards = await reportAff.report(init,fin,ids[0].publisherId)
-
-                                    if(ids[0].enabled == 'true'){
+                                let rewards;
+                                if(ids[0].enabled == 'true'){
                                         ids[0].enabled  = true
                                     }else if(ids[0].enabled == 'false'){
                                         ids[0].enabled  = false
                                     }
+                                try{
+                                    rewards = await reportAff.report(init,fin,ids[0].publisherId)
+                                }catch(err){
+                                    rewards['totalReward'] = 0;
+                                    rewards['totalConversionsCount'] = 0;
+                                }
                                     table[i] = {
                                         url : Object.keys(imgsGrouped)[i],
                                         clicksPerImg: clicksPerImg,
@@ -275,7 +279,13 @@ exports.getStatsUrl = Controller(async(req, res) => {
                             }
                             // console.table(table)
                             const ids = await getPublisherId(req.query.url)
-                            const rewards = await reportAff.report(req.query.init,req.query.fin,ids[0].publisherId)
+                            let rewards;
+                            try{
+                                rewards = await reportAff.report(req.query.init,req.query.fin,ids[0].publisherId)
+                            }catch(err){
+                                rewards['totalReward'] = 0;
+                                rewards['totalConversionsCount'] = 0;
+                            }
 
                             res.status(200).json({success: true, table: table, rewards: rewards});
                         }
