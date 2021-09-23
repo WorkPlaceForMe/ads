@@ -91,8 +91,8 @@ exports.getAds = Controller(async (req, res) => {
                             console.log(parseInt(objetos[0][obj.class][0][0]))
                             let int = Math.floor(Math.random() * objetos[0][obj.class].length)
                             resultsAffiliate.push({
-                                vista: obj, affiliate: objetos[0][obj.class][0],
-                                add: { id: parseInt(objetos[0][obj.class][0][0]), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
+                                vista: obj, affiliate: objetos[0][obj.class][int],
+                                add: { id: parseInt(objetos[0][obj.class][int][0]), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
                                 serv: serv
                             })
                         }
