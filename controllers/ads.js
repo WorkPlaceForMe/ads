@@ -97,7 +97,7 @@ exports.getAds = Controller(async (req, res) => {
                             })
                         }
                         else if (obj.class == 'upper') {
-                            let int = Math.floor(Math.random() * 70)
+                            let int = Math.floor(Math.random() * objetos[0]['upper'].length)
                             resultsAffiliate.push({
                                 vista: obj, affiliate: objetos[1]['shirt'][int],
                                 add: { id: parseInt(objetos[1]['shirt'][int][0]), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
