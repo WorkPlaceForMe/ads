@@ -42,7 +42,7 @@ exports.getAds = Controller(async (req, res) => {
                 let formData = new FormData()
                 formData.append('upload', request(url))
                 // formData.append('subscriptions', 'Object,themes,food,tags,face,fashion')
-                formData.append('subscriptions', 'Object,fashion')
+                formData.append('subscriptions', 'fashion,Object')
                 const request_config = {
                     method: 'post',
                     url: vista_url + apiEndpoint,
@@ -67,15 +67,9 @@ exports.getAds = Controller(async (req, res) => {
                             if (response.data.results[algo] != {}) {
                                 for (const obj of response.data.results[algo]) {
                                     if (algo == 'Object' && obj.class != 'person' && obj.confidence > 0.6) {
-                                        if (resultsVista.length == 2) {
-                                            break;
-                                        }
                                         resultsVista.push(obj)
                                     }
                                     if (algo == 'fashion' && obj.class != 'person' && obj.confidence > 0.6) {
-                                        if (resultsVista.length == 2) {
-                                            break;
-                                        }
                                         resultsVista.push(obj)
                                     }
                                 }
@@ -85,10 +79,10 @@ exports.getAds = Controller(async (req, res) => {
                     const objetos = await readCsv.readCsv(aut['idP'])
                     const resultsAffiliate = []
                     for (const obj of resultsVista) {
-
                         if (objetos[0][obj.class] != undefined) {
-
-                            console.log(parseInt(objetos[0][obj.class][0][0]))
+                            if(objetos[0][obj.class].length != 0){
+                            console.log(obj.class)
+                            // console.log(parseInt(objetos[0][obj.class][0][0]))
                             let int = Math.floor(Math.random() * objetos[0][obj.class].length)
                             resultsAffiliate.push({
                                 vista: obj, affiliate: objetos[0][obj.class][int],
@@ -96,21 +90,31 @@ exports.getAds = Controller(async (req, res) => {
                                 serv: serv
                             })
                         }
-                        else if (obj.class == 'upper') {
-                            let int = Math.floor(Math.random() * objetos[0]['upper'].length)
+                            if (resultsAffiliate.length == 2) {
+                                break;
+                            }
+                        }
+                        if (obj.class == 'upper') {
+                            let int = Math.floor(Math.random() * objetos[1]['shirt'].length)
                             resultsAffiliate.push({
                                 vista: obj, affiliate: objetos[1]['shirt'][int],
                                 add: { id: parseInt(objetos[1]['shirt'][int][0]), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
                                 serv: serv
                             })
+                            if (resultsAffiliate.length == 2) {
+                                break;
+                            }
                         }
                         if (obj.class == 'lower') {
-                            let int = Math.floor(Math.random() * 70)
+                            let int = Math.floor(Math.random() * objetos[1]['pants'].length)
                             resultsAffiliate.push({
                                 vista: obj, affiliate: objetos[1]['pants'][int],
                                 add: { id: parseInt(objetos[1]['pants'][int][0]), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
                                 serv: serv
                             })
+                            if (resultsAffiliate.length == 2) {
+                                break;
+                            }
                         }
 
                     }
