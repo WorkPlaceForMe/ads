@@ -120,13 +120,13 @@ $(document).on('mousedown', 'a.but2', function (e) {
 				E +
 				"' class='but' style='background:url(http://" + serv + "/api/pictures/"
 			if(E == 0){
-				h = h + iconAndSize('iconNoShadow.gif', false) + "padding: 60px 60px;cursor: pointer;'>&nbsp;</span></div></a>"
+				h = h + iconAndSize('iconNoShadow.gif', false) + "padding: 35px 40px;cursor: pointer;'>&nbsp;</span></div></a>"
 			}else if(E == 1){
-				h = h + iconAndSize('iconBorder.gif', true) + "padding: 60px 60px;cursor: pointer;'>&nbsp;</span></div></a>"
+				h = h + iconAndSize('iconBorder.gif', true) + "padding: 35px 40px;cursor: pointer;'>&nbsp;</span></div></a>"
 			}else if(E == 2){
-				h = h + iconAndSize('iconBorder.gif', false) + "padding: 60px 60px;cursor: pointer;'>&nbsp;</span></div></a>"
+				h = h + iconAndSize('iconBorder.gif', false) + "padding: 35px 40px;cursor: pointer;'>&nbsp;</span></div></a>"
 			}else{
-				h = h + iconAndSize('iconNoShadow.gif', false) + "padding: 60px 60px;cursor: pointer;'>&nbsp;</span></div></a>"
+				h = h + iconAndSize('iconNoShadow.gif', false) + "padding: 35px 40px;cursor: pointer;'>&nbsp;</span></div></a>"
 			}
 			a(e).append(h)
 			var i = document.createElement('div')
