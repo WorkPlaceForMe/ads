@@ -38,8 +38,8 @@ exports.readCsv = async function(idPbl){
                   }
               )
               // for(const id in ids){
-              // const affiliateEndpoint = `${conf.get('accesstrade_endpoint')}/v1/publishers/me/sites/${idPbl}/campaigns/${ids[id]}/productfeed/url`
-                let affiliateEndpoint = `http://gurkha.accesstrade.in.th/publishers/site/${idPbl}/campaign/677/productfeed/csv/071bb6b4d95e1402cec6a61383481e1a`
+              // const affiliateEndpoint = `${conf.get('accesstrade_endpoint')}/v1/publishers/me/sites/${idPbl}/campaigns/677/productfeed/url`
+              let affiliateEndpoint = `http://gurkha.accesstrade.in.th/publishers/site/${idPbl}/campaign/677/productfeed/csv/071bb6b4d95e1402cec6a61383481e1a`
 
                 try{
                     console.log(`Downloading shopee`)
@@ -50,13 +50,13 @@ exports.readCsv = async function(idPbl){
                     resolve(results)
 
                 } catch(err) {
-                    console.error(err)
+                    // console.error(err)
                 }
               // }
               // fs.promises.createWriteStream(`./csv/${idPbl}.csv`, JSON.stringify(result, null, 2) , 'utf-8');
               // resolve(result)
           }).catch((err)=>{
-            console.error(err)
+            // console.error(err)
             reject(err)})
     })
   }
@@ -120,9 +120,8 @@ async function readCsv(path,id){
   return new Promise( (resolve, reject) =>{
   
   fs.createReadStream(path)
-      .pipe(parseCsv({delimiter: ','}))
+      .pipe(parseCsv({delimiter: ',',from_line: 2, headers: true}))
       .on('data', function(csvrow) {
-
         // aqui mandar a vista cada row
         for(const element of arrObjetos){
           if(csvrow[15].toLowerCase().includes(" "+element) || csvrow[15].toLowerCase().includes(element)){
