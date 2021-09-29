@@ -24,9 +24,9 @@ exports.getAds = Controller(async (req, res) => {
     const apiEndpoint = '/api/v1/sync'
 
     // getting query strings
-    const { ad_type, ad_width, ad_height, ad_format, media_type, url, site, uid, serv } = req.query
+    const { ad_type, img_width, img_height, ad_format, media_type, url, site, uid, serv } = req.query
 
-    let cachedImg = await cache.getAsync(url);
+    let cachedImg = await cache.getAsync(`${img_width}_${img_height}_${url}`);
     if (cachedImg)
         return res.status(200).send({
             results: JSON.parse(cachedImg)
@@ -34,7 +34,11 @@ exports.getAds = Controller(async (req, res) => {
 
     await addImg(dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url, uid, site, async function (err, rows) {
         if (rows) {
-            const aut = await auth(site.split('/')[2], site.split('/')[0])
+            let checker = site.split('/')[2];
+            if(checker.includes('www.')){
+                checker = checker.split('w.')[1]
+            }
+            const aut = await auth(checker, site.split('/')[0])
             if (aut['enabled'] == false) {
                 console.log("Cancelling")
                 return res.status(400).json({ success: false, message: "Unauthorized" })
@@ -75,7 +79,8 @@ exports.getAds = Controller(async (req, res) => {
                                     resultsAffiliate.push({
                                         vista: obj, affiliate: objetos[1]['shirt'][int],
                                         add: { id: parseInt(objetos[1]['shirt'][int][0]), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
-                                        serv: serv
+                                        serv: serv,
+                                        size: {h: img_height, w: img_width}
                                     })
                                     if (resultsAffiliate.length == 2) {
                                         break;
@@ -86,7 +91,8 @@ exports.getAds = Controller(async (req, res) => {
                                     resultsAffiliate.push({
                                         vista: obj, affiliate: objetos[1]['pants'][int],
                                         add: { id: parseInt(objetos[1]['pants'][int][0]), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
-                                        serv: serv
+                                        serv: serv,
+                                        size: {h: img_height, w: img_width}
                                     })
                                     if (resultsAffiliate.length == 2) {
                                         break;
@@ -102,7 +108,8 @@ exports.getAds = Controller(async (req, res) => {
                                     resultsAffiliate.push({
                                         vista: obj, affiliate: objetos[0][obj.class][int],
                                         add: { id: parseInt(objetos[0][obj.class][int][0]), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
-                                        serv: serv
+                                        serv: serv,
+                                        size: {h: img_height, w: img_width}
                                     })
                                 }
                                 if (resultsAffiliate.length == 2) {
@@ -113,16 +120,13 @@ exports.getAds = Controller(async (req, res) => {
                     }
                     }
                     const sendingResults = convert(resultsAffiliate)
-                    await cache.setAsync(url, JSON.stringify(sendingResults));
+                    await cache.setAsync(`${img_width}_${img_height}_${url}`, JSON.stringify(sendingResults));
                     res.status(200).send({
                         results: sendingResults
                     })
                 }
                 catch (err) {
-                    console.log(err)
-                    console.trace(err)
-                    console.log(util.inspect(err, false, null, true))
-                    await cache.setAsync(url, JSON.stringify({}));
+                    await cache.setAsync(`${img_width}_${img_height}_${url}`, JSON.stringify({}));
                     return res.status(500).json({ success: false, message: "Vista Image failled" })
                 }
             }

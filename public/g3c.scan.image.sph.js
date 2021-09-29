@@ -100,14 +100,30 @@ $(document).on('mousedown', 'a.but2', function (e) {
 				product_url: f.product_url,
 				object: f.object,
 				iframe: f.iframe,
-				id: f.id
+				id: f.id,
+				size: f.imgSize
 			}
 		if ('indoorroom' != g.object && 'person' != g.object && f.keywords != ' ') {
 			if(c.my<55){
 				c.my = 55
 			}
-			if(c.mx<55){
-				c.mx = 55
+			if(c.my > (g.size.h - 55)){
+				c.my = g.size.h - 55
+			}
+			let width = 350;
+			let posX = c.mx - 120 + 'px';
+			if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
+					if(window.screen.width <= 350){
+							width = window.screen.width
+					}
+					posX = -5 + 'vw';
+			}else{
+				if(c.mx<270){
+				c.mx = 270
+			}
+			}
+			if(c.mx > (g.size.w - 55)){
+				c.mx = g.size.w - 55
 			}
 			var topvl = c.my
 			var leftvl = c.mx
@@ -120,24 +136,24 @@ $(document).on('mousedown', 'a.but2', function (e) {
 				E +
 				"' class='but' style='background:url(http://" + serv + "/api/pictures/"
 			if(E == 0){
-				h = h + iconAndSize('iconNoShadow.gif', false) + "padding: 35px 40px;cursor: pointer;'>&nbsp;</span></div></a>"
+				h = h + iconAndSize('iconNoShadow.gif', false) + "padding: 35px 40px;cursor: pointer; filter: drop-shadow(5px 10px 15px #222);'>&nbsp;</span></div></a>"
 			}else if(E == 1){
-				h = h + iconAndSize('iconBorder.gif', true) + "padding: 35px 40px;cursor: pointer;'>&nbsp;</span></div></a>"
+				h = h + iconAndSize('iconBorder.gif', true) + "padding: 35px 40px;cursor: pointer; filter: drop-shadow(5px 10px 15px #222);'>&nbsp;</span></div></a>"
 			}else if(E == 2){
-				h = h + iconAndSize('iconBorder.gif', false) + "padding: 35px 40px;cursor: pointer;'>&nbsp;</span></div></a>"
+				h = h + iconAndSize('iconBorder.gif', false) + "padding: 35px 40px;cursor: pointer; filter: drop-shadow(5px 10px 15px #222);'>&nbsp;</span></div></a>"
 			}else{
-				h = h + iconAndSize('iconNoShadow.gif', false) + "padding: 35px 40px;cursor: pointer;'>&nbsp;</span></div></a>"
+				h = h + iconAndSize('iconNoShadow.gif', false) + "padding: 35px 40px;cursor: pointer; filter: drop-shadow(5px 10px 15px #222);'>&nbsp;</span></div></a>"
 			}
 			a(e).append(h)
 			var i = document.createElement('div')
 			;(i.innerHTML = g.iframe), (i.id = 'mark_point_' + E++), (i.className = 'wrapper')
 			var j =
-				'position:absolute;zIndex:50;clear:both;width:350px;padding:0.2em;background-color:#FFFFFF;display:none;border: 1px solid gray;-webkit-border-radius: 6px;-moz-border-radius: 6px;border-radius: 6px;-webkit-box-shadow: 0 2px 5px;-moz-box-shadow: 0 2px 5px;box-shadow: 0 2px 5px;'
+				`position:absolute;zIndex:50;clear:both;width:${width}px;padding:0.2em;background-color:#FFFFFF;display:none;border: 1px solid gray;-webkit-border-radius: 6px;-moz-border-radius: 6px;border-radius: 6px;-webkit-box-shadow: 0 2px 5px;-moz-box-shadow: 0 2px 5px;box-shadow: 0 2px 5px;`
 			i.style.cssText = j
 			var k = a(e).width()
-			i.style.top = c.my - 60 + 'px'
+			i.style.top = c.my - 60 + 'px';
 			//k / 2 > c.mx ? i.style.left = c.mx - 240 + "px" : i.style.right = k - c.mx - 17 + "px", a(e).append(i);
-			;(i.style.left = c.mx - 120 + 'px'), a(e).append(i)
+			(i.style.left = posX ), a(e).append(i)
 		}
 	}
 	let sending = false;
@@ -170,6 +186,10 @@ $(document).on('mousedown', 'a.but2', function (e) {
 					a(this).css(
 						'background-size',
 						'60px'
+					),
+					a('.but').css(
+						'padding',
+						'35px 40px'
 					),
 						a('#' + b).css('display', 'none')
 				}
@@ -221,13 +241,17 @@ $(document).on('mousedown', 'a.but2', function (e) {
 						'background-size',
 						'60px'
 					),
+					// a(this).css(
+					// 	'background-color',
+					// 	'#FFFFFF'
+					// ),
 					a(this).css(
-						'background-color',
-						'#FFFFFF'
+						'filter',
+						'drop-shadow(5px 10px 15px #222)'
 					),
 					a('.but').css(
 						'padding',
-						'60px 60px'
+						'35px 40px'
 					),
 					a(this).css(
 						'cursor',
@@ -364,10 +388,10 @@ $(document).on('mousedown', 'a.but2', function (e) {
 					var m =
 							'ad_type=' +
 							z +
-							'&ad_width=' +
-							A +
-							'&ad_height=' +
-							B +
+							'&img_width=' +
+							h.cur_width +
+							'&img_height=' +
+							h.cur_height +
 							'&ad_format=' +
 							C +
 							'&media_type=' +

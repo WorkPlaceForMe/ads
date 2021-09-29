@@ -21,15 +21,18 @@ exports.auth = Controller(async(req, res) => {
 })
 
 exports.check = Controller(async(req, res) => {
-
-    checkSite(req.query.site.split('/')[2], async function(err,rows){
+    let checker = req.query.site.split('/')[2];
+    if(checker.includes('www.')){
+        checker = checker.split('w.')[1]
+    }
+    checkSite(checker, async function(err,rows){
         if(err){
             res.status(500).json(err);
             }
         else{
             if(rows.length == 0){
                 const locId = uuidv4();
-                await crt.create(locId,req.query.site.split('/')[2],req.query.site.split('/')[0])
+                await crt.create(locId,checker,req.query.site.split('/')[0])
                 return res.status(200).json({success: true, message: 'Site registered'});
             }else{
                 const site = rows[0].name

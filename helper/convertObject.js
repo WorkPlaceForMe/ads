@@ -33,6 +33,7 @@ exports.convert = (arr) => {
         }
         
         const adsinfo = [{
+            imgSize: {w: obj.size.w, h:obj.size.h},
             focal_point: [item.x,item.y],
             description: item.description,
             name: item.name,
