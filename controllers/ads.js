@@ -69,8 +69,8 @@ exports.getAds = Controller(async (req, res) => {
                     const resultsAffiliate = []
                     for (const subscriptions of resultsVista) {
                         if (subscriptions['face'].length != 0) {
-                            for (const obj of subscriptions['fashion']) {
-                                if (subscriptions['face'][0].deep_face.gender[0]['label'] == 'Female') {
+                            if (subscriptions['face'][0].deep_face.gender[0]['label'] == 'Female') {
+                                for (const obj of subscriptions['fashion']) {
                                     if (obj.class == 'upper') {
                                         let int = Math.floor(Math.random() * objetos[1]['Women Clothes']['shirt'].length)
                                         resultsAffiliate.push({
@@ -94,7 +94,9 @@ exports.getAds = Controller(async (req, res) => {
                                         }
                                     }
                                 }
-                                if (subscriptions['face'][0].deep_face.gender[0]['label'] == 'Male') {
+                            }
+                            if (subscriptions['face'][0].deep_face.gender[0]['label'] == 'Male') {
+                                for (const obj of subscriptions['fashion']) {
                                     if (obj.class == 'upper') {
                                         let int = Math.floor(Math.random() * objetos[1]['Men Clothes']['shirt'].length)
                                         resultsAffiliate.push({
