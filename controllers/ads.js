@@ -70,47 +70,73 @@ exports.getAds = Controller(async (req, res) => {
                     for (const subscriptions of resultsVista) {
                         if (subscriptions['face'].length != 0) {
                             for (const obj of subscriptions['fashion']) {
-                                if (obj.class == 'upper') {
-                                    let int = Math.floor(Math.random() * objetos[1]['shirt'].length)
-                                    resultsAffiliate.push({
-                                        vista: obj, affiliate: objetos[1]['shirt'][int],
-                                        add: { id: parseInt(objetos[1]['shirt'][int][0]), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
-                                        serv: serv
-                                    })
-                                    if (resultsAffiliate.length == 2) {
-                                        break;
+                                if (subscriptions['face'][0].deep_face.gender[0]['label'] == 'Female') {
+                                    if (obj.class == 'upper') {
+                                        let int = Math.floor(Math.random() * objetos[1]['Women Clothes']['shirt'].length)
+                                        resultsAffiliate.push({
+                                            vista: obj, affiliate: objetos[1]["Women Clothes"]['shirt'][int],
+                                            add: { id: parseInt(objetos[1]['Women Clothes']['shirt'][int][0]), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
+                                            serv: serv
+                                        })
+                                        if (resultsAffiliate.length == 2) {
+                                            break;
+                                        }
+                                    }
+                                    if (obj.class == 'lower') {
+                                        let int = Math.floor(Math.random() * objetos[1]['Women Clothes']['pants'].length)
+                                        resultsAffiliate.push({
+                                            vista: obj, affiliate: objetos[1]['Women Clothes']['pants'][int],
+                                            add: { id: parseInt(objetos[1]['Women Clothes']['pants'][int][0]), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
+                                            serv: serv
+                                        })
+                                        if (resultsAffiliate.length == 2) {
+                                            break;
+                                        }
                                     }
                                 }
-                                if (obj.class == 'lower') {
-                                    let int = Math.floor(Math.random() * objetos[1]['pants'].length)
-                                    resultsAffiliate.push({
-                                        vista: obj, affiliate: objetos[1]['pants'][int],
-                                        add: { id: parseInt(objetos[1]['pants'][int][0]), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
-                                        serv: serv
-                                    })
+                                if (subscriptions['face'][0].deep_face.gender[0]['label'] == 'Male') {
+                                    if (obj.class == 'upper') {
+                                        let int = Math.floor(Math.random() * objetos[1]['Men Clothes']['shirt'].length)
+                                        resultsAffiliate.push({
+                                            vista: obj, affiliate: objetos[1]['Men Clothes']['shirt'][int],
+                                            add: { id: parseInt(objetos[1]['Men Clothes']['shirt'][int][0]), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
+                                            serv: serv
+                                        })
+                                        if (resultsAffiliate.length == 2) {
+                                            break;
+                                        }
+                                    }
+                                    if (obj.class == 'lower') {
+                                        let int = Math.floor(Math.random() * objetos[1]['Men Clothes']['pants'].length)
+                                        resultsAffiliate.push({
+                                            vista: obj, affiliate: objetos[1]['Men Clothes']['pants'][int],
+                                            add: { id: parseInt(objetos[1]['Men Clothes']['pants'][int][0]), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
+                                            serv: serv
+                                        })
+                                        if (resultsAffiliate.length == 2) {
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        if (resultsAffiliate.length < 2) {
+                            for (const obj of subscriptions['Object']) {
+                                if (objetos[0][obj.class] != undefined && obj.confidence > 0.6) {
+                                    if (objetos[0][obj.class].length != 0) {
+                                        let int = Math.floor(Math.random() * objetos[0][obj.class].length)
+                                        resultsAffiliate.push({
+                                            vista: obj, affiliate: objetos[0][obj.class][int],
+                                            add: { id: parseInt(objetos[0][obj.class][int][0]), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
+                                            serv: serv
+                                        })
+                                    }
                                     if (resultsAffiliate.length == 2) {
                                         break;
                                     }
                                 }
                             }
                         }
-                        if(resultsAffiliate.length <2){
-                        for (const obj of subscriptions['Object']) {
-                            if (objetos[0][obj.class] != undefined && obj.confidence > 0.6) {
-                                if (objetos[0][obj.class].length != 0) {
-                                    let int = Math.floor(Math.random() * objetos[0][obj.class].length)
-                                    resultsAffiliate.push({
-                                        vista: obj, affiliate: objetos[0][obj.class][int],
-                                        add: { id: parseInt(objetos[0][obj.class][int][0]), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
-                                        serv: serv
-                                    })
-                                }
-                                if (resultsAffiliate.length == 2) {
-                                    break;
-                                }
-                            }
-                        }
-                    }
                     }
                     const sendingResults = convert(resultsAffiliate)
                     await cache.setAsync(url, JSON.stringify(sendingResults));

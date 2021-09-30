@@ -10,66 +10,70 @@ const parseCsv = require('csv-parse');
 const objetos = require('../csv/objetos2.json');
 
 const arrObjetos = Object.keys(objetos[0])
-const arrPrendas = Object.keys(objetos[1])
+const WomenClothes = Object.keys(objetos[1]['Women Clothes'])
+const MenClothes =  Object.keys(objetos[1]["Men Clothes"])
 
-exports.readCsv = async function(idPbl){
-  if (fs.existsSync(`./csv/${idPbl}.csv`)){
-    return new Promise( (resolve, reject) =>{
-    let res = require(`../csv/${idPbl}.json`);
-    resolve(res)
-    }) 
+console.log(WomenClothes)
+
+exports.readCsv = async function (idPbl) {
+  if (fs.existsSync(`./csv/${idPbl}.csv`)) {
+    return new Promise((resolve, reject) => {
+      let res = require(`../csv/${idPbl}.json`);
+      resolve(res)
+    })
   }
   let cachedDown = await cache.getAsync(`downloading-${idPbl}`);
-  if(cachedDown == 'false' || !cachedDown){
+  if (cachedDown == 'false' || !cachedDown) {
     await cache.setAsync(`downloading-${idPbl}`, true);
-    return new Promise(function(resolve, reject){
+    return new Promise(function (resolve, reject) {
       // const ids = {
       //     //lazada : 520,
       //     //trueShopping : 594,
       //     shopee : 677
       // }
       // let result = []
-          aff.getAff.then(async function(credentials){
-              const token = jwt.sign(
-                  { sub: credentials.userUid},
-                  credentials.secretKey,
-                  {
-                  algorithm: "HS256"
-                  }
-              )
-              // for(const id in ids){
-              // const affiliateEndpoint = `${conf.get('accesstrade_endpoint')}/v1/publishers/me/sites/${idPbl}/campaigns/677/productfeed/url`
-              let affiliateEndpoint = `http://gurkha.accesstrade.in.th/publishers/site/${idPbl}/campaign/677/productfeed/csv/071bb6b4d95e1402cec6a61383481e1a`
+      aff.getAff.then(async function (credentials) {
+        const token = jwt.sign(
+          { sub: credentials.userUid },
+          credentials.secretKey,
+          {
+            algorithm: "HS256"
+          }
+        )
+        // for(const id in ids){
+        // const affiliateEndpoint = `${conf.get('accesstrade_endpoint')}/v1/publishers/me/sites/${idPbl}/campaigns/677/productfeed/url`
+        let affiliateEndpoint = `http://gurkha.accesstrade.in.th/publishers/site/${idPbl}/campaign/677/productfeed/csv/071bb6b4d95e1402cec6a61383481e1a`
 
-                try{
-                    console.log(`Downloading shopee`)
-                    await download(affiliateEndpoint,idPbl)
+        try {
+          console.log(`Downloading shopee`)
+          await download(affiliateEndpoint, idPbl)
 
-                    const results = await readCsv(`./csv/${idPbl}.csv`,idPbl)
+          const results = await readCsv(`./csv/${idPbl}.csv`, idPbl)
 
-                    resolve(results)
+          resolve(results)
 
-                } catch(err) {
-                    // console.error(err)
-                }
-              // }
-              // fs.promises.createWriteStream(`./csv/${idPbl}.csv`, JSON.stringify(result, null, 2) , 'utf-8');
-              // resolve(result)
-          }).catch((err)=>{
-            // console.error(err)
-            reject(err)})
+        } catch (err) {
+          // console.error(err)
+        }
+        // }
+        // fs.promises.createWriteStream(`./csv/${idPbl}.csv`, JSON.stringify(result, null, 2) , 'utf-8');
+        // resolve(result)
+      }).catch((err) => {
+        // console.error(err)
+        reject(err)
+      })
     })
   }
-  else{
+  else {
     cachedDown = await cache.getAsync(`downloading-${idPbl}`)
-    while(cachedDown == 'true'){
+    while (cachedDown == 'true') {
       cachedDown = await cache.getAsync(`downloading-${idPbl}`)
       continue;
     }
-    return new Promise( (resolve, reject) =>{
+    return new Promise((resolve, reject) => {
       let res = require(`../csv/${idPbl}.json`);
       resolve(res)
-    }) 
+    })
   }
 }
 
@@ -84,17 +88,17 @@ async function download(url, path) {
   path = `./csv/${path}_temp.csv`
   const file = fs.createWriteStream(path)
 
-  return new Promise(function(resolve, reject) {
-    const request = http.get(uri.href).on('response', function(res) {
+  return new Promise(function (resolve, reject) {
+    const request = http.get(uri.href).on('response', function (res) {
       const len = parseInt(res.headers['content-length'], 10)
       let downloaded = 0
       res
-        .on('data', function(chunk) {
+        .on('data', function (chunk) {
           file.write(chunk)
           downloaded += chunk.length
           process.stdout.write(`Downloading ${downloaded} bytes\r`)
         })
-        .on('end', function() {
+        .on('end', function () {
           file.end()
           fs.rename(path, `./csv/${id}.csv`, function (err) {
             if (err) throw err;
@@ -109,49 +113,54 @@ async function download(url, path) {
         })
     })
 
-    request.setTimeout(TIMEOUT, function() {
+    request.setTimeout(TIMEOUT, function () {
       request.abort()
       reject(new Error(`request timeout after ${TIMEOUT / 1000.0}s`))
     })
   })
 }
 
-async function readCsv(path,id){
-  return new Promise( (resolve, reject) =>{
-  
-  fs.createReadStream(path)
-      .pipe(parseCsv({delimiter: ',',from_line: 2, headers: true}))
-      .on('data', function(csvrow) {
+async function readCsv(path, id) {
+  return new Promise((resolve, reject) => {
+
+    fs.createReadStream(path)
+      .pipe(parseCsv({ delimiter: ',', from_line: 2, headers: true }))
+      .on('data', function (csvrow) {
         // aqui mandar a vista cada row
-        for(const element of arrObjetos){
-          if(csvrow[15].toLowerCase().includes(" "+element) || csvrow[15].toLowerCase().includes(element)){
+        for (const element of arrObjetos) {
+          if (csvrow[15].toLowerCase().includes(" " + element) || csvrow[15].toLowerCase() == element) {
             objetos[0][element].push(csvrow)
-        }else if(csvrow[17].toLowerCase().includes(" "+element) || csvrow[15].toLowerCase().includes(element)){
-          objetos[0][element].push(csvrow)
-        }else if(csvrow[13].toLowerCase().includes(" "+element) || csvrow[15].toLowerCase().includes(element)){
-          objetos[0][element].push(csvrow)
+          } else if (csvrow[17].toLowerCase().includes(" " + element) || csvrow[17].toLowerCase() == element) {
+            objetos[0][element].push(csvrow)
+          } else if (csvrow[13].toLowerCase().includes(" " + element) || csvrow[13].toLowerCase() == element) {
+            objetos[0][element].push(csvrow)
+          }
+        }
+        if (csvrow[15] == 'Mobile') {
+          objetos[0]['cell_phone'].push(csvrow)
+        }
+        if(csvrow[13] == 'Women Clothes'){
+        for (const element of WomenClothes) {
+          if (csvrow[15].toLowerCase().includes(" " + element) || csvrow[15].toLowerCase().includes(element)) {
+            objetos[1]['Women Clothes'][element].push(csvrow)
+          } else if (csvrow[17].toLowerCase().includes(" " + element) || csvrow[17].toLowerCase().includes(element)) {
+            objetos[1]['Women Clothes'][element].push(csvrow)
+          }
         }
       }
-       if(csvrow[15].includes("Mobile & Gadgets") || csvrow[15]=='Mobile & Gadgets'){
-        objetos[0]['cell_phone'].push(csvrow)
-      }else if(csvrow[17].includes("Mobile & Gadgets")|| csvrow[17]=='Mobile & Gadgets'){
-        objetos[0]['cell_phone'].push(csvrow)
-      }else if(csvrow[13].includes("Mobile & Gadgets")|| csvrow[13]=='Mobile & Gadgets'){
-        objetos[0]['cell_phone'].push(csvrow)
-
-      }
-      for(const element of arrPrendas){
-        if(csvrow[15].toLowerCase().includes(" "+element) || csvrow[15].toLowerCase().includes(element)){
-          objetos[1][element].push(csvrow)
-      }else if(csvrow[17].toLowerCase().includes(" "+element) || csvrow[15].toLowerCase().includes(element)){
-        objetos[1][element].push(csvrow)
-      }else if(csvrow[13].toLowerCase().includes(" "+element) || csvrow[15].toLowerCase().includes(element)){
-        objetos[1][element].push(csvrow)
-      } 
+      if(csvrow[13] == 'Men Clothes'){
+        for (const element of MenClothes) {
+          console.log(element)
+          if (csvrow[15].toLowerCase().includes(" " + element) || csvrow[15].toLowerCase().includes(element)) {
+            objetos[1]['Men Clothes'][element].push(csvrow)
+          } else if (csvrow[17].toLowerCase().includes(" " + element) || csvrow[17].toLowerCase().includes(element)) {
+            objetos[1]['Men Clothes'][element].push(csvrow)
+          } 
+        }
       }
       })
-      .on('end', async function() {
-        await fs.promises.writeFile(`./csv/${id}.json`, JSON.stringify(objetos, null, 2) , 'utf-8');
+      .on('end', async function () {
+        await fs.promises.writeFile(`./csv/${id}.json`, JSON.stringify(objetos, null, 2), 'utf-8');
         await cache.setAsync(`downloading-${id}`, false);
         console.log(`Done with shopee`)
         resolve(objetos)

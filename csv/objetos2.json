@@ -81,11 +81,16 @@
         "toothbrush": []
     },
     {
-    "skirt" : [],
-    "bra" : [],
-    "dress" : [],
-    "shirt" : [],
-    "shorts" : [],
-    "pants" : []
+        "Women Clothes": {
+            "skirt": [],
+            "dress": [],
+            "shirt": [],
+            "shorts": [],
+            "pants": []
+        },
+        "Men Clothes": {
+            "shirt": [],
+            "pants": []
+        }
     }
 ]
