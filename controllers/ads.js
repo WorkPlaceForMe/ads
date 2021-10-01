@@ -24,9 +24,9 @@ exports.getAds = Controller(async (req, res) => {
     const apiEndpoint = '/api/v1/sync'
 
     // getting query strings
-    const { ad_type, ad_width, ad_height, ad_format, media_type, url, site, uid, serv } = req.query
+    const { ad_type, img_width, img_height, ad_format, media_type, url, site, uid, serv } = req.query
 
-    let cachedImg = await cache.getAsync(url);
+    let cachedImg = await cache.getAsync(`${img_width}_${img_height}_${url}`);
     if (cachedImg)
         return res.status(200).send({
             results: JSON.parse(cachedImg)
@@ -34,7 +34,11 @@ exports.getAds = Controller(async (req, res) => {
 
     await addImg(dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url, uid, site, async function (err, rows) {
         if (rows) {
-            const aut = await auth(site.split('/')[2], site.split('/')[0])
+            let checker = site.split('/')[2];
+            if(checker.includes('www.')){
+                checker = checker.split('w.')[1]
+            }
+            const aut = await auth(checker, site.split('/')[0])
             if (aut['enabled'] == false) {
                 console.log("Cancelling")
                 return res.status(400).json({ success: false, message: "Unauthorized" })
@@ -69,6 +73,7 @@ exports.getAds = Controller(async (req, res) => {
                     const resultsAffiliate = []
                     for (const subscriptions of resultsVista) {
                         if (subscriptions['face'].length != 0) {
+
                             if (subscriptions['face'][0].deep_face.gender[0]['label'] == 'Female') {
                                 for (const obj of subscriptions['fashion']) {
                                     if (obj.class == 'upper') {
@@ -118,10 +123,12 @@ exports.getAds = Controller(async (req, res) => {
                                         if (resultsAffiliate.length == 2) {
                                             break;
                                         }
+
                                     }
                                 }
                             }
                         }
+
                         if (resultsAffiliate.length < 2) {
                             for (const obj of subscriptions['Object']) {
                                 if (objetos[0][obj.class] != undefined && obj.confidence > 0.6) {
@@ -136,21 +143,19 @@ exports.getAds = Controller(async (req, res) => {
                                     if (resultsAffiliate.length == 2) {
                                         break;
                                     }
+
                                 }
                             }
                         }
                     }
                     const sendingResults = convert(resultsAffiliate)
-                    await cache.setAsync(url, JSON.stringify(sendingResults));
+                    await cache.setAsync(`${img_width}_${img_height}_${url}`, JSON.stringify(sendingResults));
                     res.status(200).send({
                         results: sendingResults
                     })
                 }
                 catch (err) {
-                    console.log(err)
-                    console.trace(err)
-                    console.log(util.inspect(err, false, null, true))
-                    await cache.setAsync(url, JSON.stringify({}));
+                    await cache.setAsync(`${img_width}_${img_height}_${url}`, JSON.stringify({}));
                     return res.status(500).json({ success: false, message: "Vista Image failled" })
                 }
             }
