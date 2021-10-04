@@ -49,7 +49,6 @@ exports.readCsv = async function (idPbl) {
             }
           })
           console.log(`Downloading shopee`)
-          console.log(affiliateResponse.data.baseUrl)
           await download(affiliateResponse.data.baseUrl, idPbl)
 
           const results = await readCsv(`./csv/${idPbl}.csv`, idPbl)
@@ -154,7 +153,6 @@ async function readCsv(path, id) {
         }
         if (csvrow[13] == 'Men Clothes') {
           for (const element of MenClothes) {
-            console.log(element)
             if (csvrow[15].toLowerCase().includes(" " + element) || csvrow[15].toLowerCase().includes(element)) {
               objetos[1]['Men Clothes'][element].push(csvrow)
             } else if (csvrow[17].toLowerCase().includes(" " + element) || csvrow[17].toLowerCase().includes(element)) {
