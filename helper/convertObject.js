@@ -6,7 +6,7 @@ exports.convert = (arr) => {
     }
     let arrResult = [];
     for(const obj of arr){
-        // console.log(obj)
+        console.log(obj)
         addAd(obj.add.id,obj.add.site, obj.add.date,obj.add.url,obj.add.uid,function(err,rows){
         })
         let item = {
@@ -33,7 +33,7 @@ exports.convert = (arr) => {
         }
         
         const adsinfo = [{
-            imgSize: {w: obj.size.w, h:obj.size.h},
+            imgSize: {w: obj.vista.boundingBox.width, h:obj.vista.boundingBox.height},
             focal_point: [item.x,item.y],
             description: item.description,
             name: item.name,
