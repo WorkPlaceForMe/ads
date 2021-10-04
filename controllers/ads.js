@@ -57,7 +57,8 @@ exports.getAds = Controller(async (req, res) => {
                         username: user,
                         password: password
                     },
-                    data: formData
+                    data: formData,
+                    timeout: 100000
                 }
                 console.log("Sending request")
                 try {
@@ -81,7 +82,8 @@ exports.getAds = Controller(async (req, res) => {
                                         resultsAffiliate.push({
                                             vista: obj, affiliate: objetos[1]["Women Clothes"]['shirt'][int],
                                             add: { id: parseInt(objetos[1]['Women Clothes']['shirt'][int][0]), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
-                                            serv: serv
+                                            serv: serv,
+                                            size: {w: img_width, h: img_height}
                                         })
                                         if (resultsAffiliate.length == 2) {
                                             break;
@@ -92,7 +94,8 @@ exports.getAds = Controller(async (req, res) => {
                                         resultsAffiliate.push({
                                             vista: obj, affiliate: objetos[1]['Women Clothes']['pants'][int],
                                             add: { id: parseInt(objetos[1]['Women Clothes']['pants'][int][0]), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
-                                            serv: serv
+                                            serv: serv,
+                                            size: {w: img_width, h: img_height}
                                         })
                                         if (resultsAffiliate.length == 2) {
                                             break;
@@ -107,7 +110,8 @@ exports.getAds = Controller(async (req, res) => {
                                         resultsAffiliate.push({
                                             vista: obj, affiliate: objetos[1]['Men Clothes']['shirt'][int],
                                             add: { id: parseInt(objetos[1]['Men Clothes']['shirt'][int][0]), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
-                                            serv: serv
+                                            serv: serv,
+                                            size: {w: img_width, h: img_height}
                                         })
                                         if (resultsAffiliate.length == 2) {
                                             break;
@@ -118,7 +122,8 @@ exports.getAds = Controller(async (req, res) => {
                                         resultsAffiliate.push({
                                             vista: obj, affiliate: objetos[1]['Men Clothes']['pants'][int],
                                             add: { id: parseInt(objetos[1]['Men Clothes']['pants'][int][0]), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
-                                            serv: serv
+                                            serv: serv,
+                                            size: {w: img_width, h: img_height}
                                         })
                                         if (resultsAffiliate.length == 2) {
                                             break;
@@ -137,7 +142,8 @@ exports.getAds = Controller(async (req, res) => {
                                         resultsAffiliate.push({
                                             vista: obj, affiliate: objetos[0][obj.class][int],
                                             add: { id: parseInt(objetos[0][obj.class][int][0]), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
-                                            serv: serv
+                                            serv: serv,
+                                            size: {w: img_width, h: img_height}
                                         })
                                     }
                                     if (resultsAffiliate.length == 2) {
