@@ -57,8 +57,7 @@ exports.getAds = Controller(async (req, res) => {
                         username: user,
                         password: password
                     },
-                    data: formData,
-                    timeout: 100000
+                    data: formData
                 }
                 console.log("Sending request")
                 try {
