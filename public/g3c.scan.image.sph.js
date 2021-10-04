@@ -138,7 +138,7 @@ $(document).on('mousedown', 'a.but2', function (e) {
 				leftvl +
 				"px;'><span name='mark_point_" +
 				E +
-				" class='but' style='background:url(" + ext + "://"+ serv + "api/pictures/"
+				"' class='but' style='background:url(" + ext + "://"+ serv + "/api/pictures/"
 			if(E == 0){
 				h = h + iconAndSize('iconNoShadow.gif', false) + "padding: 35px 40px;cursor: pointer; filter: drop-shadow(5px 10px 15px #222);'>&nbsp;</span></div></a>"
 			}else if(E == 1){
@@ -169,7 +169,7 @@ $(document).on('mousedown', 'a.but2', function (e) {
 					$('.ui-corner-all').hide()
 					a(this).css(
 						'background',
-						`url(${ext}://${serv}/api/pictures/iconNoShadow.gif) no-repeat 40% 40%`
+						'url(' + ext+ '://' + serv + '/api/pictures/iconNoShadow.gif) no-repeat 40% 40%'
 					),				
 					a(this).css(
 						'background-size',
@@ -185,7 +185,7 @@ $(document).on('mousedown', 'a.but2', function (e) {
 					var b = a(this).attr('name')
 					a(this).css(
 						'background',
-						`url(${ext}://${serv}/api/pictures/iconNoShadow.gif) no-repeat 40% 40%`
+						'url(' + ext+ '://' + serv + '/api/pictures/iconNoShadow.gif) no-repeat 40% 40%'
 					),
 					a(this).css(
 						'background-size',
@@ -239,7 +239,7 @@ $(document).on('mousedown', 'a.but2', function (e) {
 					var b = a(this)[0].id
 					a('.but').css(
 						'background',
-						`url(${ext}://${serv}/api/pictures/iconNoShadow.gif) no-repeat 40% 40%`
+						'url(' + ext+ '://' + serv + '/api/pictures/iconNoShadow.gif) no-repeat 40% 40%'
 					),
 					a('.but').css(
 						'background-size',
