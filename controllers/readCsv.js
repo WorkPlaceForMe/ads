@@ -13,8 +13,6 @@ const arrObjetos = Object.keys(objetos[0])
 const WomenClothes = Object.keys(objetos[1]['Women Clothes'])
 const MenClothes =  Object.keys(objetos[1]["Men Clothes"])
 
-console.log(WomenClothes)
-
 exports.readCsv = async function (idPbl) {
   if (fs.existsSync(`./csv/${idPbl}.csv`)) {
     return new Promise((resolve, reject) => {
@@ -41,12 +39,19 @@ exports.readCsv = async function (idPbl) {
           }
         )
         // for(const id in ids){
-        // const affiliateEndpoint = `${conf.get('accesstrade_endpoint')}/v1/publishers/me/sites/${idPbl}/campaigns/677/productfeed/url`
-        let affiliateEndpoint = `http://gurkha.accesstrade.in.th/publishers/site/${idPbl}/campaign/677/productfeed/csv/071bb6b4d95e1402cec6a61383481e1a`
+        const affiliateEndpoint = `${conf.get('accesstrade_endpoint')}/v1/publishers/me/sites/${idPbl}/campaigns/677/productfeed/url`
+        // let affiliateEndpoint = `http://gurkha.accesstrade.in.th/publishers/site/${idPbl}/campaign/677/productfeed/csv/071bb6b4d95e1402cec6a61383481e1a`
 
         try {
+          const affiliateResponse = await axios.get(affiliateEndpoint, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'X-Accesstrade-User-Type': 'publisher'
+                    }
+          })
+
           console.log(`Downloading shopee`)
-          await download(affiliateEndpoint, idPbl)
+          await download(affiliateResponse, idPbl)
 
           const results = await readCsv(`./csv/${idPbl}.csv`, idPbl)
 
