@@ -6,7 +6,6 @@ exports.convert = (arr) => {
     }
     let arrResult = [];
     for(const obj of arr){
-        console.log(obj)
         addAd(obj.add.id,obj.add.site, obj.add.date,obj.add.url,obj.add.uid,function(err,rows){
         })
         let item = {
