@@ -138,7 +138,7 @@ $(document).on('mousedown', 'a.but2', function (e) {
 				leftvl +
 				"px;'><span name='mark_point_" +
 				E +
-				` class='but' style='background:url(${ext}://${serv}/api/pictures/`
+				" class='but' style='background:url(" + ext + "://"+ serv + "api/pictures/"
 			if(E == 0){
 				h = h + iconAndSize('iconNoShadow.gif', false) + "padding: 35px 40px;cursor: pointer; filter: drop-shadow(5px 10px 15px #222);'>&nbsp;</span></div></a>"
 			}else if(E == 1){
