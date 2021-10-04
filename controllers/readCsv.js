@@ -4,14 +4,15 @@ const jwt = require('jsonwebtoken')
 const conf = require('../middleware/prop')
 const fs = require('fs');
 const cache = require('../helper/cacheManager')
-const http = require('http');
+const https = require('https');
 const { parse } = require('url')
 const parseCsv = require('csv-parse');
 const objetos = require('../csv/objetos2.json');
+const { trace } = require('console');
 
 const arrObjetos = Object.keys(objetos[0])
 const WomenClothes = Object.keys(objetos[1]['Women Clothes'])
-const MenClothes =  Object.keys(objetos[1]["Men Clothes"])
+const MenClothes = Object.keys(objetos[1]["Men Clothes"])
 
 exports.readCsv = async function (idPbl) {
   if (fs.existsSync(`./csv/${idPbl}.csv`)) {
@@ -39,26 +40,24 @@ exports.readCsv = async function (idPbl) {
           }
         )
         // for(const id in ids){
-        const affiliateEndpoint = `${conf.get('accesstrade_endpoint')}/v1/publishers/me/sites/${idPbl}/campaigns/677/productfeed/url`
-        // let affiliateEndpoint = `http://gurkha.accesstrade.in.th/publishers/site/${idPbl}/campaign/677/productfeed/csv/071bb6b4d95e1402cec6a61383481e1a`
-
+        let affiliateEndpoint = `${conf.get('accesstrade_endpoint')}/v1/publishers/me/sites/${idPbl}/campaigns/677/productfeed/url`
         try {
           const affiliateResponse = await axios.get(affiliateEndpoint, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'X-Accesstrade-User-Type': 'publisher'
-                    }
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'X-Accesstrade-User-Type': 'publisher'
+            }
           })
-
           console.log(`Downloading shopee`)
-          await download(affiliateResponse, idPbl)
+          console.log(affiliateResponse.data.baseUrl)
+          await download(affiliateResponse.data.baseUrl, idPbl)
 
           const results = await readCsv(`./csv/${idPbl}.csv`, idPbl)
 
           resolve(results)
 
         } catch (err) {
-          // console.error(err)
+          console.error(err)
         }
         // }
         // fs.promises.createWriteStream(`./csv/${idPbl}.csv`, JSON.stringify(result, null, 2) , 'utf-8');
@@ -94,7 +93,7 @@ async function download(url, path) {
   const file = fs.createWriteStream(path)
 
   return new Promise(function (resolve, reject) {
-    const request = http.get(uri.href).on('response', function (res) {
+    const request = https.get(uri.href).on('response', function (res) {
       const len = parseInt(res.headers['content-length'], 10)
       let downloaded = 0
       res
@@ -144,25 +143,25 @@ async function readCsv(path, id) {
         if (csvrow[15] == 'Mobile') {
           objetos[0]['cell_phone'].push(csvrow)
         }
-        if(csvrow[13] == 'Women Clothes'){
-        for (const element of WomenClothes) {
-          if (csvrow[15].toLowerCase().includes(" " + element) || csvrow[15].toLowerCase().includes(element)) {
-            objetos[1]['Women Clothes'][element].push(csvrow)
-          } else if (csvrow[17].toLowerCase().includes(" " + element) || csvrow[17].toLowerCase().includes(element)) {
-            objetos[1]['Women Clothes'][element].push(csvrow)
+        if (csvrow[13] == 'Women Clothes') {
+          for (const element of WomenClothes) {
+            if (csvrow[15].toLowerCase().includes(" " + element) || csvrow[15].toLowerCase().includes(element)) {
+              objetos[1]['Women Clothes'][element].push(csvrow)
+            } else if (csvrow[17].toLowerCase().includes(" " + element) || csvrow[17].toLowerCase().includes(element)) {
+              objetos[1]['Women Clothes'][element].push(csvrow)
+            }
           }
         }
-      }
-      if(csvrow[13] == 'Men Clothes'){
-        for (const element of MenClothes) {
-          console.log(element)
-          if (csvrow[15].toLowerCase().includes(" " + element) || csvrow[15].toLowerCase().includes(element)) {
-            objetos[1]['Men Clothes'][element].push(csvrow)
-          } else if (csvrow[17].toLowerCase().includes(" " + element) || csvrow[17].toLowerCase().includes(element)) {
-            objetos[1]['Men Clothes'][element].push(csvrow)
-          } 
+        if (csvrow[13] == 'Men Clothes') {
+          for (const element of MenClothes) {
+            console.log(element)
+            if (csvrow[15].toLowerCase().includes(" " + element) || csvrow[15].toLowerCase().includes(element)) {
+              objetos[1]['Men Clothes'][element].push(csvrow)
+            } else if (csvrow[17].toLowerCase().includes(" " + element) || csvrow[17].toLowerCase().includes(element)) {
+              objetos[1]['Men Clothes'][element].push(csvrow)
+            }
+          }
         }
-      }
       })
       .on('end', async function () {
         await fs.promises.writeFile(`./csv/${id}.json`, JSON.stringify(objetos, null, 2), 'utf-8');
