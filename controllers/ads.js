@@ -64,7 +64,6 @@ exports.getAds = Controller(async (req, res) => {
                     const response = await axios(request_config)
 
                     console.log('=====================> VISTA RESPONSE <========================')
-                    // console.log(response.data.image, response.data.results)
                     let resultsVista = []
                     if (response.data) {
                         resultsVista.push(response.data.results)

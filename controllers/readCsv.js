@@ -40,21 +40,40 @@ exports.readCsv = async function (idPbl) {
           }
         )
         // for(const id in ids){
-        let affiliateEndpoint = `${conf.get('accesstrade_endpoint')}/v1/publishers/me/sites/${idPbl}/campaigns/677/productfeed/url`
+
+        let campaignEndpoint = `${conf.get('accesstrade_endpoint')}/v1/publishers/me/sites/${idPbl}/campaigns/affiliated`
+        
         try {
-          const affiliateResponse = await axios.get(affiliateEndpoint, {
+          const campaignResponse = await axios.get(campaignEndpoint, {
             headers: {
               'Authorization': `Bearer ${token}`,
               'X-Accesstrade-User-Type': 'publisher'
             }
           })
-          console.log(`Downloading shopee`)
-          await download(affiliateResponse.data.baseUrl, idPbl)
+          let results;
+          for(const campaign of campaignResponse.data){
+            console.log(campaign.id)
+            if(campaign.id == 677){
+              try {
+                let affiliateEndpoint = `${conf.get('accesstrade_endpoint')}/v1/publishers/me/sites/${idPbl}/campaigns/${campaign.id}/productfeed/url`
+                const affiliateResponse = await axios.get(affiliateEndpoint, {
+                  headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'X-Accesstrade-User-Type': 'publisher'
+                  }
+                })
+                console.log(`Downloading shopee`)
+                await download(affiliateResponse.data.baseUrl, idPbl)
 
-          const results = await readCsv(`./csv/${idPbl}.csv`, idPbl)
+                results = await readCsv(idPbl)
 
+
+              } catch (err) {
+                console.error(err)
+              }
+            }
+          }
           resolve(results)
-
         } catch (err) {
           console.error(err)
         }
@@ -123,7 +142,8 @@ async function download(url, path) {
   })
 }
 
-async function readCsv(path, id) {
+async function readCsv(id) {
+  let path = `./csv/${id}.csv`
   return new Promise((resolve, reject) => {
 
     fs.createReadStream(path)
