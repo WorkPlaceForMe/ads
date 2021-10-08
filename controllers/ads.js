@@ -14,7 +14,7 @@ const cache = require('../helper/cacheManager')
 
 exports.getAds = Controller(async (req, res) => {
     // Disable SSL certificate
-    process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0
+    // process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0
 
     // get property values
     const vista_url = conf.get('vista_api_url')
@@ -24,8 +24,7 @@ exports.getAds = Controller(async (req, res) => {
     const apiEndpoint = '/api/v1/sync'
 
     // getting query strings
-    const { ad_type, img_width, img_height, ad_format, media_type, url, site, uid, serv } = req.query
-
+    const { ad_type, img_width, img_height, ad_format, media_type, url, site, uid, serv, mobile } = req.query
     let cachedImg = await cache.getAsync(`${img_width}_${img_height}_${url}`);
     if (cachedImg)
         return res.status(200).send({
@@ -81,7 +80,8 @@ exports.getAds = Controller(async (req, res) => {
                                             vista: obj, affiliate: objetos[1]["Women Clothes"]['shirt'][int],
                                             add: { id: parseInt(objetos[1]['Women Clothes']['shirt'][int][0]), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
                                             serv: serv,
-                                            size: {w: img_width, h: img_height}
+                                            size: {w: img_width, h: img_height},
+                                            mobile: mobile
                                         })
                                         if (resultsAffiliate.length == 2) {
                                             break;
@@ -93,7 +93,8 @@ exports.getAds = Controller(async (req, res) => {
                                             vista: obj, affiliate: objetos[1]['Women Clothes']['pants'][int],
                                             add: { id: parseInt(objetos[1]['Women Clothes']['pants'][int][0]), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
                                             serv: serv,
-                                            size: {w: img_width, h: img_height}
+                                            size: {w: img_width, h: img_height},
+                                            mobile: mobile
                                         })
                                         if (resultsAffiliate.length == 2) {
                                             break;
@@ -109,7 +110,8 @@ exports.getAds = Controller(async (req, res) => {
                                             vista: obj, affiliate: objetos[1]['Men Clothes']['shirt'][int],
                                             add: { id: parseInt(objetos[1]['Men Clothes']['shirt'][int][0]), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
                                             serv: serv,
-                                            size: {w: img_width, h: img_height}
+                                            size: {w: img_width, h: img_height},
+                                            mobile: mobile
                                         })
                                         if (resultsAffiliate.length == 2) {
                                             break;
@@ -121,7 +123,8 @@ exports.getAds = Controller(async (req, res) => {
                                             vista: obj, affiliate: objetos[1]['Men Clothes']['pants'][int],
                                             add: { id: parseInt(objetos[1]['Men Clothes']['pants'][int][0]), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
                                             serv: serv,
-                                            size: {w: img_width, h: img_height}
+                                            size: {w: img_width, h: img_height},
+                                            mobile: mobile
                                         })
                                         if (resultsAffiliate.length == 2) {
                                             break;
@@ -141,7 +144,8 @@ exports.getAds = Controller(async (req, res) => {
                                             vista: obj, affiliate: objetos[0][obj.class][int],
                                             add: { id: parseInt(objetos[0][obj.class][int][0]), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
                                             serv: serv,
-                                            size: {w: img_width, h: img_height}
+                                            size: {w: img_width, h: img_height},
+                                            mobile: mobile
                                         })
                                     }
                                     if (resultsAffiliate.length == 2) {

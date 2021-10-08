@@ -78,6 +78,16 @@ $(document).on('mousedown', 'a.but2', function (e) {
 });
 
 
+$(document).on('click', '.closeBut', function () {
+	const wrap = `#markPoint_${$(this)[0].offsetParent.attributes[0].value.split('_')[1]}`
+	const button = `#spanPoint_${$(this)[0].offsetParent.attributes[0].value.split('_')[1]}`
+	console.log($(button))
+	$(button).css('display', ''),
+	$(wrap).css('display', 'none')
+
+});
+
+
 //jQuery plugin to analyse images on website and show context connect ads automatically.|Copyright (c) 2013 GRAYMATICS SG PTE LTD (www.graymatics.com). All rights reserved.|version 0.7
 ;(function (a, b) {
 	function c(b) {
@@ -118,7 +128,7 @@ $(document).on('mousedown', 'a.but2', function (e) {
 					if(window.screen.width <= 350){
 							width = window.screen.width
 					}
-					posX = -5 + 'vw';
+					posX = 2 + 'vw';
 			}else{
 				if(c.mx<270){
 				c.mx = 270
@@ -130,19 +140,19 @@ $(document).on('mousedown', 'a.but2', function (e) {
 			var topvl = c.my
 			var leftvl = c.mx
 			var h =
-				"<a title='SHOP NOW!'class='but1' id ='"+ g.id +"'><div class='mark' style='position:absolute;top:" +
+				"<a title='SHOP NOW!'class='but1' id ='"+ g.id +"'><div class='mark' id='mark_" + E + "' style='position:absolute;top:" +
 				topvl +
 				'px;left:' +
 				leftvl +
-				"px;'><span name='mark_point_" +
+				"px;'><span id='spanPoint_" +
 				E +
 				"' class='but' style='background:url(" + serv + "/api/pictures/"
-				
+
 				h = h + iconAndSize('iconBorder.gif', false) + "padding: 35px 40px;cursor: pointer;'>&nbsp;</span></div></a>"
 
 			a(e).append(h)
 			var i = document.createElement('div')
-			;(i.innerHTML = g.iframe), (i.id = 'mark_point_' + E++), (i.className = 'wrapper')
+			;(i.innerHTML = g.iframe), (i.id = 'markPoint_' + E++), (i.className = 'wrapper')
 			var j =
 				`position:absolute;zIndex:50;clear:both;width:${width}px;padding:0.2em;background-color:#FFFFFF;display:none;border: 1px solid gray;-webkit-border-radius: 6px;-moz-border-radius: 6px;border-radius: 6px;-webkit-box-shadow: 0 2px 5px;-moz-box-shadow: 0 2px 5px;box-shadow: 0 2px 5px;`
 			i.style.cssText = j
@@ -155,40 +165,47 @@ $(document).on('mousedown', 'a.but2', function (e) {
 	let sending = false;
 	function e() {
 		if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
-			a('.mark span').toggle(
+			a('.mark span').click(
 				function () {
-					var b = a(this).attr('name')
-					$('.ui-corner-all').hide()
+					var b = a(this).attr('id')
+					console.log(a(this).attr('id'))
+					const wrap = `markPoint_${a(this).attr('id').split('_')[1]}`
+					// $('.ui-corner-all').hide()
+					// a(this).css(
+					// 	'background',
+					// 	'url(' + serv + '/api/pictures/iconBorder.gif) no-repeat 40% 40%'
+					// ),				
 					a(this).css(
-						'background',
-						'url(' + serv + '/api/pictures/iconNoShadow.gif) no-repeat 40% 40%'
-					),				
-					a(this).css(
-						'background-size',
-						'60px'
+						'display',
+						'none'
 					),
 						a('.wrapper').css('z-index', '50'),
 						a('.mark').css('z-index', '200'),
 						a(this).css('z-index', '200'),
-						a('#' + b).css('z-index', '100'),
-						a('#' + b).css('display', '')
-				},
-				function () {
-					var b = a(this).attr('name')
-					a(this).css(
-						'background',
-						'url(' + serv + '/api/pictures/iconNoShadow.gif) no-repeat 40% 40%'
-					),
-					a(this).css(
-						'background-size',
-						'60px'
-					),
-					a('.but').css(
-						'padding',
-						'35px 40px'
-					),
-						a('#' + b).css('display', 'none')
+						a('#' + wrap).css('z-index', '100'),
+						a('#' + wrap).css('display', '')
+						
 				}
+				// function () {
+				// 	var b = a(this).attr('name')
+				// 	a(this).css(
+				// 		'background',
+				// 		'url(' + serv + '/api/pictures/iconBorder.gif) no-repeat 40% 40%'
+				// 	),
+				// 	a(this).css(
+				// 		'display',
+				// 		''
+				// 	),
+				// 	a(this).css(
+				// 		'background-size',
+				// 		'60px'
+				// 	),
+				// 	a('.but').css(
+				// 		'padding',
+				// 		'35px 40px'
+				// 	),
+				// 		a('#' + b).css('display', 'none')
+				// }
 			)
 		}else{
 			a('.but').mouseenter(
@@ -231,7 +248,7 @@ $(document).on('mousedown', 'a.but2', function (e) {
 					var b = a(this)[0].id
 					a('.but').css(
 						'background',
-						'url(' + serv + '/api/pictures/iconNoShadow.gif) no-repeat 40% 40%'
+						'url(' + serv + '/api/pictures/iconBorder.gif) no-repeat 40% 40%'
 					),
 					a('.but').css(
 						'background-size',
@@ -346,7 +363,9 @@ $(document).on('mousedown', 'a.but2', function (e) {
 		var d = b.getMax()
 		return d
 	}
-	;(a.GM = {}),
+	;
+	let num = 0;
+	(a.GM = {}),
 		(a.GM.IMLayer = function (a, b) {
 			;(this.imgsrc = a),
 				(this.celement = b),
@@ -373,6 +392,10 @@ $(document).on('mousedown', 'a.but2', function (e) {
 						a.pop()
 						l = `${a.join('/')}/${this.imgsrc}`
 					}
+					let mobile = 0;
+					if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
+						mobile = 1
+					}
 					var m =
 							'ad_type=' +
 							z +
@@ -391,7 +414,10 @@ $(document).on('mousedown', 'a.but2', function (e) {
 							'&uid=' +
 							uuid + 
 							'&serv=' +
-							serv
+							serv +
+							'&mobile=' +
+							mobile
+					num = num + 1
 					a.ajax({
 						url: v,
 						type: 'GET',
