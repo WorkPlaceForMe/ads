@@ -137,15 +137,9 @@ $(document).on('mousedown', 'a.but2', function (e) {
 				"px;'><span name='mark_point_" +
 				E +
 				"' class='but' style='background:url(" + serv + "/api/pictures/"
-			if(E == 0){
-				h = h + iconAndSize('iconNoShadow.gif', false) + "padding: 35px 40px;cursor: pointer;'>&nbsp;</span></div></a>"
-			}else if(E == 1){
-				h = h + iconAndSize('iconBorder.gif', true) + "padding: 35px 40px;cursor: pointer;'>&nbsp;</span></div></a>"
-			}else if(E == 2){
+				
 				h = h + iconAndSize('iconBorder.gif', false) + "padding: 35px 40px;cursor: pointer;'>&nbsp;</span></div></a>"
-			}else{
-				h = h + iconAndSize('iconNoShadow.gif', false) + "padding: 35px 40px;cursor: pointer;'>&nbsp;</span></div></a>"
-			}
+
 			a(e).append(h)
 			var i = document.createElement('div')
 			;(i.innerHTML = g.iframe), (i.id = 'mark_point_' + E++), (i.className = 'wrapper')
