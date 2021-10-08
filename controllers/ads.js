@@ -160,7 +160,7 @@ exports.getAds = Controller(async (req, res) => {
                 }
                 catch (err) {
                     await cache.setAsync(`${img_width}_${img_height}_${url}`, JSON.stringify({}));
-                    return res.status(500).json({ success: false, message: "Vista Image failled" })
+                    return res.status(500).json({ success: false, message: "Vista Image failled", error: err, img: url })
                 }
             }
         }
