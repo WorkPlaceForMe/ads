@@ -81,7 +81,6 @@ $(document).on('mousedown', 'a.but2', function (e) {
 $(document).on('click', '.closeBut', function () {
 	const wrap = `#markPoint_${$(this)[0].offsetParent.attributes[0].value.split('_')[1]}`
 	const button = `#spanPoint_${$(this)[0].offsetParent.attributes[0].value.split('_')[1]}`
-	console.log($(button))
 	$(button).css('display', ''),
 	$(wrap).css('display', 'none')
 
@@ -167,14 +166,7 @@ $(document).on('click', '.closeBut', function () {
 		if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
 			a('.mark span').click(
 				function () {
-					var b = a(this).attr('id')
-					console.log(a(this).attr('id'))
-					const wrap = `markPoint_${a(this).attr('id').split('_')[1]}`
-					// $('.ui-corner-all').hide()
-					// a(this).css(
-					// 	'background',
-					// 	'url(' + serv + '/api/pictures/iconBorder.gif) no-repeat 40% 40%'
-					// ),				
+					const wrap = `markPoint_${a(this).attr('id').split('_')[1]}`			
 					a(this).css(
 						'display',
 						'none'
@@ -186,26 +178,6 @@ $(document).on('click', '.closeBut', function () {
 						a('#' + wrap).css('display', '')
 						
 				}
-				// function () {
-				// 	var b = a(this).attr('name')
-				// 	a(this).css(
-				// 		'background',
-				// 		'url(' + serv + '/api/pictures/iconBorder.gif) no-repeat 40% 40%'
-				// 	),
-				// 	a(this).css(
-				// 		'display',
-				// 		''
-				// 	),
-				// 	a(this).css(
-				// 		'background-size',
-				// 		'60px'
-				// 	),
-				// 	a('.but').css(
-				// 		'padding',
-				// 		'35px 40px'
-				// 	),
-				// 		a('#' + b).css('display', 'none')
-				// }
 			)
 		}else{
 			a('.but').mouseenter(
