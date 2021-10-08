@@ -5,16 +5,14 @@ styleEl.innerHTML =
 document.head.appendChild(styleEl)
 
 const uuid = new Date().getTime()
-const serv = document.currentScript.getAttribute('api_ip')
-let ext = 'http';
-if(serv.split(':')[1] == '3311'){
-	ext = 'https'
-}
+
+let serv = document.currentScript.getAttribute('src').split('/')
+serv = `${serv[0]}//${serv[2]}`
 
 
 $(document).ready(function () {
 	$.ajax({
-		url: `${ext}://${serv}/api/check`,
+		url: `${serv}/api/check`,
 		type: 'GET',
 		data: `site=${window.location.href}`,
 		dataType: 'json',
@@ -37,7 +35,7 @@ $(document).on('mousedown', 'a.but1', function (e) {
 		
 		// dataLayer.push(data)
 			$.ajax({
-			url: `${ext}://${serv}/api/data`,
+			url: `${serv}/api/data`,
 			type: 'POST',
 			data: data,
 			dataType: 'json',
@@ -67,7 +65,7 @@ $(document).on('mousedown', 'a.but2', function (e) {
 			img: img
 		}
 			$.ajax({
-			url: `${ext}://${serv}/api/data`,
+			url: `${serv}/api/data`,
 			type: 'POST',
 			data: data,
 			dataType: 'json',
@@ -84,7 +82,7 @@ $(document).on('mousedown', 'a.but2', function (e) {
 ;(function (a, b) {
 	function c(b) {
 		a.ajax({
-			url: `${ext}://api.graymatics.com/grayit/process/image/batch`,
+			url: `http://api.graymatics.com/grayit/process/image/batch`,
 			type: 'POST',
 			data: 'API_KEY=' + y + '&URL=' + b + '&Add_Info=[{"source_url":"' + document.URL + '"}]',
 			dataType: 'json',
@@ -138,15 +136,15 @@ $(document).on('mousedown', 'a.but2', function (e) {
 				leftvl +
 				"px;'><span name='mark_point_" +
 				E +
-				"' class='but' style='background:url(" + ext + "://"+ serv + "/api/pictures/"
+				"' class='but' style='background:url(" + serv + "/api/pictures/"
 			if(E == 0){
-				h = h + iconAndSize('iconNoShadow.gif', false) + "padding: 35px 40px;cursor: pointer; filter: drop-shadow(5px 10px 15px #222);'>&nbsp;</span></div></a>"
+				h = h + iconAndSize('iconNoShadow.gif', false) + "padding: 35px 40px;cursor: pointer;'>&nbsp;</span></div></a>"
 			}else if(E == 1){
-				h = h + iconAndSize('iconBorder.gif', true) + "padding: 35px 40px;cursor: pointer; filter: drop-shadow(5px 10px 15px #222);'>&nbsp;</span></div></a>"
+				h = h + iconAndSize('iconBorder.gif', true) + "padding: 35px 40px;cursor: pointer;'>&nbsp;</span></div></a>"
 			}else if(E == 2){
-				h = h + iconAndSize('iconBorder.gif', false) + "padding: 35px 40px;cursor: pointer; filter: drop-shadow(5px 10px 15px #222);'>&nbsp;</span></div></a>"
+				h = h + iconAndSize('iconBorder.gif', false) + "padding: 35px 40px;cursor: pointer;'>&nbsp;</span></div></a>"
 			}else{
-				h = h + iconAndSize('iconNoShadow.gif', false) + "padding: 35px 40px;cursor: pointer; filter: drop-shadow(5px 10px 15px #222);'>&nbsp;</span></div></a>"
+				h = h + iconAndSize('iconNoShadow.gif', false) + "padding: 35px 40px;cursor: pointer;'>&nbsp;</span></div></a>"
 			}
 			a(e).append(h)
 			var i = document.createElement('div')
@@ -169,7 +167,7 @@ $(document).on('mousedown', 'a.but2', function (e) {
 					$('.ui-corner-all').hide()
 					a(this).css(
 						'background',
-						'url(' + ext+ '://' + serv + '/api/pictures/iconNoShadow.gif) no-repeat 40% 40%'
+						'url(' + serv + '/api/pictures/iconNoShadow.gif) no-repeat 40% 40%'
 					),				
 					a(this).css(
 						'background-size',
@@ -185,7 +183,7 @@ $(document).on('mousedown', 'a.but2', function (e) {
 					var b = a(this).attr('name')
 					a(this).css(
 						'background',
-						'url(' + ext+ '://' + serv + '/api/pictures/iconNoShadow.gif) no-repeat 40% 40%'
+						'url(' + serv + '/api/pictures/iconNoShadow.gif) no-repeat 40% 40%'
 					),
 					a(this).css(
 						'background-size',
@@ -212,7 +210,7 @@ $(document).on('mousedown', 'a.but2', function (e) {
 					if(sending == false){
 						sending = true;
 						$.ajax({
-						url: `${ext}://${serv}/api/data`,
+						url: `${serv}/api/data`,
 						type: 'POST',
 						data: data,
 						dataType: 'json',
@@ -239,19 +237,11 @@ $(document).on('mousedown', 'a.but2', function (e) {
 					var b = a(this)[0].id
 					a('.but').css(
 						'background',
-						'url(' + ext+ '://' + serv + '/api/pictures/iconNoShadow.gif) no-repeat 40% 40%'
+						'url(' + serv + '/api/pictures/iconNoShadow.gif) no-repeat 40% 40%'
 					),
 					a('.but').css(
 						'background-size',
 						'60px'
-					),
-					// a(this).css(
-					// 	'background-color',
-					// 	'#FFFFFF'
-					// ),
-					a(this).css(
-						'filter',
-						'drop-shadow(5px 10px 15px #222)'
 					),
 					a('.but').css(
 						'padding',
@@ -474,7 +464,7 @@ $(document).on('mousedown', 'a.but2', function (e) {
 					  this.addGroup('suits,suit,tuxedo,tuxedos'),
 					  this.addGroup('coat,coats'))
 		},
-		v = `${ext}://${serv}/api/v1/ads`,
+		v = `${serv}/api/v1/ads`,
 		w = 'image',
 		z = 'image',
 		A = 240,
