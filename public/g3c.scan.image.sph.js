@@ -145,6 +145,8 @@ $(document).on('click', '.closeBut', function () {
 				leftvl +
 				"px;'><span id='spanPoint_" +
 				E +
+				"' name='spanPoint_" +
+				E +
 				"' class='but' style='background:url(" + serv + "/api/pictures/"
 
 				h = h + iconAndSize('iconBorder.gif', false) + "padding: 35px 40px;cursor: pointer;'>&nbsp;</span></div></a>"
@@ -203,7 +205,7 @@ $(document).on('click', '.closeBut', function () {
 						error: function (e) {console.error(e)}
 						})
 					}
-					var b = a(this).attr('name')		
+					var b =`markPoint_${a(this).attr('name').split('_')[1]}`
 					a(this).css(
 						'background-size',
 						'0px'

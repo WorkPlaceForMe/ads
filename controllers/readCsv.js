@@ -183,6 +183,7 @@ async function readCsv(id) {
       })
       .on('end', async function () {
         await fs.promises.writeFile(`./csv/${id}.json`, JSON.stringify(objetos, null, 2), 'utf-8');
+        fs.unlinkSync(path)
         await cache.setAsync(`downloading-${id}`, false);
         console.log(`Done with shopee`)
         resolve(objetos)

@@ -25,7 +25,7 @@ exports.getAds = Controller(async (req, res) => {
 
     // getting query strings
     const { ad_type, img_width, img_height, ad_format, media_type, url, site, uid, serv, mobile } = req.query
-    let cachedImg = await cache.getAsync(`${img_width}_${img_height}_${url}`);
+    let cachedImg = await cache.getAsync(`${mobile}_${img_width}_${img_height}_${url}`);
     if (cachedImg)
         return res.status(200).send({
             results: JSON.parse(cachedImg)
@@ -157,13 +157,13 @@ exports.getAds = Controller(async (req, res) => {
                         }
                     }
                     const sendingResults = convert(resultsAffiliate)
-                    await cache.setAsync(`${img_width}_${img_height}_${url}`, JSON.stringify(sendingResults));
+                    await cache.setAsync(`${mobile}_${img_width}_${img_height}_${url}`, JSON.stringify(sendingResults));
                     res.status(200).send({
                         results: sendingResults
                     })
                 }
                 catch (err) {
-                    await cache.setAsync(`${img_width}_${img_height}_${url}`, JSON.stringify({}));
+                    await cache.setAsync(`${mobile}_${img_width}_${img_height}_${url}`, JSON.stringify({}));
                     return res.status(500).json({ success: false, message: "Vista Image failled", error: err, img: url })
                 }
             }

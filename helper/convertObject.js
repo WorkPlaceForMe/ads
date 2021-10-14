@@ -35,7 +35,7 @@ exports.convert = (arr) => {
         let close = ''
 
         if(obj.mobile == 1){
-            close = `<button class='closeBut' style="float: right;"> &#10006;</button>`;
+            close = `<button class='closeBut' aria-label="Close" style="float: right;padding: 0; background-color: transparent; border: 0; -webkit-appearance: none; width: 20px; font-size: 20px"> <span aria-hidden="true">&times;</span></button>`;
         }
         
         const adsinfo = [{
