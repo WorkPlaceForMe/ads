@@ -18,7 +18,7 @@ const options = {
   key: fs.readFileSync('key.pem'),
   cert: fs.readFileSync('cert.pem')
 };
-
+const sequelize = require('./campaigns-db/database')
 const httpsServer = https.createServer(options, app);
 const httpServer = http.createServer(app);
 
@@ -28,6 +28,7 @@ app.use(cookieParser())
 app.use(cors())
 
 require("./helper/cacheManager");
+
 
 if (conf.get('install') == true) {
   mysql
@@ -71,6 +72,11 @@ app.use(handleError)
 
 httpsServer.listen(portS || 3000, function () {
 	console.log(`App is up on port ${portS || '3000'} on HTTPS`)
+  sequelize.sync({ force : true }).then(()=>{
+    console.log('sequelize is connected')
+  }).catch(err =>{
+    console.error('no se concecto',err)
+  })
 });
 
 httpServer.listen(port || 3000, function () {

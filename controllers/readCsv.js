@@ -8,14 +8,69 @@ const https = require('https');
 const { parse } = require('url')
 const parseCsv = require('csv-parse');
 const objetos = require('../csv/objetos2.json');
-const { trace } = require('console');
-
+const { trace, Console } = require('console');
+const products = require('../campaigns-db/models/products');
+const { stringify } = require('uuid');
+const clothing = require('../campaigns-db/models/clothing');
 const arrObjetos = Object.keys(objetos[0])
 const WomenClothes = Object.keys(objetos[1]['Women Clothes'])
 const MenClothes = Object.keys(objetos[1]["Men Clothes"])
 
 exports.readCsv = async function (idPbl) {
   if (fs.existsSync(`./csv/${idPbl}.csv`)) {
+    const objetos_json = require("../csv/59183.json")
+    for (obj in objetos_json[0]) {
+      objetos_json[0][obj].forEach((element) => {
+        if (element != null) {
+          products.create({
+            Merchant_Product_Name: element[1],
+            Image_URL: element[2],
+            Product_URL_Web_encoded: element[4],
+            Product_URL_Mobile_encoded: element[5],
+            Description: element[6],
+            Price: element[7],
+            Descount: element[8],
+            Available: element[9],
+            Main_Category_Name: element[13],
+            Category_Name: element[15],
+            Sub_Category_Name: element[17],
+            Price_Unit: element[18],
+            lable: obj
+          }).catch((err) => {
+            console.error('algo fallo', err)
+            console.trace(err)
+          })
+        }
+      })
+    }
+    for (const Garment of WomenClothes) {
+      if (objetos_json[1]['Women Clothes'][Garment] != null) {
+        objetos_json[1]['Women Clothes'][Garment].forEach(element,index => {
+          clothing.create({
+            Merchant_Product_Name:element[1],
+            Image_URL: element[2],
+            Product_URL_Web_encoded: element[4],
+            Product_URL_Mobile_encoded: element[5],
+            Description: element[6],
+            Price:element[7],
+            Descount: element[8],
+            Available: element[9],
+            Main_Category_Name: element[13],
+            Category_Name:element[15],
+            Sub_Category_Name: element[17],
+            Price_Unit: element[18],
+            lable: {
+              gender: 'Woman',
+              garment: Garment
+            }
+          }).catch((err) => {
+            console.error('algo fallo con la ropa ', err)
+            console.trace(err)
+          })
+        });
+      }
+    }
+
     return new Promise((resolve, reject) => {
       let res = require(`../csv/${idPbl}.json`);
       resolve(res)
@@ -154,7 +209,6 @@ async function readCsv(path, id) {
         }
         if (csvrow[13] == 'Men Clothes') {
           for (const element of MenClothes) {
-            console.log(element)
             if (csvrow[15].toLowerCase().includes(" " + element) || csvrow[15].toLowerCase().includes(element)) {
               objetos[1]['Men Clothes'][element].push(csvrow)
             } else if (csvrow[17].toLowerCase().includes(" " + element) || csvrow[17].toLowerCase().includes(element)) {
