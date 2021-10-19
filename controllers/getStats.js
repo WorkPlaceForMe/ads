@@ -107,7 +107,15 @@ exports.getStats = Controller(async(req, res) => {
                                 if(Number.isNaN(viewsPerAd)){
                                     viewsPerAd = 0;
                                 }
+
                                 const ids = await getPublisherId(Object.keys(imgsGrouped)[i])
+                                if(ids.length == 0){
+                                    ids[0] = {
+                                        enabled: false,
+                                        id: 0
+                                    }
+                                }
+
                                 const init = new Date(req.query.init).toISOString()
                                 const fin = new Date(req.query.fin).toISOString()
                                 let rewards;
