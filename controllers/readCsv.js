@@ -20,86 +20,6 @@ const { Readable } = require("stream")
 
 exports.readCsv = async function (idPbl) {
   if (fs.existsSync(`./csv/${idPbl}.json`)) {
-    const objetos_json = require("../csv/59183.json")
-    for (obj in objetos_json[0]) {
-      objetos_json[0][obj].forEach((element) => {
-        if (element != null) {
-          products.create({
-            Merchant_Product_Name: element[1],
-            Image_URL: element[2],
-            Product_URL_Web_encoded: element[4],
-            Product_URL_Mobile_encoded: element[5],
-            Description: element[6],
-            Price: element[7],
-            Descount: element[8],
-            Available: element[9],
-            Main_Category_Name: element[13],
-            Category_Name: element[15],
-            Sub_Category_Name: element[17],
-            Price_Unit: element[18],
-            lable: obj
-          }).catch((err) => {
-            console.error('algo fallo', err)
-            console.trace(err)
-          })
-        }
-      })
-    }
-    for (const Garment of WomenClothes) {
-      if (objetos_json[1]['Women Clothes'][Garment] != null) {
-        objetos_json[1]['Women Clothes'][Garment].forEach(element => {
-          clothing.create({
-            Merchant_Product_Name:element[1],
-            Image_URL: element[2],
-            Product_URL_Web_encoded: element[4],
-            Product_URL_Mobile_encoded: element[5],
-            Description: element[6],
-            Price:element[7],
-            Descount: element[8],
-            Available: element[9],
-            Main_Category_Name: element[13],
-            Category_Name:element[15],
-            Sub_Category_Name: element[17],
-            Price_Unit: element[18],
-            lable: {
-              gender: 'Woman',
-              garment: Garment
-            }
-          }).catch((err) => {
-            console.error('algo fallo con la ropa ', err)
-            console.trace(err)
-          })
-        });
-      }
-    }
-    for (const Garment of MenClothes) {
-      if (objetos_json[1]['Men Clothes'][Garment] != null) {
-        objetos_json[1]['Men Clothes'][Garment].forEach(element => {
-          clothing.create({
-            Merchant_Product_Name:element[1],
-            Image_URL: element[2],
-            Product_URL_Web_encoded: element[4],
-            Product_URL_Mobile_encoded: element[5],
-            Description: element[6],
-            Price:element[7],
-            Descount: element[8],
-            Available: element[9],
-            Main_Category_Name: element[13],
-            Category_Name:element[15],
-            Sub_Category_Name: element[17],
-            Price_Unit: element[18],
-            lable: {
-              gender: 'Woman',
-              garment: Garment
-            }
-          }).catch((err) => {
-            console.error('algo fallo con la ropa ', err)
-            console.trace(err)
-          })
-        });
-      }
-    }
-
     return new Promise((resolve, reject) => {
       let res = require(`../csv/${idPbl}.json`);
       resolve(res)
@@ -133,7 +53,6 @@ exports.readCsv = async function (idPbl) {
             }
           })
           console.log(`Downloading shopee`)
-          console.log(affiliateResponse.data.baseUrl)
           const rs = await download(affiliateResponse.data.baseUrl, idPbl)
 
           const results = await readCsv(rs, idPbl)
@@ -217,6 +136,85 @@ async function readCsv(path, id) {
         await fs.promises.writeFile(`./csv/${id}.json`, JSON.stringify(objetos, null, 2), 'utf-8');
         await cache.setAsync(`downloading-${id}`, false);
         console.log(`Done with shopee`)
+        const objetos_json = require("../csv/59183.json")
+        for (obj in objetos_json[0]) {
+          objetos_json[0][obj].forEach((element) => {
+            if (element != null) {
+              products.create({
+                Merchant_Product_Name: element[1],
+                Image_URL: element[2],
+                Product_URL_Web_encoded: element[4],
+                Product_URL_Mobile_encoded: element[5],
+                Description: element[6],
+                Price: element[7],
+                Descount: element[8],
+                Available: element[9],
+                Main_Category_Name: element[13],
+                Category_Name: element[15],
+                Sub_Category_Name: element[17],
+                Price_Unit: element[18],
+                lable: obj
+              }).catch((err) => {
+                console.error('algo fallo', err)
+                console.trace(err)
+              })
+            }
+          })
+        }
+        for (const Garment of WomenClothes) {
+          if (objetos_json[1]['Women Clothes'][Garment] != null) {
+            objetos_json[1]['Women Clothes'][Garment].forEach(element => {
+              clothing.create({
+                Merchant_Product_Name:element[1],
+                Image_URL: element[2],
+                Product_URL_Web_encoded: element[4],
+                Product_URL_Mobile_encoded: element[5],
+                Description: element[6],
+                Price:element[7],
+                Descount: element[8],
+                Available: element[9],
+                Main_Category_Name: element[13],
+                Category_Name:element[15],
+                Sub_Category_Name: element[17],
+                Price_Unit: element[18],
+                lable: {
+                  gender: 'Woman',
+                  garment: Garment
+                }
+              }).catch((err) => {
+                console.error('algo fallo con la ropa ', err)
+                console.trace(err)
+              })
+            });
+          }
+        }
+        for (const Garment of MenClothes) {
+          if (objetos_json[1]['Men Clothes'][Garment] != null) {
+            objetos_json[1]['Men Clothes'][Garment].forEach(element => {
+              clothing.create({
+                Merchant_Product_Name:element[1],
+                Image_URL: element[2],
+                Product_URL_Web_encoded: element[4],
+                Product_URL_Mobile_encoded: element[5],
+                Description: element[6],
+                Price:element[7],
+                Descount: element[8],
+                Available: element[9],
+                Main_Category_Name: element[13],
+                Category_Name:element[15],
+                Sub_Category_Name: element[17],
+                Price_Unit: element[18],
+                lable: {
+                  gender: 'Mem',
+                  garment: Garment
+                }
+              }).catch((err) => {
+                console.error('algo fallo con la ropa de hombre', err)
+                console.trace(err)
+              })
+            });
+          }
+        }
         resolve(objetos)
       });
   })

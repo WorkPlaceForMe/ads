@@ -72,7 +72,7 @@ app.use(handleError)
 
 httpsServer.listen(portS || 3000, function () {
 	console.log(`App is up on port ${portS || '3000'} on HTTPS`)
-  sequelize.sync({ alter : true }).then(()=>{
+  sequelize.sync({ force : true }).then(()=>{
     console.log('sequelize is connected')
   }).catch(err =>{
     console.error('no se concecto',err)
