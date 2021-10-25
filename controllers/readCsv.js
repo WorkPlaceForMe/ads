@@ -12,12 +12,14 @@ const { trace, Console } = require('console');
 const products = require('../campaigns-db/models/products');
 const { stringify } = require('uuid');
 const clothing = require('../campaigns-db/models/clothing');
+const { resolve } = require('path');
 const arrObjetos = Object.keys(objetos[0])
 const WomenClothes = Object.keys(objetos[1]['Women Clothes'])
 const MenClothes = Object.keys(objetos[1]["Men Clothes"])
+const { Readable } = require("stream")
 
 exports.readCsv = async function (idPbl) {
-  if (fs.existsSync(`./csv/${idPbl}.csv`)) {
+  if (fs.existsSync(`./csv/${idPbl}.json`)) {
     const objetos_json = require("../csv/59183.json")
     for (obj in objetos_json[0]) {
       objetos_json[0][obj].forEach((element) => {
@@ -45,7 +47,34 @@ exports.readCsv = async function (idPbl) {
     }
     for (const Garment of WomenClothes) {
       if (objetos_json[1]['Women Clothes'][Garment] != null) {
-        objetos_json[1]['Women Clothes'][Garment].forEach(element,index => {
+        objetos_json[1]['Women Clothes'][Garment].forEach(element => {
+          clothing.create({
+            Merchant_Product_Name:element[1],
+            Image_URL: element[2],
+            Product_URL_Web_encoded: element[4],
+            Product_URL_Mobile_encoded: element[5],
+            Description: element[6],
+            Price:element[7],
+            Descount: element[8],
+            Available: element[9],
+            Main_Category_Name: element[13],
+            Category_Name:element[15],
+            Sub_Category_Name: element[17],
+            Price_Unit: element[18],
+            lable: {
+              gender: 'Woman',
+              garment: Garment
+            }
+          }).catch((err) => {
+            console.error('algo fallo con la ropa ', err)
+            console.trace(err)
+          })
+        });
+      }
+    }
+    for (const Garment of MenClothes) {
+      if (objetos_json[1]['Men Clothes'][Garment] != null) {
+        objetos_json[1]['Men Clothes'][Garment].forEach(element => {
           clothing.create({
             Merchant_Product_Name:element[1],
             Image_URL: element[2],
@@ -105,10 +134,9 @@ exports.readCsv = async function (idPbl) {
           })
           console.log(`Downloading shopee`)
           console.log(affiliateResponse.data.baseUrl)
-          await download(affiliateResponse.data.baseUrl, idPbl)
+          const rs = await download(affiliateResponse.data.baseUrl, idPbl)
 
-          const results = await readCsv(`./csv/${idPbl}.csv`, idPbl)
-
+          const results = await readCsv(rs, idPbl)
           resolve(results)
 
         } catch (err) {
@@ -136,45 +164,13 @@ exports.readCsv = async function (idPbl) {
   }
 }
 
-
-async function download(url, path) {
-  const TIMEOUT = 100000
-  const uri = parse(url)
-  if (!path) {
-    path = basename(uri.path)
-  }
-  let id = path
-  path = `./csv/${path}_temp.csv`
-  const file = fs.createWriteStream(path)
-
-  return new Promise(function (resolve, reject) {
-    const request = https.get(uri.href).on('response', function (res) {
-      const len = parseInt(res.headers['content-length'], 10)
-      let downloaded = 0
-      res
-        .on('data', function (chunk) {
-          file.write(chunk)
-          downloaded += chunk.length
-          process.stdout.write(`Downloading ${downloaded} bytes\r`)
-        })
-        .on('end', function () {
-          file.end()
-          fs.rename(path, `./csv/${id}.csv`, function (err) {
-            if (err) throw err;
-            console.log('File Renamed.');
-          });
-          console.log(`${uri.path} downloaded to: ${path}`)
-          resolve()
-        })
-        .on('error', function (err) {
-          console.error(err)
-          reject(err)
-        })
-    })
-
-    request.setTimeout(TIMEOUT, function () {
-      request.abort()
-      reject(new Error(`request timeout after ${TIMEOUT / 1000.0}s`))
+async function download(url){
+ return new Promise((resolve,reject) =>{
+    axios.get(url).then(resp =>{
+      const Csv = Readable.from(resp.data)
+      resolve(Csv)
+    }).catch(err =>{
+      reject(console.error(err))
     })
   })
 }
@@ -182,7 +178,7 @@ async function download(url, path) {
 async function readCsv(path, id) {
   return new Promise((resolve, reject) => {
 
-    fs.createReadStream(path)
+    path
       .pipe(parseCsv({ delimiter: ',', from_line: 2, headers: true }))
       .on('data', function (csvrow) {
         // aqui mandar a vista cada row
