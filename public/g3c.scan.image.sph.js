@@ -32,8 +32,7 @@ $(document).on('mousedown', 'a.but1', function (e) {
 			idItem: e.currentTarget.id,
 			img: e.originalEvent.path[3].children[0].currentSrc
 		}
-		
-		// dataLayer.push(data)
+
 			$.ajax({
 			url: `${serv}/api/data`,
 			type: 'POST',
@@ -184,12 +183,13 @@ $(document).on('click', '.closeBut', function () {
 		}else{
 			a('.but').mouseenter(
 				function(e){
+					console.log(e)
 					const data = {
 						time: new Date(),
 						url: window.location.href,
 						type: 1,
-						idItem: e.srcElement.parentNode.parentNode.id,
-						img: e.srcElement.parentNode.parentNode.parentNode.children[0].currentSrc
+						idItem: e.currentTarget.parentNode.parentNode.id,
+						img: e.currentTarget.parentNode.parentNode.parentNode.children[0].currentSrc
 					}
 
 					if(sending == false){
