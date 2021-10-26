@@ -2,14 +2,14 @@
 <html>
 
 <head>
-    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
     <script type="text/javascript">
         g3c_user = 'perumal'
         g3c_password = 'GMTC4perumal1'
 
-        api_url = 'http://localhost:3000'
+        api_url = 'http://localhost:3310'
     </script>
-    <script type="text/javascript" src="g3c.scan.image.sph.js"></script>
+    <script type="text/javascript" src="/system/g3c.scan.image.sph.js" api_ip = 'localhost:3310'></script>
 
     <style>
         .img-block {
@@ -25,9 +25,22 @@
 <body>
     <h2>HTML Image</h2>
     <div class="img-block">
-        <img src="https://www.w3schools.com/html/img_girl.jpg" alt="Girl in a jacket" width="500" height="600" />
-        <img src="https://www.w3schools.com/html/img_girl.jpg" alt="Girl in a jacket" width="500" height="600" />
+        <!-- <img src="https://www.w3schools.com/html/img_girl.jpg" alt="Girl in a jacket" width="500" height="600" style='object-fit: contain;' /> -->
+        <!-- <img src="https://www.w3schools.com/html/img_girl.jpg" alt="Girl in a jacket" width="500" height="600" /> -->
+        <!-- <img src="http://localhost:3310/api/pictures/jacket.png" alt="Person wearing shoes" width="500" height="600" style='object-fit: contain;'  />
+        <img src="http://localhost:3310/api/pictures/person-shoes.jpg" alt="Person wearing shoes" width="500" height="600" style='object-fit: contain;'  /> -->
+        <img src="http://localhost:3310/api/pictures/image.png" alt="Person wearing shoes" width="500" height="600" style='object-fit: contain;'  />
+        <img src="http://localhost:3310/api/pictures/girl.jpg" alt="Person wearing shoes" width="500" height="600" style='object-fit: contain;'  />
+        <img src="http://localhost:3310/api/pictures/tuxedo.jpg" alt="Person wearing shoes" width="500" height="600" style='object-fit: contain;'  />
+        <img src="http://localhost:3310/api/pictures/AIS_AR.jpg" alt="Person wearing shoes" width="500" height="600" style='object-fit: contain;'  />
+        <img src="http://localhost:3310/api/pictures/graymatic-3.jpg" alt="Person wearing shoes" width="500" height="600" style='object-fit: contain;'  />
+        <img src="http://localhost:3310/api/pictures/ais_5g_sim (1).jpg" alt="Person wearing shoes" width="500" height="600" style='object-fit: contain;'  />
+        <img src="http://localhost:3310/api/pictures/ais_cloud-game.jpg" alt="Person wearing shoes" width="500" height="600" style='object-fit: contain;'  />
+        <img src="http://localhost:3310/api/pictures/ais_play.jpg" alt="Person wearing shoes" width="500" height="600" style='object-fit: contain;'  />
+        <img src="http://localhost:3310/api/pictures/AIS_Speed_Test.jpg" alt="Person wearing shoes" width="500" height="600" style='object-fit: contain;'  />
     </div>
+    <a>aaaa</a>
+    				<a title='SHOP NOW!'class='but1' id ='1111111'><div class='mark' style='padding:50px; position:absolute;width:24px;height:24px;'><span name='mark_point_999' class='but' style='background:url(http://localhost:3310/api/pictures/Than-tag.gif) no-repeat 50% 50%;background-size: 15px;padding: 0 8px;cursor: pointer; '>&nbsp;</span></div></a>
 </body>
 
 </html>

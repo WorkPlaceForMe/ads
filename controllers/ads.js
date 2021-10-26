@@ -1,14 +1,20 @@
 const conf = require('../middleware/prop')
 const Controller = require('../helper/controller')
-const StatusError = require('../helper/StatusError')
 const axios = require('axios')
 const FormData = require('form-data')
 const request = require('request')
+const readCsv = require('./readCsv')
+const convert = require('../helper/convertObject').convert
+const db = require('../helper/dbconnection')
+const dateFormat = require('dateformat');
+const auth = require('../helper/auth')
 const util = require('util')
+const cache = require('../helper/cacheManager')
 
-exports.getAds = Controller(async(req, res) => {
+
+exports.getAds = Controller(async (req, res) => {
     // Disable SSL certificate
-    process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0
+    // process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0
 
     // get property values
     const vista_url = conf.get('vista_api_url')
@@ -18,41 +24,153 @@ exports.getAds = Controller(async(req, res) => {
     const apiEndpoint = '/api/v1/sync'
 
     // getting query strings
-    const { ad_type, ad_width, ad_height, ad_format, media_type, url } = req.query
+    const { ad_type, img_width, img_height, ad_format, media_type, url, site, uid, serv, mobile } = req.query
+    let cachedImg = await cache.getAsync(`${mobile}_${img_width}_${img_height}_${url}`);
+    if (cachedImg)
+        return res.status(200).send({
+            results: JSON.parse(cachedImg)
+        })
 
-    const formData = new FormData()
-    formData.append('upload', request(url))
-    formData.append('subscriptions', 'Object,themes,food,tags,face,fashion')
+    await addImg(dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url, uid, site, async function (err, rows) {
+        if (rows) {
+            let checker = site.split('/')[2];
+            if(checker.includes('www.')){
+                checker = checker.split('w.')[1]
+            }
+            const aut = await auth(checker, site.split('/')[0])
+            if (aut['enabled'] == false) {
+                console.log("Cancelling")
+                return res.status(400).json({ success: false, message: "Unauthorized" })
+            } else {
+                let formData = new FormData()
+                formData.append('upload', request(url))
+                // formData.append('subscriptions', 'Object,themes,food,tags,face,fashion')
+                formData.append('subscriptions', 'face,fashion,Object')
+                const request_config = {
+                    method: 'post',
+                    url: vista_url + apiEndpoint,
+                    headers: {
+                        'Content-Type': `multipart/form-data; boundary=${formData._boundary}`
+                    },
+                    auth: {
+                        username: user,
+                        password: password
+                    },
+                    data: formData
+                }
+                console.log("Sending request")
+                try {
+                    const response = await axios(request_config)
 
-    const request_config = {
-        method: 'post',
-        url: vista_url + apiEndpoint,
-        headers: {
-            'Content-Type': `multipart/form-data; boundary=${formData._boundary}`
-        },
-        auth: {
-            username: user,
-            password: password
-        },
-        data: formData
-    }
-    const response = await axios(request_config)
+                    console.log('=====================> VISTA RESPONSE <========================')
+                    let resultsVista = []
+                    if (response.data) {
+                        resultsVista.push(response.data.results)
+                    }
+                    const objetos = await readCsv.readCsv(aut['idP'])
+                    const resultsAffiliate = []
+                    for (const subscriptions of resultsVista) {
+                        if (subscriptions['face'].length != 0) {
 
-    console.log('=====================> VISTA RESPONSE <========================')
-        // console.log(response)
-    console.log(util.inspect(response.data, false, null, true))
+                            if (subscriptions['face'][0].deep_face.gender[0]['label'] == 'Female') {
+                                for (const obj of subscriptions['fashion']) {
+                                    if (obj.class == 'upper') {
+                                        let int = Math.floor(Math.random() * objetos[1]['Women Clothes']['shirt'].length)
+                                        resultsAffiliate.push({
+                                            vista: obj, affiliate: objetos[1]["Women Clothes"]['shirt'][int],
+                                            add: { id: parseInt(objetos[1]['Women Clothes']['shirt'][int][0]), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
+                                            serv: serv,
+                                            size: {w: img_width, h: img_height},
+                                            mobile: mobile
+                                        })
+                                        if (resultsAffiliate.length == 2) {
+                                            break;
+                                        }
+                                    }
+                                    if (obj.class == 'lower') {
+                                        let int = Math.floor(Math.random() * objetos[1]['Women Clothes']['pants'].length)
+                                        resultsAffiliate.push({
+                                            vista: obj, affiliate: objetos[1]['Women Clothes']['pants'][int],
+                                            add: { id: parseInt(objetos[1]['Women Clothes']['pants'][int][0]), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
+                                            serv: serv,
+                                            size: {w: img_width, h: img_height},
+                                            mobile: mobile
+                                        })
+                                        if (resultsAffiliate.length == 2) {
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                            if (subscriptions['face'][0].deep_face.gender[0]['label'] == 'Male') {
+                                for (const obj of subscriptions['fashion']) {
+                                    if (obj.class == 'upper') {
+                                        let int = Math.floor(Math.random() * objetos[1]['Men Clothes']['shirt'].length)
+                                        resultsAffiliate.push({
+                                            vista: obj, affiliate: objetos[1]['Men Clothes']['shirt'][int],
+                                            add: { id: parseInt(objetos[1]['Men Clothes']['shirt'][int][0]), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
+                                            serv: serv,
+                                            size: {w: img_width, h: img_height},
+                                            mobile: mobile
+                                        })
+                                        if (resultsAffiliate.length == 2) {
+                                            break;
+                                        }
+                                    }
+                                    if (obj.class == 'lower') {
+                                        let int = Math.floor(Math.random() * objetos[1]['Men Clothes']['pants'].length)
+                                        resultsAffiliate.push({
+                                            vista: obj, affiliate: objetos[1]['Men Clothes']['pants'][int],
+                                            add: { id: parseInt(objetos[1]['Men Clothes']['pants'][int][0]), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
+                                            serv: serv,
+                                            size: {w: img_width, h: img_height},
+                                            mobile: mobile
+                                        })
+                                        if (resultsAffiliate.length == 2) {
+                                            break;
+                                        }
 
-    res.send({
-        results: [{
-            adsinfo: [{
-                focal_point: [200, 200],
-                description: 'WenVen Boys & Girls Cotton Jackets with Removable Hood',
-                name: 'WenVen Girls Jacket',
-                url: 'https://images-na.ssl-images-amazon.com/images/I/81Oc%2BhRkUqL._AC_UX679_.jpg',
-                product_price: 39,
-                product_url: 'https://www.amazon.com/WenVen-Girls-Cotton-Jackets-Removable/dp/B07BF99FQ2/ref=sr_1_4?dchild=1&keywords=brown+jacket+girl&qid=1615147300&sr=8-4',
-                iframe: '<div class="s-expand-height s-include-content-margin s-border-bottom s-latency-cf-section">\r\n<div class="a-section a-spacing-medium">\r\n\r\n\r\n<div class="a-section a-spacing-micro s-grid-status-badge-container">\r\n\r\n</div>\r\n\r\n\r\n<span data-component-type="s-product-image" class="rush-component" data-component-id="10">\r\n\r\n<a class="a-link-normal s-no-outline" href="/Amazon-Essentials-Full-Zip-High-Pile-X-Large/dp/B07Q2H7JMM/ref=sr_1_1?dchild=1&amp;keywords=brown+jacket+girl&amp;qid=1615147948&amp;sr=8-1">\r\n<div class="a-section aok-relative s-image-square-aspect">\r\n\r\n\r\n\r\n<img src="https://m.media-amazon.com/images/I/81SSoagYm3L._MCnd_AC_UL320_.jpg" class="s-image" alt="Amazon Essentials Girls\' Sherpa Fleece Full-Zip Jacket" srcset="https://m.media-amazon.com/images/I/81SSoagYm3L._MCnd_AC_UL320_.jpg 1x, https://m.media-amazon.com/images/I/81SSoagYm3L._MCnd_AC_UL480_FMwebp_QL65_.jpg 1.5x, https://m.media-amazon.com/images/I/81SSoagYm3L._MCnd_AC_UL640_FMwebp_QL65_.jpg 2x, https://m.media-amazon.com/images/I/81SSoagYm3L._MCnd_AC_UL800_FMwebp_QL65_.jpg 2.5x, https://m.media-amazon.com/images/I/81SSoagYm3L._MCnd_AC_UL960_FMwebp_QL65_.jpg 3x" data-image-index="1" data-image-load="" data-image-latency="s-product-image" data-image-source-density="1">\r\n\r\n\r\n</div>\r\n</a>\r\n</span>\r\n\r\n\r\n<div class="a-section a-spacing-none a-spacing-top-small">\r\n\r\n<h2 class="a-size-mini a-spacing-none a-color-base s-line-clamp-4">\r\n\r\n\r\n\r\n<a class="a-link-normal a-text-normal" href="/Amazon-Essentials-Full-Zip-High-Pile-X-Large/dp/B07Q2H7JMM/ref=sr_1_1?dchild=1&amp;keywords=brown+jacket+girl&amp;qid=1615147948&amp;sr=8-1">\r\n\r\n\r\n\r\n<span class="a-size-base-plus a-color-base a-text-normal" dir="auto">Amazon Essentials Girls\' Sherpa Fleece Full-Zip Jacket</span>\r\n\r\n\r\n\r\n\r\n</a>\r\n\r\n\r\n</h2>\r\n\r\n</div>\r\n\r\n<div class="a-section a-spacing-none a-spacing-top-micro">\r\n<div class="a-row a-size-small">\r\n<span aria-label="4.7 out of 5 stars">\r\n\r\n\r\n\r\n\r\n<span class="a-declarative" data-action="a-popover" data-a-popover="{&quot;max-width&quot;:&quot;700&quot;,&quot;closeButton&quot;:false,&quot;position&quot;:&quot;triggerBottom&quot;,&quot;url&quot;:&quot;/review/widgets/average-customer-review/popover/ref=acr_search__popover?ie=UTF8&amp;asin=B07Q2H7JMM&amp;ref=acr_search__popover&amp;contextId=search&quot;}">\r\n\r\n<a href="javascript:void(0)" class="a-popover-trigger a-declarative"><i class="a-icon a-icon-star-small a-star-small-4-5 aok-align-bottom"><span class="a-icon-alt">4.7 out of 5 stars</span></i><i class="a-icon a-icon-popover"></i></a>\r\n</span>\r\n\r\n\r\n\r\n\r\n</span>\r\n\r\n<span aria-label="1,683">\r\n\r\n<a class="a-link-normal" href="/Amazon-Essentials-Full-Zip-High-Pile-X-Large/dp/B07Q2H7JMM/ref=sr_1_1?dchild=1&amp;keywords=brown+jacket+girl&amp;qid=1615147948&amp;sr=8-1#customerReviews">\r\n\r\n\r\n\r\n<span class="a-size-base" dir="auto">1,683</span>\r\n\r\n\r\n\r\n\r\n</a>\r\n\r\n</span>\r\n</div>\r\n</div>\r\n\r\n\r\n<div class="a-section a-spacing-none a-spacing-top-small">\r\n<div class="a-row a-size-base a-color-base"><div class="a-row"><div class="a-row">\r\n<a class="a-size-base a-link-normal a-text-normal" href="/Amazon-Essentials-Full-Zip-High-Pile-X-Large/dp/B07Q2H7JMM/ref=sr_1_1?dchild=1&amp;keywords=brown+jacket+girl&amp;qid=1615147948&amp;sr=8-1">\r\n\r\n\r\n\r\n<span class="a-price" data-a-size="l" data-a-color="base"><span class="a-offscreen">$25.00</span><span aria-hidden="true"><span class="a-price-symbol">$</span><span class="a-price-whole">25<span class="a-price-decimal">.</span></span><span class="a-price-fraction">00</span></span></span>\r\n\r\n\r\n\r\n\r\n</a>\r\n</div></div></div>\r\n</div>\r\n\r\n\r\n<div class="a-section a-spacing-none a-spacing-top-micro">\r\n<div class="a-row a-size-base a-color-secondary s-align-children-center"><span class="a-size-small a-color-secondary" dir="auto">Ships to India</span></div>\r\n</div>\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n</div>\r\n</div>'
-            }]
-        }]
+                                    }
+                                }
+                            }
+                        }
+
+                        if (resultsAffiliate.length < 2) {
+                            for (const obj of subscriptions['Object']) {
+                                if (objetos[0][obj.class] != undefined && obj.confidence > 0.6) {
+                                    if (objetos[0][obj.class].length != 0) {
+                                        let int = Math.floor(Math.random() * objetos[0][obj.class].length)
+                                        resultsAffiliate.push({
+                                            vista: obj, affiliate: objetos[0][obj.class][int],
+                                            add: { id: parseInt(objetos[0][obj.class][int][0]), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
+                                            serv: serv,
+                                            size: {w: img_width, h: img_height},
+                                            mobile: mobile
+                                        })
+                                    }
+                                    if (resultsAffiliate.length == 2) {
+                                        break;
+                                    }
+
+                                }
+                            }
+                        }
+                    }
+                    const sendingResults = convert(resultsAffiliate)
+                    await cache.setAsync(`${mobile}_${img_width}_${img_height}_${url}`, JSON.stringify(sendingResults));
+                    res.status(200).send({
+                        results: sendingResults
+                    })
+                }
+                catch (err) {
+                    await cache.setAsync(`${mobile}_${img_width}_${img_height}_${url}`, JSON.stringify({}));
+                    return res.status(500).json({ success: false, message: "Vista Image failled", error: err, img: url })
+                }
+            }
+        }
     })
 })
+
+async function addImg(time, imgName, idGeneration, site, callback) {
+    return db.query(`INSERT INTO imgsPage values (0,'${time}','${imgName}','${idGeneration}','${site}')`, callback)
+}

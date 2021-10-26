@@ -1,0 +1,33 @@
+const db = require('../helper/dbconnection')
+
+ const auth = async function(site,term){
+    const data = await enabled(site)
+    let resp = {}
+    if(data.length != 0){
+        if(data[0].enabled == 'true'){
+            resp['enabled'] = true
+            resp['idP'] = data[0].publisherId
+            return resp
+        }else {
+            resp['enabled'] = false
+            return resp
+        }   
+    }else {
+        resp['enabled'] = false
+        return resp
+    }
+ };
+
+ module.exports = auth;
+
+
+const enabled = function(site){
+ return new Promise(function(resolve, reject){
+    db.query(`SELECT * from publishers where name ='${site}';`,  (error, elements)=>{
+            if(error){
+                return reject(error);
+            }
+            return resolve(elements);
+        });
+ });
+}

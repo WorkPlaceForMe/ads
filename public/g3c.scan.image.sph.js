@@ -1,29 +1,97 @@
-loadjscssfile('//code.jquery.com/ui/1.11.3/themes/smoothness/jquery-ui.css', 'css') //dynamically load and add this .js file
+/* eslint-disable no-mixed-spaces-and-tabs */
 var styleEl = document.createElement('style')
 styleEl.innerHTML =
-	'.ui-tooltip-graymatics{background-color: #000033 !important;background:url("");font-size: 14px;font-weight: bold;opacity:0.8; color:#ffffff}'
+	'.ui-tooltip-graymatics{background-color: #000033 !important;background:url("");font-size: 14px;font-weight: bold;opacity:0.8; color:#ffffff}; '
 document.head.appendChild(styleEl)
 
-document.writeln(
-	"<script type='text/javascript' src='//code.jquery.com/ui/1.11.3/jquery-ui.js'></script>"
-)
+const uuid = new Date().getTime()
+
+let serv = document.currentScript.getAttribute('src').split('/')
+serv = `${serv[0]}//${serv[2]}`
+
 
 $(document).ready(function () {
-	$(document).tooltip({
-		track: true,
-		tooltipClass: 'ui-tooltip-graymatics'
-	})
-
-	$('.mark').tooltip({
-		disabled: true
+	$.ajax({
+		url: `${serv}/api/check`,
+		type: 'GET',
+		data: `site=${window.location.href}`,
+		dataType: 'json',
+		success: function (a) {
+			
+		},
+		error: function (e) {console.error(e)}
 	})
 })
+
+$(document).on('mousedown', 'a.but1', function (e) {
+	if(e.button == 0 || e.button == 1){
+		const data = {
+			time: new Date(),
+			url: window.location.href,
+			type: 1,
+			idItem: e.currentTarget.id,
+			img: e.originalEvent.path[3].children[0].currentSrc
+		}
+		
+		// dataLayer.push(data)
+			$.ajax({
+			url: `${serv}/api/data`,
+			type: 'POST',
+			data: data,
+			dataType: 'json',
+			success: function (a) {
+				
+			},
+			error: function (e) {console.error(e)}
+		})
+	}
+});
+
+$(document).on('mousedown', 'a.but2', function (e) {
+	if(e.button == 0 || e.button == 1){
+		let idItem, img;
+		if(navigator.userAgent.indexOf("Firefox") != -1 ) {
+			idItem = e.srcElement.parentNode.parentNode.parentNode.parentNode.parentNode.childNodes[1].id;
+			img = e.srcElement.parentNode.parentNode.parentNode.parentNode.parentNode.childNodes[0].currentSrc;
+		}else{
+			idItem = parseInt(decodeURI(e.originalEvent.path[2].href).split('id=')[1]) || parseInt(decodeURI(e.originalEvent.path[1].href).split('id=')[1]);
+			img = e.originalEvent.path[5].children[0].currentSrc || e.originalEvent.path[6].children[0].currentSrc;
+		}
+		const data = {
+			time: new Date(),
+			url: window.location.href,
+			type: 2,
+			idItem: idItem,
+			img: img
+		}
+			$.ajax({
+			url: `${serv}/api/data`,
+			type: 'POST',
+			data: data,
+			dataType: 'json',
+			success: function (a) {
+				
+			},
+			error: function (e) {console.error(e)}
+		})
+	}
+});
+
+
+$(document).on('click', '.closeBut', function () {
+	const wrap = `#markPoint_${$(this)[0].offsetParent.attributes[0].value.split('_')[1]}`
+	const button = `#spanPoint_${$(this)[0].offsetParent.attributes[0].value.split('_')[1]}`
+	$(button).css('display', ''),
+	$(wrap).css('display', 'none')
+
+});
+
 
 //jQuery plugin to analyse images on website and show context connect ads automatically.|Copyright (c) 2013 GRAYMATICS SG PTE LTD (www.graymatics.com). All rights reserved.|version 0.7
 ;(function (a, b) {
 	function c(b) {
 		a.ajax({
-			url: 'http://api.graymatics.com/grayit/process/image/batch',
+			url: `http://api.graymatics.com/grayit/process/image/batch`,
 			type: 'POST',
 			data: 'API_KEY=' + y + '&URL=' + b + '&Add_Info=[{"source_url":"' + document.URL + '"}]',
 			dataType: 'json',
@@ -42,55 +110,136 @@ $(document).ready(function () {
 				product_price: f.product_price,
 				product_url: f.product_url,
 				object: f.object,
-				iframe: f.iframe
+				iframe: f.iframe,
+				id: f.id,
+				size: f.imgSize
 			}
 		if ('indoorroom' != g.object && 'person' != g.object && f.keywords != ' ') {
-			var topvl = c.my - 50
-			var leftvl = c.mx - 30
+			if(c.my<55){
+				c.my = 55
+			}
+			if(c.my > (g.size.h - 55)){
+				c.my = g.size.h - 55
+			}
+			let width = 350;
+			let posX = c.mx - 120 + 'px';
+			if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
+					if(window.screen.width <= 350){
+							width = window.screen.width
+					}
+					posX = 2 + 'vw';
+			}else{
+				if(c.mx<270){
+				c.mx = 270
+			}
+			}
+			if(c.mx > (g.size.w - 55)){
+				c.mx = g.size.w - 55
+			}
+			var topvl = c.my
+			var leftvl = c.mx
 			var h =
-				"<a title='SHOP NOW!'><div class='mark' style='padding:50px; position:absolute;top:" +
+				"<a title='SHOP NOW!'class='but1' id ='"+ g.id +"'><div class='mark' id='mark_" + E + "' style='position:absolute;top:" +
 				topvl +
 				'px;left:' +
 				leftvl +
-				"px;width:24px;height:24px;'><span name='mark_point_" +
+				"px;'><span id='spanPoint_" +
 				E +
-				"' style='background:url(http://scripts.graymatics.com/images/cart-icon.png) no-repeat 50% 50%;padding: 0 8px;cursor: pointer;'>&nbsp;</span></div></a>"
+				"' name='spanPoint_" +
+				E +
+				"' class='but' style='background:url(" + serv + "/api/pictures/"
+
+				h = h + iconAndSize('iconBorder.gif', false) + "padding: 35px 40px;cursor: pointer;'>&nbsp;</span></div></a>"
+
 			a(e).append(h)
 			var i = document.createElement('div')
-			;(i.innerHTML = g.iframe), (i.id = 'mark_point_' + E++), (i.className = 'wrapper')
+			;(i.innerHTML = g.iframe), (i.id = 'markPoint_' + E++), (i.className = 'wrapper')
 			var j =
-				'position:absolute;zIndex:100;clear:both;width:240px;height:95px;padding:0.2em;background-color:#FFFFFF;display:none;border: 1px solid gray;-webkit-border-radius: 6px;-moz-border-radius: 6px;border-radius: 6px;-webkit-box-shadow: 0 2px 5px;-moz-box-shadow: 0 2px 5px;box-shadow: 0 2px 5px;'
+				`position:absolute;zIndex:50;clear:both;width:${width}px;padding:0.2em;background-color:#FFFFFF;display:none;border: 1px solid gray;-webkit-border-radius: 6px;-moz-border-radius: 6px;border-radius: 6px;-webkit-box-shadow: 0 2px 5px;-moz-box-shadow: 0 2px 5px;box-shadow: 0 2px 5px;`
 			i.style.cssText = j
 			var k = a(e).width()
-			i.style.top = c.my - 20 + 'px'
+			i.style.top = c.my - 60 + 'px';
 			//k / 2 > c.mx ? i.style.left = c.mx - 240 + "px" : i.style.right = k - c.mx - 17 + "px", a(e).append(i);
-			;(i.style.left = c.mx - 120 + 'px'), a(e).append(i)
+			(i.style.left = posX ), a(e).append(i)
 		}
 	}
+	let sending = false;
 	function e() {
-		a('.mark span').toggle(
-			function () {
-				var b = a(this).attr('name')
-				$('.ui-corner-all').hide()
-				a(this).css(
-					'background',
-					'url(http://scripts.graymatics.com/images/circle.png) no-repeat 50% 50%'
-				),
-					a('.wrapper').css('z-index', '50'),
-					a('.mark').css('z-index', '60'),
+		if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
+			a('.mark span').click(
+				function () {
+					const wrap = `markPoint_${a(this).attr('id').split('_')[1]}`			
+					a(this).css(
+						'display',
+						'none'
+					),
+						a('.wrapper').css('z-index', '50'),
+						a('.mark').css('z-index', '200'),
+						a(this).css('z-index', '200'),
+						a('#' + wrap).css('z-index', '100'),
+						a('#' + wrap).css('display', '')
+						
+				}
+			)
+		}else{
+			a('.but').mouseenter(
+				function(e){
+					const data = {
+						time: new Date(),
+						url: window.location.href,
+						type: 1,
+						idItem: e.srcElement.parentNode.parentNode.id,
+						img: e.srcElement.parentNode.parentNode.parentNode.children[0].currentSrc
+					}
+
+					if(sending == false){
+						sending = true;
+						$.ajax({
+						url: `${serv}/api/data`,
+						type: 'POST',
+						data: data,
+						dataType: 'json',
+						success: function (a) {
+							sending = false;
+						},
+						error: function (e) {console.error(e)}
+						})
+					}
+					var b =`markPoint_${a(this).attr('name').split('_')[1]}`
+					a(this).css(
+						'background-size',
+						'0px'
+					),
+					a('.wrapper').css('z-index', '250'),
+					a('.mark').css('z-index', '200'),
 					a(this).css('z-index', '200'),
-					a('#' + b).css('z-index', '100'),
+					a('#' + b).css('z-index', '250'),
 					a('#' + b).css('display', '')
-			},
-			function () {
-				var b = a(this).attr('name')
-				a(this).css(
-					'background',
-					'url(http://scripts.graymatics.com/images/cart-icon.png) no-repeat 50% 50%'
-				),
+				}
+			)
+			a('.wrapper').mouseleave(
+				function () {
+					var b = a(this)[0].id
+					a('.but').css(
+						'background',
+						'url(' + serv + '/api/pictures/iconBorder.gif) no-repeat 40% 40%'
+					),
+					a('.but').css(
+						'background-size',
+						'60px'
+					),
+					a('.but').css(
+						'padding',
+						'35px 40px'
+					),
+					a(this).css(
+						'cursor',
+						'pointer'
+					),				
 					a('#' + b).css('display', 'none')
-			}
-		)
+				}
+			)
+		}
 	}
 	function f(a, c, e) {
 		for (var f = a, g = 0; f.length > g; g++)
@@ -102,7 +251,7 @@ $(document).ready(function () {
 						l = f[g].adsinfo[h]
 					l.focal_point !== b
 						? ((i = (l.focal_point[0] * c.cur_width) / c.ori_width),
-						  (j = l.focal_point[1] * (c.cur_height / c.ori_height) + 150),
+						  (j = l.focal_point[1] * (c.cur_height / c.ori_height)),
 						  (k = !0))
 						: ((i = c.cur_width - 20 * (h + 1)), (j = 130), (k = !1)),
 						(c.mx = i),
@@ -188,7 +337,9 @@ $(document).ready(function () {
 		var d = b.getMax()
 		return d
 	}
-	;(a.GM = {}),
+	;
+	let num = 0;
+	(a.GM = {}),
 		(a.GM.IMLayer = function (a, b) {
 			;(this.imgsrc = a),
 				(this.celement = b),
@@ -206,20 +357,41 @@ $(document).ready(function () {
 					var j = r(this.celement)
 					j || (j = '')
 					var k = g(this.celement),
-						l = this.imgsrc,
-						m =
+						l = this.imgsrc
+					if(l.split('/')[0] == 'http:' || l.split('/')[0] == 'https:'){
+						l = this.imgsrc
+					}else{
+						let sitee = window.location.href
+						let a = sitee.split('/')
+						a.pop()
+						l = `${a.join('/')}/${this.imgsrc}`
+					}
+					let mobile = 0;
+					if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
+						mobile = 1
+					}
+					var m =
 							'ad_type=' +
 							z +
-							'&ad_width=' +
-							A +
-							'&ad_height=' +
-							B +
+							'&img_width=' +
+							h.cur_width +
+							'&img_height=' +
+							h.cur_height +
 							'&ad_format=' +
 							C +
 							'&media_type=' +
 							w +
 							'&url=' +
-							l
+							l +
+							'&site=' +
+							pe + 
+							'&uid=' +
+							uuid + 
+							'&serv=' +
+							serv +
+							'&mobile=' +
+							mobile
+					num = num + 1
 					a.ajax({
 						url: v,
 						type: 'GET',
@@ -286,13 +458,14 @@ $(document).ready(function () {
 					  this.addGroup('suits,suit,tuxedo,tuxedos'),
 					  this.addGroup('coat,coats'))
 		},
-		v = api_url + '/api/v1/ads',
+		v = `${serv}/api/v1/ads`,
 		w = 'image',
 		z = 'image',
 		A = 240,
 		B = 95,
 		C = '240x95_as',
-		E = 0
+		E = 0,
+		pe = window.location.href
 	window.onload = function () {
 		var b = []
 		for (
@@ -307,21 +480,19 @@ $(document).ready(function () {
 	}
 })(jQuery)
 
-function loadjscssfile(filename, filetype) {
-	if (filetype == 'js') {
-		//if filename is a external JavaScript file
-		var fileref = document.createElement('script')
-		fileref.setAttribute('type', 'text/javascript')
-		fileref.setAttribute('src', filename)
-	} else if (filetype == 'css') {
-		//if filename is an external CSS file
-		var fileref = document.createElement('link')
-		fileref.setAttribute('rel', 'stylesheet')
-		fileref.setAttribute('type', 'text/css')
-		fileref.setAttribute('href', filename)
+function iconAndSize(file, big){
+	let size, rep;
+	if(big == true){
+		size = 80;
+		rep = 50
+		if(file == 'iconShadow.gif'){
+			size = 100;
+			rep = 70
+		}
+	}else{
+		size = 60;
+		rep = 40;
 	}
-	if (typeof fileref != 'undefined') {
-		if (filetype == 'js') $('head').append(fileref)
-		if (filetype == 'css') $('head').append(fileref)
-	}
+	const str = `${file}) no-repeat ${rep}% ${rep}%;background-size: ${size}px;`
+	return str
 }
