@@ -1,4 +1,3 @@
-/* eslint-disable no-mixed-spaces-and-tabs */
 var styleEl = document.createElement('style')
 styleEl.innerHTML =
 	'.ui-tooltip-graymatics{background-color: #000033 !important;background:url("");font-size: 14px;font-weight: bold;opacity:0.8; color:#ffffff}; '
@@ -123,8 +122,11 @@ $(document).on('click', '.closeBut', function () {
 			let width = 350;
 			let posX = c.mx - 120 + 'px';
 			if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
-					if(window.screen.width <= 350){
-							width = window.screen.width
+					if(window.screen.width <= 400){
+							width = 330
+					}					
+					if(window.screen.width <= 360){
+							width = 300
 					}
 					posX = 2 + 'vw';
 			}else{
@@ -183,7 +185,6 @@ $(document).on('click', '.closeBut', function () {
 		}else{
 			a('.but').mouseenter(
 				function(e){
-					console.log(e)
 					const data = {
 						time: new Date(),
 						url: window.location.href,
