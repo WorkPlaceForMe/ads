@@ -1,0 +1,6 @@
+app.properties2
+node_modules/**
+clientAis/**
+clientClient/**
+csv/**
+!csv/objetos2.json
