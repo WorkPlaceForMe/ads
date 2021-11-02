@@ -70,9 +70,9 @@ app.use(routers)
 // global error handling
 app.use(handleError)
 
-httpsServer.listen(portS || 3000, function () {
+httpsServer.listen(portS || 3000, async function () {
 	console.log(`App is up on port ${portS || '3000'} on HTTPS`)
-  sequelize.sync({ force : true }).then(()=>{
+  sequelize.authenticate().then(()=>{
     console.log('sequelize is connected')
   }).catch(err =>{
     console.error('no se concecto',err)
