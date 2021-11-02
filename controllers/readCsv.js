@@ -8,9 +8,17 @@ const https = require('https');
 const { parse } = require('url')
 const parseCsv = require('csv-parse');
 const objetos = require('../csv/objetos2.json');
+const { trace, Console } = require('console');
+const products = require('../campaigns-db/models/products');
+const { stringify } = require('uuid');
+const clothing = require('../campaigns-db/models/clothing');
+const { resolve } = require('path');
+
 const arrObjetos = Object.keys(objetos[0])
 const WomenClothes = Object.keys(objetos[1]['Women Clothes'])
 const MenClothes = Object.keys(objetos[1]["Men Clothes"])
+const { Readable } = require("stream");
+const sequelize = require('../campaigns-db/database')
 
 exports.readCsv = async function (idPbl) {
   if (fs.existsSync(`./csv/${idPbl}.json`)) {
@@ -48,21 +56,12 @@ exports.readCsv = async function (idPbl) {
               'X-Accesstrade-User-Type': 'publisher'
             }
           })
-          let results;
-          for(const campaign of campaignResponse.data){
-            if(campaign.id == 677){
-              try {
-                let affiliateEndpoint = `${conf.get('accesstrade_endpoint')}/v1/publishers/me/sites/${idPbl}/campaigns/${campaign.id}/productfeed/url`
-                const affiliateResponse = await axios.get(affiliateEndpoint, {
-                  headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'X-Accesstrade-User-Type': 'publisher'
-                  }
-                })
-                console.log(`Downloading shopee`)
-                await download(affiliateResponse.data.baseUrl, idPbl)
 
-                results = await readCsv(idPbl)
+          console.log(`Downloading shopee`)
+          const rs = await download(affiliateResponse.data.baseUrl, idPbl)
+
+          const results = await readCsv(rs, idPbl)
+          resolve(results)
 
 
               } catch (err) {
@@ -74,11 +73,7 @@ exports.readCsv = async function (idPbl) {
         } catch (err) {
           console.error(err)
         }
-        // }
-        // fs.promises.createWriteStream(`./csv/${idPbl}.csv`, JSON.stringify(result, null, 2) , 'utf-8');
-        // resolve(result)
       }).catch((err) => {
-        // console.error(err)
         reject(err)
       })
     })
@@ -96,45 +91,13 @@ exports.readCsv = async function (idPbl) {
   }
 }
 
-
-async function download(url, path) {
-  const TIMEOUT = 100000
-  const uri = parse(url)
-  if (!path) {
-    path = basename(uri.path)
-  }
-  let id = path
-  path = `./csv/${path}_temp.csv`
-  const file = fs.createWriteStream(path)
-
-  return new Promise(function (resolve, reject) {
-    const request = https.get(uri.href).on('response', function (res) {
-      const len = parseInt(res.headers['content-length'], 10)
-      let downloaded = 0
-      res
-        .on('data', function (chunk) {
-          file.write(chunk)
-          downloaded += chunk.length
-          process.stdout.write(`Downloading ${downloaded} bytes\r`)
-        })
-        .on('end', function () {
-          file.end()
-          fs.rename(path, `./csv/${id}.csv`, function (err) {
-            if (err) throw err;
-            console.log('File Renamed.');
-          });
-          console.log(`${uri.path} downloaded to: ${path}`)
-          resolve()
-        })
-        .on('error', function (err) {
-          console.error(err)
-          reject(err)
-        })
-    })
-
-    request.setTimeout(TIMEOUT, function () {
-      request.abort()
-      reject(new Error(`request timeout after ${TIMEOUT / 1000.0}s`))
+async function download(url) {
+  return new Promise((resolve, reject) => {
+    axios.get(url).then(resp => {
+      const Csv = Readable.from(resp.data)
+      resolve(Csv)
+    }).catch(err => {
+      reject(console.error(err))
     })
   })
 }
@@ -143,16 +106,16 @@ async function readCsv(id) {
   let path = `./csv/${id}.csv`
   return new Promise((resolve, reject) => {
 
-    fs.createReadStream(path)
+    path
       .pipe(parseCsv({ delimiter: ',', from_line: 2, headers: true }))
       .on('data', function (csvrow) {
         // aqui mandar a vista cada row
         for (const element of arrObjetos) {
-          if (csvrow[15].toLowerCase().includes(" " + element) || csvrow[15].toLowerCase() == element) {
+          if (csvrow[15].toLowerCase().includes(" " + element) || csvrow[15].toLowerCase() === element) {
             objetos[0][element].push(csvrow)
-          } else if (csvrow[17].toLowerCase().includes(" " + element) || csvrow[17].toLowerCase() == element) {
+          } else if (csvrow[17].toLowerCase().includes(" " + element) || csvrow[17].toLowerCase() === element) {
             objetos[0][element].push(csvrow)
-          } else if (csvrow[13].toLowerCase().includes(" " + element) || csvrow[13].toLowerCase() == element) {
+          } else if (csvrow[13].toLowerCase().includes(" " + element) || csvrow[13].toLowerCase() === element) {
             objetos[0][element].push(csvrow)
           }
         }
@@ -183,6 +146,89 @@ async function readCsv(id) {
         fs.unlinkSync(path)
         await cache.setAsync(`downloading-${id}`, false);
         console.log(`Done with shopee`)
+        const objetos_json = objetos
+        console.log(typeof (objetos_json))
+        console.log("uploading to Mysql")
+        await sequelize.sync().then(()=>{
+          for (obj in objetos_json[0]) {
+            objetos_json[0][obj].forEach((element) => {
+              if (element != null) {
+                products.create({
+                  Merchant_Product_Name: element[1],
+                  Image_URL: element[2],
+                  Product_URL_Web_encoded: element[4],
+                  Product_URL_Mobile_encoded: element[5],
+                  Description: element[6],
+                  Price: element[7],
+                  Descount: element[8],
+                  Available: element[9],
+                  Main_Category_Name: element[13],
+                  Category_Name: element[15],
+                  Sub_Category_Name: element[17],
+                  Price_Unit: element[18],
+                  lable: obj
+                }).catch((err) => {
+                  console.error('algo fallo', err)
+                  console.trace(err)
+                })
+              }
+            })
+          }
+          for (const Garment of WomenClothes) {
+            if (objetos_json[1]['Women Clothes'][Garment] != null) {
+              objetos_json[1]['Women Clothes'][Garment].forEach(element => {
+                clothing.create({
+                  Merchant_Product_Name: element[1],
+                  Image_URL: element[2],
+                  Product_URL_Web_encoded: element[4],
+                  Product_URL_Mobile_encoded: element[5],
+                  Description: element[6],
+                  Price: element[7],
+                  Descount: element[8],
+                  Available: element[9],
+                  Main_Category_Name: element[13],
+                  Category_Name: element[15],
+                  Sub_Category_Name: element[17],
+                  Price_Unit: element[18],
+                  lable: {
+                    gender: 'Woman',
+                    garment: Garment
+                  }
+                }).catch((err) => {
+                  console.error('algo fallo con la ropa ', err)
+                  console.trace(err)
+                })
+              });
+            }
+          }
+          for (const Garment of MenClothes) {
+            if (objetos_json[1]['Men Clothes'][Garment] != null) {
+              objetos_json[1]['Men Clothes'][Garment].forEach(element => {
+                clothing.create({
+                  Merchant_Product_Name: element[1],
+                  Image_URL: element[2],
+                  Product_URL_Web_encoded: element[4],
+                  Product_URL_Mobile_encoded: element[5],
+                  Description: element[6],
+                  Price: element[7],
+                  Descount: element[8],
+                  Available: element[9],
+                  Main_Category_Name: element[13],
+                  Category_Name: element[15],
+                  Sub_Category_Name: element[17],
+                  Price_Unit: element[18],
+                  lable: {
+                    gender: 'Men',
+                    garment: Garment
+                  }
+                }).catch((err) => {
+                  console.error('algo fallo con la ropa de hombre', err)
+                  console.trace(err)
+                })
+              });
+            }
+          }
+        })
         resolve(objetos)
       });
   })
