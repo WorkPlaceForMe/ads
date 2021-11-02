@@ -4,13 +4,9 @@ const jwt = require('jsonwebtoken')
 const conf = require('../middleware/prop')
 const fs = require('fs');
 const cache = require('../helper/cacheManager')
-const https = require('https');
-const { parse } = require('url')
 const parseCsv = require('csv-parse');
 const objetos = require('../csv/objetos2.json');
-const { trace, Console } = require('console');
 const products = require('../campaigns-db/models/products');
-const { stringify } = require('uuid');
 const clothing = require('../campaigns-db/models/clothing');
 const { resolve } = require('path');
 
@@ -31,11 +27,11 @@ exports.readCsv = async function (idPbl) {
   if (cachedDown == 'false' || !cachedDown) {
     await cache.setAsync(`downloading-${idPbl}`, true);
     return new Promise(function (resolve, reject) {
-      // const ids = {
-      //     //lazada : 520,
-      //     //trueShopping : 594,
-      //     shopee : 677
-      // }
+      const ids = {
+          //lazada : 520,
+          //trueShopping : 594,
+          shopee : 677
+      }
       // let result = []
       aff.getAff.then(async function (credentials) {
         const token = jwt.sign(
@@ -45,7 +41,7 @@ exports.readCsv = async function (idPbl) {
             algorithm: "HS256"
           }
         )
-        // for(const id in ids){
+        for(const id in ids){
 
         let campaignEndpoint = `${conf.get('accesstrade_endpoint')}/v1/publishers/me/sites/${idPbl}/campaigns/affiliated`
         
@@ -68,11 +64,7 @@ exports.readCsv = async function (idPbl) {
                 console.error(err)
               }
             }
-          }
-          resolve(results)
-        } catch (err) {
-          console.error(err)
-        }
+          
       }).catch((err) => {
         reject(err)
       })
@@ -150,7 +142,7 @@ async function readCsv(id) {
         console.log(typeof (objetos_json))
         console.log("uploading to Mysql")
         await sequelize.sync().then(()=>{
-          for (obj in objetos_json[0]) {
+          for (const obj in objetos_json[0]) {
             objetos_json[0][obj].forEach((element) => {
               if (element != null) {
                 products.create({

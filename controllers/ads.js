@@ -186,7 +186,7 @@ async function addImg(time, imgName, idGeneration, site, callback) {
                                             if (obj.class == 'upper') {
                                                 let item = 'shirt'
                                                 if(obj.deep_fashion_color.sleeve_length[0].label == "ExtraLongSleeves"){
-￼                                                   item = 'jacket'
+                                                    item = 'jacket'
                                                 }
                                                 clothing.findAndCountAll({
                                                     where: {
@@ -212,8 +212,8 @@ async function addImg(time, imgName, idGeneration, site, callback) {
                                             }
                                             if (obj.class == 'lower') {
                                                 let item = 'pants'
-                                                if(obj.deep_fashion_color.sleeve_length[0].label == "ShortPant"){
-￼                                                   item = 'short'
+                                                if(obj.deep_fashion_color.pant_length[0].label == "ShortPant"){
+                                                    item = 'short'
                                                 }
                                                 clothing.findAndCountAll({
                                                     where: {
