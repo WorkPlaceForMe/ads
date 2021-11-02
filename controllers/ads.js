@@ -12,8 +12,6 @@ const util = require('util')
 const cache = require('../helper/cacheManager')
 const products = require('../campaigns-db/models/products')
 const clothing = require('../campaigns-db/models/clothing')
-const { resolve } = require('path')
-const { reject } = require('bluebird')
 
 
 exports.getAds = Controller(async (req, res) => {
@@ -78,13 +76,59 @@ exports.getAds = Controller(async (req, res) => {
                     }
                     const objetos = await readCsv.readCsv(aut['idP'])
 
-                    async function filler() {
-                        return new Promise((resolve, reject) => {
+                    const resultsAffiliate = await filler(resultsVista,serv,img_width,img_height,site,url,uid,objetos)
+                    const sendingResults = convert(resultsAffiliate)
+
+                    await cache.setAsync(`${mobile}_${img_width}_${img_height}_${url}`, JSON.stringify(sendingResults));
+                    res.status(200).send({
+                        results: sendingResults
+                    })
+                }
+                catch (err) {
+                    console.log(err,url)
+                    await cache.setAsync(`${mobile}_${img_width}_${img_height}_${url}`, JSON.stringify({}));
+                    return res.status(500).json({ success: false, message: "Vista Image failled", error: err, img: url })
+                }
+            }
+        }
+    })
+})
+
+async function addImg(time, imgName, idGeneration, site, callback) {
+    return db.query(`INSERT INTO imgsPage values (0,'${time}','${imgName}','${idGeneration}','${site}')`, callback)
+}
+                    async function filler(resultsVista,serv,img_width,img_height,site,url,uid,objetos) {
+                        return new Promise((resolve) => {
                             const resultsAffiliate = []
                             for (const subscriptions of resultsVista) {
                                 if (subscriptions['face'].length != 0) {
                                     if (subscriptions['face'][0].deep_face.gender[0]['label'] == 'Female') {
                                         for (const obj of subscriptions['fashion']) {
+                                            if (obj.class == 'person') {
+                                                if(obj.deep_fashion_color.skirt_length[0].confidence >= 0.4){
+                                                clothing.findAndCountAll({
+                                                    where: {
+                                                        lable: {
+                                                            gender: 'Woman',
+                                                            garment: 'dress'
+                                                        }
+                                                    },
+                                                })
+                                                    .then(result => {
+                                                        const count = result.count
+                                                        const row = result.rows
+                                                        let int = Math.floor(Math.random() * count)
+                                                        if (resultsAffiliate.length < 2) {
+                                                        resultsAffiliate.push({
+                                                            vista: obj, affiliate: row[int].dataValues,
+                                                            add: { id: parseInt(row[int].dataValues['Merchant_Product_ID']), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
+                                                            serv: serv,
+                                                            size: { w: img_width, h: img_height }
+                                                        })
+                                                    }
+                                                    })
+                                            }
+                                            }
                                             if (obj.class == 'upper') {
                                                 clothing.findAndCountAll({
                                                     where: {
@@ -109,11 +153,15 @@ exports.getAds = Controller(async (req, res) => {
                                                     })
                                             }
                                             if (obj.class == 'lower') {
+                                                let item = 'pants'
+                                                if(obj.deep_fashion_color.sleeve_length[0].label == "ShortPant"){
+                                                    item = 'shorts'
+                                                }
                                                 clothing.findAndCountAll({
                                                     where: {
                                                         lable: {
                                                             gender: 'Woman',
-                                                            garment: 'pants'
+                                                            garment: item
                                                         }
                                                     },
                                                 })
@@ -136,11 +184,15 @@ exports.getAds = Controller(async (req, res) => {
                                     if (subscriptions['face'][0].deep_face.gender[0]['label'] == 'Male') {
                                         for (const obj of subscriptions['fashion']) {
                                             if (obj.class == 'upper') {
+                                                let item = 'shirt'
+                                                if(obj.deep_fashion_color.sleeve_length[0].label == "ExtraLongSleeves"){
+                                                    item = 'jacket'
+                                                }
                                                 clothing.findAndCountAll({
                                                     where: {
                                                         lable: {
                                                             gender: 'Men',
-                                                            garment: 'shirt'
+                                                            garment: item
                                                         }
                                                     },
                                                 })
@@ -159,11 +211,15 @@ exports.getAds = Controller(async (req, res) => {
                                                     })
                                             }
                                             if (obj.class == 'lower') {
+                                                let item = 'pants'
+                                                if(obj.deep_fashion_color.pant_length[0].label == "ShortPant"){
+                                                    item = 'short'
+                                                }
                                                 clothing.findAndCountAll({
                                                     where: {
                                                         lable: {
                                                             gender: 'Men',
-                                                            garment: 'pants'
+                                                            garment: item
                                                         }
                                                     },
                                                 })
@@ -220,28 +276,4 @@ exports.getAds = Controller(async (req, res) => {
                                 resolve(resultsAffiliate);
                               }, 1000);
                         })
-
-
-
                     }
-                    const resultsAffiliate = await filler()
-                    const sendingResults = convert(resultsAffiliate)
-
-                    await cache.setAsync(`${mobile}_${img_width}_${img_height}_${url}`, JSON.stringify(sendingResults));
-                    res.status(200).send({
-                        results: sendingResults
-                    })
-                }
-                catch (err) {
-                    console.log(err,url)
-                    await cache.setAsync(`${mobile}_${img_width}_${img_height}_${url}`, JSON.stringify({}));
-                    return res.status(500).json({ success: false, message: "Vista Image failled", error: err, img: url })
-                }
-            }
-        }
-    })
-})
-
-async function addImg(time, imgName, idGeneration, site, callback) {
-    return db.query(`INSERT INTO imgsPage values (0,'${time}','${imgName}','${idGeneration}','${site}')`, callback)
-}
