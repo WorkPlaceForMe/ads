@@ -18,7 +18,7 @@ const { reject } = require('bluebird')
 
 exports.getAds = Controller(async (req, res) => {
     // Disable SSL certificate
-    process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0
+    // process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0
 
     // get property values
     const vista_url = conf.get('vista_api_url')
@@ -28,10 +28,10 @@ exports.getAds = Controller(async (req, res) => {
     const apiEndpoint = '/api/v1/sync'
 
     // getting query strings
-    const { ad_type, img_width, img_height, ad_format, media_type, url, site, uid, serv } = req.query
 
+    const { ad_type, img_width, img_height, ad_format, media_type, url, site, uid, serv, mobile } = req.query
+    let cachedImg = await cache.getAsync(`${mobile}_${img_width}_${img_height}_${url}`);
 
-    let cachedImg = await cache.getAsync(`${img_width}_${img_height}_${url}`);
     if (cachedImg)
         return res.status(200).send({
             results: JSON.parse(cachedImg)
@@ -50,7 +50,9 @@ exports.getAds = Controller(async (req, res) => {
             } else {
                 let formData = new FormData()
                 formData.append('upload', request(url))
-                formData.append('subscriptions', 'face,fashion,Object')
+
+                formData.append('subscriptions', 'face,fashion,Object,tags1,tags2')
+
                 const request_config = {
                     method: 'post',
                     url: vista_url + apiEndpoint,
@@ -67,13 +69,15 @@ exports.getAds = Controller(async (req, res) => {
                 try {
                     const response = await axios(request_config)
 
+                        // console.log(util.inspect(response.data.results, false, null, true),url)
+
                     console.log('=====================> VISTA RESPONSE <========================')
-                    // console.log(response.data.image, response.data.results)
                     let resultsVista = []
                     if (response.data) {
                         resultsVista.push(response.data.results)
                     }
                     const objetos = await readCsv.readCsv(aut['idP'])
+
                     async function filler() {
                         return new Promise((resolve, reject) => {
                             const resultsAffiliate = []
@@ -209,6 +213,7 @@ exports.getAds = Controller(async (req, res) => {
                                             }
                                         }
                                     }
+
                                 }
                             }
                             setTimeout(() => {
@@ -216,19 +221,21 @@ exports.getAds = Controller(async (req, res) => {
                               }, 1000);
                         })
 
+
+
                     }
                     const resultsAffiliate = await filler()
                     const sendingResults = convert(resultsAffiliate)
-                    console.log(sendingResults)
-                    await cache.setAsync(`${img_width}_${img_height}_${url}`, JSON.stringify(sendingResults));
+
+                    await cache.setAsync(`${mobile}_${img_width}_${img_height}_${url}`, JSON.stringify(sendingResults));
                     res.status(200).send({
                         results: sendingResults
                     })
                 }
                 catch (err) {
-                    console.trace(err)
-                    await cache.setAsync(`${img_width}_${img_height}_${url}`, JSON.stringify({}));
-                    return res.status(500).json({ success: false, message: "Vista Image failled" })
+                    console.log(err,url)
+                    await cache.setAsync(`${mobile}_${img_width}_${img_height}_${url}`, JSON.stringify({}));
+                    return res.status(500).json({ success: false, message: "Vista Image failled", error: err, img: url })
                 }
             }
         }

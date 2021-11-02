@@ -90,7 +90,9 @@
         },
         "Men Clothes": {
             "shirt": [],
-            "pants": []
+            "pants": [],
+            "jacket": [],
+            "shorts": []
         }
     }
 ]

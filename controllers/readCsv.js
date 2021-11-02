@@ -13,6 +13,7 @@ const products = require('../campaigns-db/models/products');
 const { stringify } = require('uuid');
 const clothing = require('../campaigns-db/models/clothing');
 const { resolve } = require('path');
+
 const arrObjetos = Object.keys(objetos[0])
 const WomenClothes = Object.keys(objetos[1]['Women Clothes'])
 const MenClothes = Object.keys(objetos[1]["Men Clothes"])
@@ -45,20 +46,30 @@ exports.readCsv = async function (idPbl) {
           }
         )
         // for(const id in ids){
-        let affiliateEndpoint = `${conf.get('accesstrade_endpoint')}/v1/publishers/me/sites/${idPbl}/campaigns/677/productfeed/url`
+
+        let campaignEndpoint = `${conf.get('accesstrade_endpoint')}/v1/publishers/me/sites/${idPbl}/campaigns/affiliated`
+        
         try {
-          const affiliateResponse = await axios.get(affiliateEndpoint, {
+          const campaignResponse = await axios.get(campaignEndpoint, {
             headers: {
               'Authorization': `Bearer ${token}`,
               'X-Accesstrade-User-Type': 'publisher'
             }
           })
+
           console.log(`Downloading shopee`)
           const rs = await download(affiliateResponse.data.baseUrl, idPbl)
 
           const results = await readCsv(rs, idPbl)
           resolve(results)
 
+
+              } catch (err) {
+                console.error(err)
+              }
+            }
+          }
+          resolve(results)
         } catch (err) {
           console.error(err)
         }
@@ -91,7 +102,8 @@ async function download(url) {
   })
 }
 
-async function readCsv(path, id) {
+async function readCsv(id) {
+  let path = `./csv/${id}.csv`
   return new Promise((resolve, reject) => {
 
     path
@@ -131,6 +143,7 @@ async function readCsv(path, id) {
       })
       .on('end', async function () {
         await fs.promises.writeFile(`./csv/${id}.json`, JSON.stringify(objetos, null, 2), 'utf-8');
+        fs.unlinkSync(path)
         await cache.setAsync(`downloading-${id}`, false);
         console.log(`Done with shopee`)
         const objetos_json = objetos

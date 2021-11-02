@@ -1,4 +1,4 @@
-./app.properties
+app.properties
 public/**
 !public/g3c.scan.image.sph.js
 !public/pictures/iconBorder.gif
@@ -14,3 +14,4 @@ csv/**
 !csv/objetos2.json
 index.html
 startDocker.sh
+.gitignore

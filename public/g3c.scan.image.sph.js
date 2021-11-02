@@ -1,20 +1,17 @@
-/* eslint-disable no-mixed-spaces-and-tabs */
 var styleEl = document.createElement('style')
 styleEl.innerHTML =
 	'.ui-tooltip-graymatics{background-color: #000033 !important;background:url("");font-size: 14px;font-weight: bold;opacity:0.8; color:#ffffff}; '
 document.head.appendChild(styleEl)
 
 const uuid = new Date().getTime()
-const serv = document.currentScript.getAttribute('api_ip')
-let ext = 'http';
-if(serv.split(':')[1] == '3311'){
-	ext = 'https'
-}
+
+let serv = document.currentScript.getAttribute('src').split('/')
+serv = `${serv[0]}//${serv[2]}`
 
 
 $(document).ready(function () {
 	$.ajax({
-		url: `${ext}://${serv}/api/check`,
+		url: `${serv}/api/check`,
 		type: 'GET',
 		data: `site=${window.location.href}`,
 		dataType: 'json',
@@ -34,10 +31,9 @@ $(document).on('mousedown', 'a.but1', function (e) {
 			idItem: e.currentTarget.id,
 			img: e.originalEvent.path[3].children[0].currentSrc
 		}
-		
-		// dataLayer.push(data)
+
 			$.ajax({
-			url: `${ext}://${serv}/api/data`,
+			url: `${serv}/api/data`,
 			type: 'POST',
 			data: data,
 			dataType: 'json',
@@ -67,7 +63,7 @@ $(document).on('mousedown', 'a.but2', function (e) {
 			img: img
 		}
 			$.ajax({
-			url: `${ext}://${serv}/api/data`,
+			url: `${serv}/api/data`,
 			type: 'POST',
 			data: data,
 			dataType: 'json',
@@ -80,11 +76,20 @@ $(document).on('mousedown', 'a.but2', function (e) {
 });
 
 
+$(document).on('click', '.closeBut', function () {
+	const wrap = `#markPoint_${$(this)[0].offsetParent.attributes[0].value.split('_')[1]}`
+	const button = `#spanPoint_${$(this)[0].offsetParent.attributes[0].value.split('_')[1]}`
+	$(button).css('display', ''),
+	$(wrap).css('display', 'none')
+
+});
+
+
 //jQuery plugin to analyse images on website and show context connect ads automatically.|Copyright (c) 2013 GRAYMATICS SG PTE LTD (www.graymatics.com). All rights reserved.|version 0.7
 ;(function (a, b) {
 	function c(b) {
 		a.ajax({
-			url: `${ext}://api.graymatics.com/grayit/process/image/batch`,
+			url: `http://api.graymatics.com/grayit/process/image/batch`,
 			type: 'POST',
 			data: 'API_KEY=' + y + '&URL=' + b + '&Add_Info=[{"source_url":"' + document.URL + '"}]',
 			dataType: 'json',
@@ -117,10 +122,13 @@ $(document).on('mousedown', 'a.but2', function (e) {
 			let width = 350;
 			let posX = c.mx - 120 + 'px';
 			if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
-					if(window.screen.width <= 350){
-							width = window.screen.width
+					if(window.screen.width <= 400){
+							width = 330
+					}					
+					if(window.screen.width <= 360){
+							width = 300
 					}
-					posX = -5 + 'vw';
+					posX = 2 + 'vw';
 			}else{
 				if(c.mx<270){
 				c.mx = 270
@@ -132,25 +140,21 @@ $(document).on('mousedown', 'a.but2', function (e) {
 			var topvl = c.my
 			var leftvl = c.mx
 			var h =
-				"<a title='SHOP NOW!'class='but1' id ='"+ g.id +"'><div class='mark' style='position:absolute;top:" +
+				"<a title='SHOP NOW!'class='but1' id ='"+ g.id +"'><div class='mark' id='mark_" + E + "' style='position:absolute;top:" +
 				topvl +
 				'px;left:' +
 				leftvl +
-				"px;'><span name='mark_point_" +
+				"px;'><span id='spanPoint_" +
 				E +
-				"' class='but' style='background:url(" + ext + "://"+ serv + "/api/pictures/"
-			if(E == 0){
-				h = h + iconAndSize('iconNoShadow.gif', false) + "padding: 35px 40px;cursor: pointer; filter: drop-shadow(5px 10px 15px #222);'>&nbsp;</span></div></a>"
-			}else if(E == 1){
-				h = h + iconAndSize('iconBorder.gif', true) + "padding: 35px 40px;cursor: pointer; filter: drop-shadow(5px 10px 15px #222);'>&nbsp;</span></div></a>"
-			}else if(E == 2){
-				h = h + iconAndSize('iconBorder.gif', false) + "padding: 35px 40px;cursor: pointer; filter: drop-shadow(5px 10px 15px #222);'>&nbsp;</span></div></a>"
-			}else{
-				h = h + iconAndSize('iconNoShadow.gif', false) + "padding: 35px 40px;cursor: pointer; filter: drop-shadow(5px 10px 15px #222);'>&nbsp;</span></div></a>"
-			}
+				"' name='spanPoint_" +
+				E +
+				"' class='but' style='background:url(" + serv + "/api/pictures/"
+
+				h = h + iconAndSize('iconBorder.gif', false) + "padding: 35px 40px;cursor: pointer;'>&nbsp;</span></div></a>"
+
 			a(e).append(h)
 			var i = document.createElement('div')
-			;(i.innerHTML = g.iframe), (i.id = 'mark_point_' + E++), (i.className = 'wrapper')
+			;(i.innerHTML = g.iframe), (i.id = 'markPoint_' + E++), (i.className = 'wrapper')
 			var j =
 				`position:absolute;zIndex:50;clear:both;width:${width}px;padding:0.2em;background-color:#FFFFFF;display:none;border: 1px solid gray;-webkit-border-radius: 6px;-moz-border-radius: 6px;border-radius: 6px;-webkit-box-shadow: 0 2px 5px;-moz-box-shadow: 0 2px 5px;box-shadow: 0 2px 5px;`
 			i.style.cssText = j
@@ -163,39 +167,19 @@ $(document).on('mousedown', 'a.but2', function (e) {
 	let sending = false;
 	function e() {
 		if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
-			a('.mark span').toggle(
+			a('.mark span').click(
 				function () {
-					var b = a(this).attr('name')
-					$('.ui-corner-all').hide()
+					const wrap = `markPoint_${a(this).attr('id').split('_')[1]}`			
 					a(this).css(
-						'background',
-						'url(' + ext+ '://' + serv + '/api/pictures/iconNoShadow.gif) no-repeat 40% 40%'
-					),				
-					a(this).css(
-						'background-size',
-						'60px'
+						'display',
+						'none'
 					),
 						a('.wrapper').css('z-index', '50'),
 						a('.mark').css('z-index', '200'),
 						a(this).css('z-index', '200'),
-						a('#' + b).css('z-index', '100'),
-						a('#' + b).css('display', '')
-				},
-				function () {
-					var b = a(this).attr('name')
-					a(this).css(
-						'background',
-						'url(' + ext+ '://' + serv + '/api/pictures/iconNoShadow.gif) no-repeat 40% 40%'
-					),
-					a(this).css(
-						'background-size',
-						'60px'
-					),
-					a('.but').css(
-						'padding',
-						'35px 40px'
-					),
-						a('#' + b).css('display', 'none')
+						a('#' + wrap).css('z-index', '100'),
+						a('#' + wrap).css('display', '')
+						
 				}
 			)
 		}else{
@@ -205,14 +189,14 @@ $(document).on('mousedown', 'a.but2', function (e) {
 						time: new Date(),
 						url: window.location.href,
 						type: 1,
-						idItem: e.srcElement.parentNode.parentNode.id,
-						img: e.srcElement.parentNode.parentNode.parentNode.children[0].currentSrc
+						idItem: e.currentTarget.parentNode.parentNode.id,
+						img: e.currentTarget.parentNode.parentNode.parentNode.children[0].currentSrc
 					}
 
 					if(sending == false){
 						sending = true;
 						$.ajax({
-						url: `${ext}://${serv}/api/data`,
+						url: `${serv}/api/data`,
 						type: 'POST',
 						data: data,
 						dataType: 'json',
@@ -222,7 +206,7 @@ $(document).on('mousedown', 'a.but2', function (e) {
 						error: function (e) {console.error(e)}
 						})
 					}
-					var b = a(this).attr('name')		
+					var b =`markPoint_${a(this).attr('name').split('_')[1]}`
 					a(this).css(
 						'background-size',
 						'0px'
@@ -239,19 +223,11 @@ $(document).on('mousedown', 'a.but2', function (e) {
 					var b = a(this)[0].id
 					a('.but').css(
 						'background',
-						'url(' + ext+ '://' + serv + '/api/pictures/iconNoShadow.gif) no-repeat 40% 40%'
+						'url(' + serv + '/api/pictures/iconBorder.gif) no-repeat 40% 40%'
 					),
 					a('.but').css(
 						'background-size',
 						'60px'
-					),
-					// a(this).css(
-					// 	'background-color',
-					// 	'#FFFFFF'
-					// ),
-					a(this).css(
-						'filter',
-						'drop-shadow(5px 10px 15px #222)'
 					),
 					a('.but').css(
 						'padding',
@@ -362,7 +338,9 @@ $(document).on('mousedown', 'a.but2', function (e) {
 		var d = b.getMax()
 		return d
 	}
-	;(a.GM = {}),
+	;
+	let num = 0;
+	(a.GM = {}),
 		(a.GM.IMLayer = function (a, b) {
 			;(this.imgsrc = a),
 				(this.celement = b),
@@ -389,6 +367,10 @@ $(document).on('mousedown', 'a.but2', function (e) {
 						a.pop()
 						l = `${a.join('/')}/${this.imgsrc}`
 					}
+					let mobile = 0;
+					if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
+						mobile = 1
+					}
 					var m =
 							'ad_type=' +
 							z +
@@ -407,7 +389,10 @@ $(document).on('mousedown', 'a.but2', function (e) {
 							'&uid=' +
 							uuid + 
 							'&serv=' +
-							serv
+							serv +
+							'&mobile=' +
+							mobile
+					num = num + 1
 					a.ajax({
 						url: v,
 						type: 'GET',
@@ -474,7 +459,7 @@ $(document).on('mousedown', 'a.but2', function (e) {
 					  this.addGroup('suits,suit,tuxedo,tuxedos'),
 					  this.addGroup('coat,coats'))
 		},
-		v = `${ext}://${serv}/api/v1/ads`,
+		v = `${serv}/api/v1/ads`,
 		w = 'image',
 		z = 'image',
 		A = 240,
@@ -495,25 +480,6 @@ $(document).on('mousedown', 'a.but2', function (e) {
 			b[i].imageProcess()
 	}
 })(jQuery)
-
-// function loadjscssfile(filename, filetype) {
-// 	if (filetype == 'js') {
-// 		//if filename is a external JavaScript file
-// 		var fileref = document.createElement('script')
-// 		fileref.setAttribute('type', 'text/javascript')
-// 		fileref.setAttribute('src', filename)
-// 	} else if (filetype == 'css') {
-// 		//if filename is an external CSS file
-// 		var fileref = document.createElement('link')
-// 		fileref.setAttribute('rel', 'stylesheet')
-// 		fileref.setAttribute('type', 'text/css')
-// 		fileref.setAttribute('href', filename)
-// 	}
-// 	if (typeof fileref != 'undefined') {
-// 		if (filetype == 'js') $('head').append(fileref)
-// 		if (filetype == 'css') $('head').append(fileref)
-// 	}
-// }
 
 function iconAndSize(file, big){
 	let size, rep;
