@@ -45,7 +45,7 @@ exports.getAds = Controller(async (req, res) => {
                 let formData = new FormData()
                 formData.append('upload', request(url))
                 // formData.append('subscriptions', 'Object,themes,food,tags,face,fashion')
-                formData.append('subscriptions', 'face,fashion,Object')
+                formData.append('subscriptions', 'face,fashion,Object,sport,tags1,tags2')
                 const request_config = {
                     method: 'post',
                     url: vista_url + apiEndpoint,
@@ -61,7 +61,10 @@ exports.getAds = Controller(async (req, res) => {
                 console.log("Sending request")
                 try {
                     const response = await axios(request_config)
+                    // if(url === "http://localhost:3310/api/pictures/graymatic-3.jpg"){
 
+                        console.log(util.inspect(response.data.results, false, null, true),url)
+                    // }
                     console.log('=====================> VISTA RESPONSE <========================')
                     let resultsVista = []
                     if (response.data) {
@@ -69,16 +72,38 @@ exports.getAds = Controller(async (req, res) => {
                     }
                     const objetos = await readCsv.readCsv(aut['idP'])
                     const resultsAffiliate = []
+                    console.log(resultsVista)
                     for (const subscriptions of resultsVista) {
+                        // console.log("000000000000000000000000000000000000000000000000000000000000",subscriptions['face'][0].deep_face.gender[0])
                         if (subscriptions['face'].length != 0) {
-
+                            
                             if (subscriptions['face'][0].deep_face.gender[0]['label'] == 'Female') {
+                                
                                 for (const obj of subscriptions['fashion']) {
+                                    
+                                    if (obj.class == 'person') {
+                                        if(obj.deep_fashion_color.skirt_length[0].confidence >= 0.4){
+                                            let item = 'dress';
+                                            let int = Math.floor(Math.random() * objetos[1]['Women Clothes'][item].length)
+
+                                            resultsAffiliate.push({
+                                                vista: obj, affiliate: objetos[1]["Women Clothes"][item][int],
+                                                add: { id: parseInt(objetos[1]['Women Clothes'][item][int][0]), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
+                                                serv: serv,
+                                                size: {w: img_width, h: img_height},
+                                                mobile: mobile
+                                            })
+                                            if (resultsAffiliate.length == 2) {
+                                                break;
+                                            }
+                                        }
+                                    }
                                     if (obj.class == 'upper') {
-                                        let int = Math.floor(Math.random() * objetos[1]['Women Clothes']['shirt'].length)
+                                        let item = 'shirt';
+                                        let int = Math.floor(Math.random() * objetos[1]['Women Clothes'][item].length)
                                         resultsAffiliate.push({
-                                            vista: obj, affiliate: objetos[1]["Women Clothes"]['shirt'][int],
-                                            add: { id: parseInt(objetos[1]['Women Clothes']['shirt'][int][0]), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
+                                            vista: obj, affiliate: objetos[1]["Women Clothes"][item][int],
+                                            add: { id: parseInt(objetos[1]['Women Clothes'][item][int][0]), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
                                             serv: serv,
                                             size: {w: img_width, h: img_height},
                                             mobile: mobile
@@ -88,10 +113,16 @@ exports.getAds = Controller(async (req, res) => {
                                         }
                                     }
                                     if (obj.class == 'lower') {
-                                        let int = Math.floor(Math.random() * objetos[1]['Women Clothes']['pants'].length)
+                                        let item = 'pants';
+                                        let int = Math.floor(Math.random() * objetos[1]['Women Clothes'][item].length)
+                                        if(obj.deep_fashion_color.sleeve_length[0].label == "ShortPant"){
+                                            item = 'short'
+                                            int = Math.floor(Math.random() * objetos[1]['Women Clothes'][item].length)
+                                        }
+                                        
                                         resultsAffiliate.push({
-                                            vista: obj, affiliate: objetos[1]['Women Clothes']['pants'][int],
-                                            add: { id: parseInt(objetos[1]['Women Clothes']['pants'][int][0]), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
+                                            vista: obj, affiliate: objetos[1]['Women Clothes'][item][int],
+                                            add: { id: parseInt(objetos[1]['Women Clothes'][item][int][0]), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
                                             serv: serv,
                                             size: {w: img_width, h: img_height},
                                             mobile: mobile
@@ -105,10 +136,16 @@ exports.getAds = Controller(async (req, res) => {
                             if (subscriptions['face'][0].deep_face.gender[0]['label'] == 'Male') {
                                 for (const obj of subscriptions['fashion']) {
                                     if (obj.class == 'upper') {
-                                        let int = Math.floor(Math.random() * objetos[1]['Men Clothes']['shirt'].length)
+                                        let item = 'shirt';
+                                        let int = Math.floor(Math.random() * objetos[1]['Men Clothes'][item].length)
+                                        if(obj.deep_fashion_color.sleeve_length[0].label == "ExtraLongSleeves"){
+                                            item = 'jacket'
+                                            int = Math.floor(Math.random() * objetos[1]['Men Clothes'][item].length)
+                                        }
+                                        
                                         resultsAffiliate.push({
-                                            vista: obj, affiliate: objetos[1]['Men Clothes']['shirt'][int],
-                                            add: { id: parseInt(objetos[1]['Men Clothes']['shirt'][int][0]), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
+                                            vista: obj, affiliate: objetos[1]['Men Clothes'][item][int],
+                                            add: { id: parseInt(objetos[1]['Men Clothes'][item][int][0]), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
                                             serv: serv,
                                             size: {w: img_width, h: img_height},
                                             mobile: mobile
@@ -118,10 +155,16 @@ exports.getAds = Controller(async (req, res) => {
                                         }
                                     }
                                     if (obj.class == 'lower') {
-                                        let int = Math.floor(Math.random() * objetos[1]['Men Clothes']['pants'].length)
+                                        let item = 'pants';
+                                        let int = Math.floor(Math.random() * objetos[1]['Men Clothes'][item].length)
+                                        if(obj.deep_fashion_color.sleeve_length[0].label == "ShortPant"){
+                                            item = 'short'
+                                            int = Math.floor(Math.random() * objetos[1]['Men Clothes'][item].length)
+                                        }
+
                                         resultsAffiliate.push({
-                                            vista: obj, affiliate: objetos[1]['Men Clothes']['pants'][int],
-                                            add: { id: parseInt(objetos[1]['Men Clothes']['pants'][int][0]), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
+                                            vista: obj, affiliate: objetos[1]['Men Clothes'][item][int],
+                                            add: { id: parseInt(objetos[1]['Men Clothes'][item][int][0]), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
                                             serv: serv,
                                             size: {w: img_width, h: img_height},
                                             mobile: mobile
@@ -163,6 +206,7 @@ exports.getAds = Controller(async (req, res) => {
                     })
                 }
                 catch (err) {
+                    console.log(err.response.status,url)
                     await cache.setAsync(`${mobile}_${img_width}_${img_height}_${url}`, JSON.stringify({}));
                     return res.status(500).json({ success: false, message: "Vista Image failled", error: err, img: url })
                 }

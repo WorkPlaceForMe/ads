@@ -8,8 +8,6 @@ const https = require('https');
 const { parse } = require('url')
 const parseCsv = require('csv-parse');
 const objetos = require('../csv/objetos2.json');
-const { trace } = require('console');
-
 const arrObjetos = Object.keys(objetos[0])
 const WomenClothes = Object.keys(objetos[1]['Women Clothes'])
 const MenClothes = Object.keys(objetos[1]["Men Clothes"])
@@ -52,7 +50,6 @@ exports.readCsv = async function (idPbl) {
           })
           let results;
           for(const campaign of campaignResponse.data){
-            console.log(campaign.id)
             if(campaign.id == 677){
               try {
                 let affiliateEndpoint = `${conf.get('accesstrade_endpoint')}/v1/publishers/me/sites/${idPbl}/campaigns/${campaign.id}/productfeed/url`
