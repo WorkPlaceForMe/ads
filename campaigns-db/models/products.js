@@ -15,47 +15,47 @@ const products = sequelize.define("products", {
     type: Sequelize.STRING(1234),
     allowNull: true,
   },
-  Product_URL_Web_encoded :{
+  Product_URL_Web_encoded: {
     type: Sequelize.TEXT,
     allowNull: true
   },
-  Product_URL_Mobile_encoded :{
+  Product_URL_Mobile_encoded: {
     type: Sequelize.TEXT,
     allowNull: true
   },
-  Description :{
+  Description: {
     type: Sequelize.TEXT,
     allowNull: true
   },
-  Price :{
+  Price: {
     type: Sequelize.INTEGER,
     allowNull: true
   },
-  Descount :{
+  Descount: {
     type: Sequelize.INTEGER,
     allowNull: true
   },
-  Available:{
+  Available: {
     type: Sequelize.BOOLEAN,
     allowNull: true
   },
-  Main_Category_Name:{
+  Main_Category_Name: {
     type: Sequelize.STRING,
     allowNull: true
   },
-  Category_Name:{
+  Category_Name: {
     type: Sequelize.STRING,
     allowNull: true
   },
-  Sub_Category_Name:{
+  Sub_Category_Name: {
     type: Sequelize.STRING,
     allowNull: true
   },
-  Price_Unit:{
+  Price_Unit: {
     type: Sequelize.STRING,
     allowNull: true
   },
-  lable:{
+  lable: {
     type: Sequelize.STRING,
     allowNull: true
   }

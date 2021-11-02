@@ -130,6 +130,7 @@ async function readCsv(path, id) {
         }
       })
       .on('end', async function () {
+        await fs.promises.writeFile(`./csv/${id}.json`, JSON.stringify(objetos, null, 2), 'utf-8');
         await cache.setAsync(`downloading-${id}`, false);
         console.log(`Done with shopee`)
         const objetos_json = objetos
