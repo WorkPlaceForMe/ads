@@ -45,7 +45,7 @@ exports.getAds = Controller(async (req, res) => {
                 let formData = new FormData()
                 formData.append('upload', request(url))
                 // formData.append('subscriptions', 'Object,themes,food,tags,face,fashion')
-                formData.append('subscriptions', 'face,fashion,Object,sport,tags1,tags2')
+                formData.append('subscriptions', 'face,fashion,Object,tags1,tags2')
                 const request_config = {
                     method: 'post',
                     url: vista_url + apiEndpoint,
@@ -61,10 +61,9 @@ exports.getAds = Controller(async (req, res) => {
                 console.log("Sending request")
                 try {
                     const response = await axios(request_config)
-                    // if(url === "http://localhost:3310/api/pictures/graymatic-3.jpg"){
 
-                        console.log(util.inspect(response.data.results, false, null, true),url)
-                    // }
+                        // console.log(util.inspect(response.data.results, false, null, true),url)
+
                     console.log('=====================> VISTA RESPONSE <========================')
                     let resultsVista = []
                     if (response.data) {
@@ -72,9 +71,8 @@ exports.getAds = Controller(async (req, res) => {
                     }
                     const objetos = await readCsv.readCsv(aut['idP'])
                     const resultsAffiliate = []
-                    console.log(resultsVista)
                     for (const subscriptions of resultsVista) {
-                        // console.log("000000000000000000000000000000000000000000000000000000000000",subscriptions['face'][0].deep_face.gender[0])
+
                         if (subscriptions['face'].length != 0) {
                             
                             if (subscriptions['face'][0].deep_face.gender[0]['label'] == 'Female') {
@@ -206,7 +204,7 @@ exports.getAds = Controller(async (req, res) => {
                     })
                 }
                 catch (err) {
-                    console.log(err.response.status,url)
+                    console.log(err,url)
                     await cache.setAsync(`${mobile}_${img_width}_${img_height}_${url}`, JSON.stringify({}));
                     return res.status(500).json({ success: false, message: "Vista Image failled", error: err, img: url })
                 }

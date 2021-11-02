@@ -13,7 +13,7 @@ const WomenClothes = Object.keys(objetos[1]['Women Clothes'])
 const MenClothes = Object.keys(objetos[1]["Men Clothes"])
 
 exports.readCsv = async function (idPbl) {
-  if (fs.existsSync(`./csv/${idPbl}.csv`)) {
+  if (fs.existsSync(`./csv/${idPbl}.json`)) {
     return new Promise((resolve, reject) => {
       let res = require(`../csv/${idPbl}.json`);
       resolve(res)
