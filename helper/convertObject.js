@@ -2,25 +2,24 @@ const db = require('./dbconnection')
 
 exports.convert = (arr) => {
     if(arr == []){
-        return;
+        return ;
     }
     let arrResult = [];
     for(const obj of arr){
-        // console.log(obj)
         addAd(obj.add.id,obj.add.site, obj.add.date,obj.add.url,obj.add.uid,function(err,rows){
         })
         let item = {
-            name: obj.affiliate[1],
+            name: obj.affiliate['Merchant_Product_Name'],
             x: obj.vista.boundingBox.left + obj.vista.boundingBox.width/2,
             y: obj.vista.boundingBox.top,
-            image: obj.affiliate[2],
-            site: obj.affiliate[2].split('/')[2],
-            url: obj.affiliate[4],
-            price: obj.affiliate[7],
-            discounted_price: obj.affiliate[8],
-            description: obj.affiliate[6],
-            unit: obj.affiliate[18],
-            stock: obj.affiliate[9]
+            image: obj.affiliate['Image_URL'],
+            site: obj.affiliate['Image_URL'].split('.')[1],
+            url: obj.affiliate['Product_URL_Web_encoded'],
+            price: obj.affiliate['Price'],
+            discounted_price: obj.affiliate['Descount'],
+            description: obj.affiliate['Description'],
+            unit: obj.affiliate['Price_Unit'],
+            stock: obj.affiliate['Available']
         }
         item.site = item.site.split('.')
         item.site.shift()
@@ -39,7 +38,7 @@ exports.convert = (arr) => {
         }
         
         const adsinfo = [{
-            imgSize: {w: obj.size.w, h:obj.size.h},
+            imgSize: {w: obj.vista.boundingBox.width, h:obj.vista.boundingBox.height},
             focal_point: [item.x,item.y],
             description: item.description,
             name: item.name,
