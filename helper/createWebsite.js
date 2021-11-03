@@ -3,6 +3,8 @@ const axios = require('axios')
 const aff = require('./affiliate')
 const jwt = require('jsonwebtoken')
 const db = require('./dbconnection')
+const seq = require('../campaigns-db/database')
+const publishers = seq.publishers
 
 exports.create = async function(id,site,term){
     return new Promise((resolve, reject) =>{
@@ -78,12 +80,10 @@ exports.create = async function(id,site,term){
 }
 
 const addPublisher = async function(id,site,idAffiliate){
-    return new Promise(function(resolve, reject){
-        db.query(`INSERT INTO publishers values ('${id}','${site}','true','${idAffiliate}')`,  (error, elements)=>{
-                if(error){
-                    return reject(error);
-                }
-                return resolve(elements);
-            });
-    });
+    return publishers.create({
+        id: id,
+        name: site,
+        enabled: 'true',
+        publisherId: idAffiliate
+        })
 }

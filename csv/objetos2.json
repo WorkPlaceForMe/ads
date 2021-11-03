@@ -31,13 +31,11 @@
         "frisbee": [],
         "skis": [],
         "snowboard": [],
-        "sports_ball": [],
         "kite": [],
         "baseball_bat": [],
         "baseball_glove": [],
         "skateboard": [],
         "surfboard": [],
-        "tennis_racket": [],
         "bottle": [],
         "wine_glass": [],
         "cup": [],
@@ -78,7 +76,8 @@
         "scissors": [],
         "teddy_bear": [],
         "hair_drier": [],
-        "toothbrush": []
+        "toothbrush": [],
+        "sport":[]
     },
     {
         "Women Clothes": {
@@ -90,7 +89,9 @@
         },
         "Men Clothes": {
             "shirt": [],
-            "pants": []
+            "pants": [],
+            "jacket": [],
+            "shorts": []
         }
     }
 ]
