@@ -1,18 +1,17 @@
-const { incrbyfloat } = require('./cacheManager');
-const db = require('./dbconnection')
+const db  = require('../campaigns-db/database');
+const adsPage = db.adsPage
 
-exports.convert = (arr) => {
+exports.convert = async (arr) => {
     if(arr == []){
         return ;
     }
     let arrResult = [];
     for(const obj of arr){
-        addAd(obj.add.id,obj.add.site, obj.add.date,obj.add.url,obj.add.uid,function(err,rows){
-        })
+        await addAd(obj.add.id,obj.add.site, obj.add.date,obj.add.url,obj.add.uid)
         if(obj.vista.boundingBox == undefined){
             obj.vista.boundingBox = {
-                left: 50,
-                width: 150,
+                left: 100,
+                width: 300,
                 top: 50,
                 height: 150
             }
@@ -21,8 +20,8 @@ exports.convert = (arr) => {
         console.log(obj.vista)
         let item = {
             name: obj.affiliate['Merchant_Product_Name'],
-            x: obj.vista.boundingBox.left + obj.vista.boundingBox.width/2  || 0,
-            y: obj.vista.boundingBox.top || 0,
+            x: obj.vista.boundingBox.left + obj.vista.boundingBox.width/2,
+            y: obj.vista.boundingBox.top,
             image: obj.affiliate['Image_URL'],
             site: obj.affiliate['Image_URL'].split('.')[1],
             url: obj.affiliate['Product_URL_Web_encoded'],
@@ -67,6 +66,12 @@ exports.convert = (arr) => {
     return arrResult
 };
 
-function addAd(name,site,time,imgName,idGeneration,callback){
-    return db.query(`INSERT INTO adsPage values (0,'${name}','${site}','${time}','${imgName}','${idGeneration}')`,callback)
+async function addAd(name,site,time,imgName,idGeneration) {
+    return adsPage.create({
+        idItem: name,
+        site: site,
+        time :time,
+        imgName :imgName,
+        idGeneration :idGeneration,
+    })
 }
