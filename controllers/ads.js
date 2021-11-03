@@ -10,8 +10,10 @@ const dateFormat = require('dateformat');
 const auth = require('../helper/auth')
 const util = require('util')
 const cache = require('../helper/cacheManager')
-const products = require('../campaigns-db/models/products')
-const clothing = require('../campaigns-db/models/clothing')
+const db1 = require('../campaigns-db/database')
+const products = db1.products
+const clothing = db1.clothing
+const imgsPage = db1.imgsPage
 
 
 exports.getAds = Controller(async (req, res) => {
@@ -35,8 +37,7 @@ exports.getAds = Controller(async (req, res) => {
             results: JSON.parse(cachedImg)
         })
 
-    await addImg(dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url, uid, site, async function (err, rows) {
-        if (rows) {
+    await addImg(dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url, uid, site).then(async ()=>{
             let checker = site.split('/')[2];
             if (checker.includes('www.')) {
                 checker = checker.split('w.')[1]
@@ -49,7 +50,7 @@ exports.getAds = Controller(async (req, res) => {
                 let formData = new FormData()
                 formData.append('upload', request(url))
 
-                formData.append('subscriptions', 'face,fashion,Object,tags1,tags2')
+                formData.append('subscriptions', 'face,fashion,Object,tags2')
 
                 const request_config = {
                     method: 'post',
@@ -66,16 +67,13 @@ exports.getAds = Controller(async (req, res) => {
                 console.log("Sending request")
                 try {
                     const response = await axios(request_config)
-
-                        // console.log(util.inspect(response.data.results, false, null, true),url)
-
+                    
                     console.log('=====================> VISTA RESPONSE <========================')
                     let resultsVista = []
                     if (response.data) {
                         resultsVista.push(response.data.results)
                     }
                     const objetos = await readCsv.readCsv(aut['idP'])
-
                     const resultsAffiliate = await filler(resultsVista,serv,img_width,img_height,site,url,uid,objetos)
                     const sendingResults = convert(resultsAffiliate)
 
@@ -85,64 +83,95 @@ exports.getAds = Controller(async (req, res) => {
                     })
                 }
                 catch (err) {
-                    console.log(err,url)
+                    if(err.response)
+                    console.log(err.response.status,url)
                     await cache.setAsync(`${mobile}_${img_width}_${img_height}_${url}`, JSON.stringify({}));
                     return res.status(500).json({ success: false, message: "Vista Image failled", error: err, img: url })
                 }
             }
-        }
     })
 })
 
-async function addImg(time, imgName, idGeneration, site, callback) {
-    return db.query(`INSERT INTO imgsPage values (0,'${time}','${imgName}','${idGeneration}','${site}')`, callback)
+async function addImg(time, imgName, idGeneration, site) {
+    return imgsPage.create({
+        time: time,
+        img: imgName,
+        idGeneration :idGeneration,
+        site :site,
+    })
 }
                     async function filler(resultsVista,serv,img_width,img_height,site,url,uid,objetos) {
                         return new Promise((resolve) => {
                             const resultsAffiliate = []
                             for (const subscriptions of resultsVista) {
+                                for (const obj of subscriptions['Object']) {
+                                        if (obj.class == 'sports_ball' || obj.class == 'tennis_racket') {
+                                            products.findAndCountAll({
+                                                where: {
+                                                    label: 'sport'
+                                                }
+                                            })
+                                            .then(result => {
+                                                const count = result.count
+                                                const row = result.rows
+                                                let int = Math.floor(Math.random() * count)
+                                                if (resultsAffiliate.length < 2) {
+                                                    resultsAffiliate.push({
+                                                        vista: obj, affiliate: row[int].dataValues,
+                                                        add: { id: parseInt(row[int].dataValues['Merchant_Product_ID']), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
+                                                        serv: serv,
+                                                        size: { w: img_width, h: img_height }
+                                                    })
+                                                }
+                                            }).catch((err) => {
+                                                console.trace(err)
+                                                console.error(err)
+                                            })
+                                        }
+                                }
+                                
                                 if (subscriptions['face'].length != 0) {
                                     if (subscriptions['face'][0].deep_face.gender[0]['label'] == 'Female') {
                                         for (const obj of subscriptions['fashion']) {
-                                            if (obj.class == 'person') {
+                                            if (obj.class == 'person' && obj.deep_fashion_color.skirt_length) {
                                                 if(obj.deep_fashion_color.skirt_length[0].confidence >= 0.4){
-                                                clothing.findAndCountAll({
-                                                    where: {
-                                                        lable: {
-                                                            gender: 'Woman',
-                                                            garment: 'dress'
-                                                        }
-                                                    },
-                                                })
+                                                    clothing.findAndCountAll({
+                                                        where: {
+                                                            label: {
+                                                                gender: 'Woman',
+                                                                garment: 'dress'
+                                                            }
+                                                        },
+                                                    })
                                                     .then(result => {
                                                         const count = result.count
                                                         const row = result.rows
                                                         let int = Math.floor(Math.random() * count)
                                                         if (resultsAffiliate.length < 2) {
-                                                        resultsAffiliate.push({
-                                                            vista: obj, affiliate: row[int].dataValues,
-                                                            add: { id: parseInt(row[int].dataValues['Merchant_Product_ID']), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
-                                                            serv: serv,
-                                                            size: { w: img_width, h: img_height }
-                                                        })
-                                                    }
+                                                            resultsAffiliate.push({
+                                                                vista: obj, affiliate: row[int].dataValues,
+                                                                add: { id: parseInt(row[int].dataValues['Merchant_Product_ID']), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
+                                                                serv: serv,
+                                                                size: { w: img_width, h: img_height }
+                                                            })
+                                                        }
                                                     })
-                                            }
+                                                }
                                             }
                                             if (obj.class == 'upper') {
                                                 clothing.findAndCountAll({
                                                     where: {
-                                                        lable: {
+                                                        label: {
                                                             gender: 'Woman',
                                                             garment: 'shirt'
                                                         }
                                                     },
                                                 })
-                                                    .then(result => {
-                                                        const count = result.count
-                                                        const row = result.rows
-                                                        let int = Math.floor(Math.random() * count)
-                                                        if (resultsAffiliate.length < 2) {
+                                                .then(result => {
+                                                    const count = result.count
+                                                    const row = result.rows
+                                                    let int = Math.floor(Math.random() * count)
+                                                    if (resultsAffiliate.length < 2) {
                                                         resultsAffiliate.push({
                                                             vista: obj, affiliate: row[int].dataValues,
                                                             add: { id: parseInt(row[int].dataValues['Merchant_Product_ID']), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
@@ -150,26 +179,28 @@ async function addImg(time, imgName, idGeneration, site, callback) {
                                                             size: { w: img_width, h: img_height }
                                                         })
                                                     }
-                                                    })
+                                                })
                                             }
                                             if (obj.class == 'lower') {
                                                 let item = 'pants'
-                                                if(obj.deep_fashion_color.sleeve_length[0].label == "ShortPant"){
-                                                    item = 'shorts'
+                                                if(obj.deep_fashion_color.pant_length){
+                                                    if(obj.deep_fashion_color.pant_length[0].label == "ShortPant"){
+                                                        item = 'shorts'
+                                                    }
                                                 }
                                                 clothing.findAndCountAll({
                                                     where: {
-                                                        lable: {
+                                                        label: {
                                                             gender: 'Woman',
                                                             garment: item
                                                         }
                                                     },
                                                 })
-                                                    .then(result => {
-                                                        const count = result.count
-                                                        const row = result.rows
-                                                        let int = Math.floor(Math.random() * count)
-                                                        if (resultsAffiliate.length < 2) {
+                                                .then(result => {
+                                                    const count = result.count
+                                                    const row = result.rows
+                                                    let int = Math.floor(Math.random() * count)
+                                                    if (resultsAffiliate.length < 2) {
                                                         resultsAffiliate.push({
                                                             vista: obj, affiliate: row[int].dataValues,
                                                             add: { id: parseInt(row[int].dataValues['Merchant_Product_ID']), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
@@ -177,7 +208,7 @@ async function addImg(time, imgName, idGeneration, site, callback) {
                                                             size: { w: img_width, h: img_height }
                                                         })
                                                     }
-                                                    })
+                                                })
                                             }
                                         }
                                     }
@@ -185,22 +216,24 @@ async function addImg(time, imgName, idGeneration, site, callback) {
                                         for (const obj of subscriptions['fashion']) {
                                             if (obj.class == 'upper') {
                                                 let item = 'shirt'
-                                                if(obj.deep_fashion_color.sleeve_length[0].label == "ExtraLongSleeves"){
-                                                    item = 'jacket'
+                                                if(obj.deep_fashion_color.sleeve_length){
+                                                    if(obj.deep_fashion_color.sleeve_length[0].label == "ExtraLongSleeves"){
+                                                        item = 'jacket'
+                                                    }
                                                 }
                                                 clothing.findAndCountAll({
                                                     where: {
-                                                        lable: {
+                                                        label: {
                                                             gender: 'Men',
                                                             garment: item
                                                         }
                                                     },
                                                 })
-                                                    .then(result => {
-                                                        const count = result.count
-                                                        const row = result.rows
-                                                        let int = Math.floor(Math.random() * count)
-                                                        if (resultsAffiliate.length < 2) {
+                                                .then(result => {
+                                                    const count = result.count
+                                                    const row = result.rows
+                                                    let int = Math.floor(Math.random() * count)
+                                                    if (resultsAffiliate.length < 2) {
                                                         resultsAffiliate.push({
                                                             vista: obj, affiliate: row[int].dataValues,
                                                             add: { id: parseInt(row[int].dataValues['Merchant_Product_ID']), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
@@ -208,26 +241,28 @@ async function addImg(time, imgName, idGeneration, site, callback) {
                                                             size: { w: img_width, h: img_height }
                                                         })  
                                                     }
-                                                    })
+                                                })
                                             }
                                             if (obj.class == 'lower') {
                                                 let item = 'pants'
-                                                if(obj.deep_fashion_color.pant_length[0].label == "ShortPant"){
-                                                    item = 'short'
+                                                if(obj.deep_fashion_color.pant_length){
+                                                    if(obj.deep_fashion_color.pant_length[0].label == "ShortPant"){
+                                                        item = 'short'
+                                                    }
                                                 }
                                                 clothing.findAndCountAll({
                                                     where: {
-                                                        lable: {
+                                                        label: {
                                                             gender: 'Men',
                                                             garment: item
                                                         }
                                                     },
                                                 })
-                                                    .then(result => {
-                                                        const count = result.count
-                                                        const row = result.rows
-                                                        let int = Math.floor(Math.random() * count)
-                                                        if (resultsAffiliate.length < 2) {
+                                                .then(result => {
+                                                    const count = result.count
+                                                    const row = result.rows
+                                                    let int = Math.floor(Math.random() * count)
+                                                    if (resultsAffiliate.length < 2) {
                                                         resultsAffiliate.push({
                                                             vista: obj, affiliate: row[int].dataValues,
                                                             add: { id: parseInt(row[int].dataValues['Merchant_Product_ID']), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
@@ -235,7 +270,7 @@ async function addImg(time, imgName, idGeneration, site, callback) {
                                                             size: { w: img_width, h: img_height }
                                                         })
                                                     }
-                                                    })
+                                                })
                                             }
                                         }
                                     }
@@ -247,14 +282,14 @@ async function addImg(time, imgName, idGeneration, site, callback) {
                                             if (objetos[0][obj.class].length != 0) {
                                                 products.findAndCountAll({
                                                     where: {
-                                                        lable: obj.class
+                                                        label: obj.class
                                                     }
                                                 })
-                                                    .then(result => {
-                                                        const count = result.count
-                                                        const row = result.rows
-                                                        let int = Math.floor(Math.random() * count)
-                                                        if (resultsAffiliate.length < 2) {
+                                                .then(result => {
+                                                    const count = result.count
+                                                    const row = result.rows
+                                                    let int = Math.floor(Math.random() * count)
+                                                    if (resultsAffiliate.length < 2) {
                                                         resultsAffiliate.push({
                                                             vista: obj, affiliate: row[int].dataValues,
                                                             add: { id: parseInt(row[int].dataValues['Merchant_Product_ID']), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
@@ -262,18 +297,17 @@ async function addImg(time, imgName, idGeneration, site, callback) {
                                                             size: { w: img_width, h: img_height }
                                                         })
                                                     }
-                                                    }).catch((err) => {
-                                                        console.trace(err)
-                                                        console.error(err)
-                                                    })
+                                                }).catch((err) => {
+                                                    console.trace(err)
+                                                    console.error(err)
+                                                })
                                             }
                                         }
                                     }
-
                                 }
                             }
                             setTimeout(() => {
                                 resolve(resultsAffiliate);
-                              }, 1000);
+                              }, 2000);
                         })
                     }

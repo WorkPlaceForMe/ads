@@ -33,19 +33,20 @@ require("./helper/cacheManager");
 if (conf.get('install') == true) {
   console.log("Installing DB")
   mysql
-    .createConnection({
-      user: conf.get('user'),
-      password: conf.get('password'),
-      host: conf.get('host')
-    })
-    .then(connection => {
-      connection.query('CREATE DATABASE IF NOT EXISTS ' + conf.get('database') + ';').then(() => {
-          shell.exec(`mysql --password=${conf.get('password')} --user=${conf.get('user')} ${conf.get('database')} < strc.sql`, function(err,data){
-              if(err) console.error(err)
-              if(data) console.log(data)
-          })
+  .createConnection({
+    user: conf.get('user'),
+    password: conf.get('password'),
+    host: conf.get('host')
+  })
+  .then(connection => {
+    connection.query('CREATE DATABASE IF NOT EXISTS ' + conf.get('database') + ' CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;').then(() => {
+      sequelize.sequelize.sync({force: true}).then(()=>{
+        console.log('sequelize is connected')
+      }).catch(err =>{
+        console.error('no se concecto',err)
       })
     })
+  })
 }
 
 // view engine setup
@@ -72,13 +73,8 @@ app.use(routers)
 // global error handling
 app.use(handleError)
 
-httpsServer.listen(portS || 3000, async function () {
+httpsServer.listen(portS || 3000, function () {
 	console.log(`App is up on port ${portS || '3000'} on HTTPS`)
-  sequelize.authenticate().then(()=>{
-    console.log('sequelize is connected')
-  }).catch(err =>{
-    console.error('no se concecto',err)
-  })
 });
 
 httpServer.listen(port || 3000, function () {

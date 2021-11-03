@@ -1,7 +1,5 @@
-const Sequelize = require("sequelize");
-const sequelize = require("../database");
-
-const products = sequelize.define("products", {
+module.exports = (sequelize, Sequelize) => {
+    const products = sequelize.define("products", {
   Merchant_Product_ID: {
     type: Sequelize.INTEGER,
     primaryKey: true,
@@ -55,10 +53,11 @@ const products = sequelize.define("products", {
     type: Sequelize.STRING,
     allowNull: true
   },
-  lable: {
+  label: {
     type: Sequelize.STRING,
     allowNull: true
   }
-});
-
-module.exports = products;
+    });
+  
+    return products;
+  };

@@ -6,14 +6,13 @@ const fs = require('fs');
 const cache = require('../helper/cacheManager')
 const parseCsv = require('csv-parse');
 const objetos = require('../csv/objetos2.json');
-const products = require('../campaigns-db/models/products');
-const clothing = require('../campaigns-db/models/clothing');
-const { resolve } = require('path');
 const arrObjetos = Object.keys(objetos[0])
 const WomenClothes = Object.keys(objetos[1]['Women Clothes'])
 const MenClothes = Object.keys(objetos[1]["Men Clothes"])
 const { Readable } = require("stream");
-const sequelize = require('../campaigns-db/database')
+const db = require('../campaigns-db/database')
+const products = db.products
+const clothing = db.clothing
 
 exports.readCsv = async function (idPbl) {
   if (fs.existsSync(`./csv/${idPbl}.json`)) {
@@ -27,9 +26,9 @@ exports.readCsv = async function (idPbl) {
     await cache.setAsync(`downloading-${idPbl}`, true);
     return new Promise(function (resolve, reject) {
       const ids = {
-          //lazada : 520,
-          //trueShopping : 594,
-          shopee : 677
+        //lazada : 520,
+        //trueShopping : 594,
+        shopee: 677
       }
       // let result = []
       aff.getAff.then(async function (credentials) {
@@ -129,91 +128,91 @@ async function readCsv(path, id) {
       })
       .on('end', async function () {
         await fs.promises.writeFile(`./csv/${id}.json`, JSON.stringify(objetos, null, 2), 'utf-8');
-        await cache.setAsync(`downloading-${id}`, false);
         console.log(`Done with shopee`)
         const objetos_json = objetos
-        console.log(typeof (objetos_json))
+        // console.log(typeof (objetos_json))
         console.log("uploading to Mysql")
-        await sequelize.sync().then(()=>{
-          for (const obj in objetos_json[0]) {
-            objetos_json[0][obj].forEach((element) => {
-              if (element != null) {
-                products.create({
-                  Merchant_Product_Name: element[1],
-                  Image_URL: element[2],
-                  Product_URL_Web_encoded: element[4],
-                  Product_URL_Mobile_encoded: element[5],
-                  Description: element[6],
-                  Price: element[7],
-                  Descount: element[8],
-                  Available: element[9],
-                  Main_Category_Name: element[13],
-                  Category_Name: element[15],
-                  Sub_Category_Name: element[17],
-                  Price_Unit: element[18],
-                  lable: obj
-                }).catch((err) => {
-                  console.error('algo fallo', err)
-                  console.trace(err)
-                })
-              }
-            })
-          }
-          for (const Garment of WomenClothes) {
-            if (objetos_json[1]['Women Clothes'][Garment] != null) {
-              objetos_json[1]['Women Clothes'][Garment].forEach(element => {
-                clothing.create({
-                  Merchant_Product_Name: element[1],
-                  Image_URL: element[2],
-                  Product_URL_Web_encoded: element[4],
-                  Product_URL_Mobile_encoded: element[5],
-                  Description: element[6],
-                  Price: element[7],
-                  Descount: element[8],
-                  Available: element[9],
-                  Main_Category_Name: element[13],
-                  Category_Name: element[15],
-                  Sub_Category_Name: element[17],
-                  Price_Unit: element[18],
-                  lable: {
-                    gender: 'Woman',
-                    garment: Garment
-                  }
-                }).catch((err) => {
-                  console.error('algo fallo con la ropa ', err)
-                  console.trace(err)
-                })
-              });
+        // await sequelize.sync({force: true}).then(()=>{
+        for (const obj in objetos_json[0]) {
+          objetos_json[0][obj].forEach(async(element) => {
+            if (element != null) {
+            await products.create({
+                Merchant_Product_Name: element[1],
+                Image_URL: element[2],
+                Product_URL_Web_encoded: element[4],
+                Product_URL_Mobile_encoded: element[5],
+                Description: element[6],
+                Price: element[7],
+                Descount: element[8],
+                Available: element[9],
+                Main_Category_Name: element[13],
+                Category_Name: element[15],
+                Sub_Category_Name: element[17],
+                Price_Unit: element[18],
+                label: obj
+              }).catch((err) => {
+                console.error('algo fallo', err)
+                // console.trace(err)
+              })
             }
+          })
+        }
+        for (const Garment of WomenClothes) {
+          if (objetos_json[1]['Women Clothes'][Garment] != null) {
+            objetos_json[1]['Women Clothes'][Garment].forEach(async(element) => {
+              await clothing.create({
+                Merchant_Product_Name: element[1],
+                Image_URL: element[2],
+                Product_URL_Web_encoded: element[4],
+                Product_URL_Mobile_encoded: element[5],
+                Description: element[6],
+                Price: element[7],
+                Descount: element[8],
+                Available: element[9],
+                Main_Category_Name: element[13],
+                Category_Name: element[15],
+                Sub_Category_Name: element[17],
+                Price_Unit: element[18],
+                label: {
+                  gender: 'Woman',
+                  garment: Garment
+                }
+              }).catch((err) => {
+                console.error('algo fallo con la ropa ', err)
+                // console.trace(err)
+              })
+            });
           }
-          for (const Garment of MenClothes) {
-            if (objetos_json[1]['Men Clothes'][Garment] != null) {
-              objetos_json[1]['Men Clothes'][Garment].forEach(element => {
-                clothing.create({
-                  Merchant_Product_Name: element[1],
-                  Image_URL: element[2],
-                  Product_URL_Web_encoded: element[4],
-                  Product_URL_Mobile_encoded: element[5],
-                  Description: element[6],
-                  Price: element[7],
-                  Descount: element[8],
-                  Available: element[9],
-                  Main_Category_Name: element[13],
-                  Category_Name: element[15],
-                  Sub_Category_Name: element[17],
-                  Price_Unit: element[18],
-                  lable: {
-                    gender: 'Men',
-                    garment: Garment
-                  }
-                }).catch((err) => {
-                  console.error('algo fallo con la ropa de hombre', err)
-                  console.trace(err)
-                })
-              });
-            }
+        }
+        for (const Garment of MenClothes) {
+          if (objetos_json[1]['Men Clothes'][Garment] != null) {
+            objetos_json[1]['Men Clothes'][Garment].forEach(async(element) => {
+              await clothing.create({
+                Merchant_Product_Name: element[1],
+                Image_URL: element[2],
+                Product_URL_Web_encoded: element[4],
+                Product_URL_Mobile_encoded: element[5],
+                Description: element[6],
+                Price: element[7],
+                Descount: element[8],
+                Available: element[9],
+                Main_Category_Name: element[13],
+                Category_Name: element[15],
+                Sub_Category_Name: element[17],
+                Price_Unit: element[18],
+                label: {
+                  gender: 'Men',
+                  garment: Garment
+                }
+              }).catch((err) => {
+                console.error('algo fallo con la ropa de hombre', err)
+                // console.trace(err)
+              })
+            });
           }
-        })
+        }
+        await cache.setAsync(`downloading-${id}`, false);
+        // })
         resolve(objetos)
       });
   })
