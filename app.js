@@ -31,6 +31,7 @@ require("./helper/cacheManager");
 
 
 if (conf.get('install') == true) {
+  console.log("Installing DB")
   mysql
     .createConnection({
       user: conf.get('user'),

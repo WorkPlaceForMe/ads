@@ -1,8 +1,9 @@
 const Sequelize  = require('sequelize');
+const conf = require('../middleware/prop')
 
-const sequelize = new Sequelize("campaings","rodrigo","19892206-4",{
+const sequelize = new Sequelize(conf.get('database'),conf.get('user'),conf.get('password'),{
     dialect: 'mysql',
-    host: 'localhost',
+    host: conf.get('host'),
     pool: {
       max : 100,
       min : 0,
