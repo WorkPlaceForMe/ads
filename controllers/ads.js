@@ -77,8 +77,8 @@ exports.getAds = Controller(async (req, res) => {
                     resultsVista.push(response.data.results)
                 }
                 const objetos = await readCsv.readCsv(aut['idP'])
-                const resultsAffiliate = await filler(resultsVista, serv, img_width, img_height, site, url, uid, objetos)
-                const sendingResults = convert(resultsAffiliate)
+                const resultsAffiliate = await filler(resultsVista, serv, img_width, img_height, site, url, uid, objetos, mobile)
+                const sendingResults = await convert(resultsAffiliate)
 
                 await cache.setAsync(`${mobile}_${img_width}_${img_height}_${url}`, JSON.stringify(sendingResults));
                 res.status(200).send({
@@ -104,7 +104,7 @@ async function addImg(time, imgName, idGeneration, site) {
         site: site,
     })
 }
-async function filler(resultsVista, serv, img_width, img_height, site, url, uid, objetos) {
+async function filler(resultsVista, serv, img_width, img_height, site, url, uid, objetos, mobile) {
     return new Promise((resolve) => {
         const resultsAffiliate = []
         for (const subscriptions of resultsVista) {
@@ -125,14 +125,17 @@ async function filler(resultsVista, serv, img_width, img_height, site, url, uid,
                                 vista: some, affiliate: row[int].dataValues,
                                 add: { id: parseInt(row[int].dataValues['Merchant_Product_ID']), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
                                 serv: serv,
-                                size: { w: img_width, h: img_height }
+                                size: { w: img_width, h: img_height },
+                                mobile: mobile
                             })
                         }
                     })
                 }
             }
 
+
             if (subscriptions['face'].length != 0) {
+
                 if (subscriptions['face'][0].deep_face.gender[0]['label'] == 'Female') {
                     for (const obj of subscriptions['fashion']) {
                         if (obj.class == 'person' && bool) {
@@ -174,10 +177,11 @@ async function filler(resultsVista, serv, img_width, img_height, site, url, uid,
                                         let int = Math.floor(Math.random() * count)
                                         if (resultsAffiliate.length < 2 && !bool) {
                                             resultsAffiliate.push({
-                                                vista: obj, affiliate: row[int].dataValues,
+                                                vista: subscriptions['face'][0], affiliate: row[int].dataValues,
                                                 add: { id: parseInt(row[int].dataValues['Merchant_Product_ID']), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
                                                 serv: serv,
-                                                size: { w: img_width, h: img_height }
+                                                size: { w: img_width, h: img_height },
+                                                mobile: mobile
                                             })
                                         }
                                     })
@@ -198,10 +202,11 @@ async function filler(resultsVista, serv, img_width, img_height, site, url, uid,
                                     let int = Math.floor(Math.random() * count)
                                     if (resultsAffiliate.length < 2 && !bool) {
                                         resultsAffiliate.push({
-                                            vista: obj, affiliate: row[int].dataValues,
+                                            vista: subscriptions['face'][0], affiliate: row[int].dataValues,
                                             add: { id: parseInt(row[int].dataValues['Merchant_Product_ID']), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
                                             serv: serv,
-                                            size: { w: img_width, h: img_height }
+                                            size: { w: img_width, h: img_height },
+                                            mobile: mobile
                                         })
                                     }
                                 })
@@ -227,10 +232,11 @@ async function filler(resultsVista, serv, img_width, img_height, site, url, uid,
                                     let int = Math.floor(Math.random() * count)
                                     if (resultsAffiliate.length < 2 && !bool) {
                                         resultsAffiliate.push({
-                                            vista: obj, affiliate: row[int].dataValues,
+                                            vista: subscriptions['face'][0], affiliate: row[int].dataValues,
                                             add: { id: parseInt(row[int].dataValues['Merchant_Product_ID']), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
                                             serv: serv,
-                                            size: { w: img_width, h: img_height }
+                                            size: { w: img_width, h: img_height },
+                                            mobile: mobile
                                         })
                                     }
                                 })
@@ -284,10 +290,11 @@ async function filler(resultsVista, serv, img_width, img_height, site, url, uid,
                                     let int = Math.floor(Math.random() * count)
                                     if (resultsAffiliate.length < 2 && !bool) {
                                         resultsAffiliate.push({
-                                            vista: obj, affiliate: row[int].dataValues,
+                                            vista: subscriptions['face'][0], affiliate: row[int].dataValues,
                                             add: { id: parseInt(row[int].dataValues['Merchant_Product_ID']), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
                                             serv: serv,
-                                            size: { w: img_width, h: img_height }
+                                            size: { w: img_width, h: img_height },
+                                            mobile: mobile
                                         })
                                     }
                                 })
@@ -313,10 +320,11 @@ async function filler(resultsVista, serv, img_width, img_height, site, url, uid,
                                     let int = Math.floor(Math.random() * count)
                                     if (resultsAffiliate.length < 2 && !bool) {
                                         resultsAffiliate.push({
-                                            vista: obj, affiliate: row[int].dataValues,
+                                            vista: subscriptions['face'][0], affiliate: row[int].dataValues,
                                             add: { id: parseInt(row[int].dataValues['Merchant_Product_ID']), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
                                             serv: serv,
-                                            size: { w: img_width, h: img_height }
+                                            size: { w: img_width, h: img_height },
+                                            mobile: mobile
                                         })
                                     }
                                 })
@@ -366,7 +374,8 @@ async function filler(resultsVista, serv, img_width, img_height, site, url, uid,
                                             vista: obj, affiliate: row[int].dataValues,
                                             add: { id: parseInt(row[int].dataValues['Merchant_Product_ID']), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
                                             serv: serv,
-                                            size: { w: img_width, h: img_height }
+                                            size: { w: img_width, h: img_height },
+                                            mobile: mobile
                                         })
                                     }
                                 }).catch((err) => {

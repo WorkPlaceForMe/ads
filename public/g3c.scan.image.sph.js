@@ -117,7 +117,7 @@ $(document).on('click', '.closeBut', function () {
 				c.my = 55
 			}
 			if(c.my > (g.size.h - 55)){
-				c.my = g.size.h - 55
+				c.my = g.size.h - 95
 			}
 			let width = 350;
 			let posX = c.mx - 120 + 'px';
@@ -131,8 +131,8 @@ $(document).on('click', '.closeBut', function () {
 					posX = 2 + 'vw';
 			}else{
 				if(c.mx<270){
-				c.mx = 270
-			}
+					c.mx = 270
+				}
 			}
 			if(c.mx > (g.size.w - 55)){
 				c.mx = g.size.w - 55
