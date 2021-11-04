@@ -96,18 +96,18 @@ async function readCsv(path, id) {
       .on('data', function (csvrow) {
         // aqui mandar a vista cada row
         for (const element of arrObjetos) {
-          if (csvrow[15].toLowerCase().includes(" " + element) || csvrow[15].toLowerCase() === element) {
+          if (csvrow[15].toLowerCase().includes(" " + element) || csvrow[15].toLowerCase() == element) {
             objetos[0][element].push(csvrow)
-          } else if (csvrow[17].toLowerCase().includes(" " + element) || csvrow[17].toLowerCase() === element) {
+          } else if (csvrow[17].toLowerCase().includes(" " + element) || csvrow[17].toLowerCase() == element) {
             objetos[0][element].push(csvrow)
-          } else if (csvrow[13].toLowerCase().includes(" " + element) || csvrow[13].toLowerCase() === element) {
+          } else if (csvrow[13].toLowerCase().includes(" " + element) || csvrow[13].toLowerCase() == element) {
             objetos[0][element].push(csvrow)
           }
         }
         if (csvrow[15] == 'Mobile') {
           objetos[0]['cell_phone'].push(csvrow)
         }
-        if (csvrow[13] == 'Women Clothes') {
+        if (csvrow[13] == 'Women Clothes' || csvrow[15] == 'Women Sportswear') {
           for (const element of WomenClothes) {
             if (csvrow[15].toLowerCase().includes(" " + element) || csvrow[15].toLowerCase().includes(element)) {
               objetos[1]['Women Clothes'][element].push(csvrow)
@@ -116,7 +116,7 @@ async function readCsv(path, id) {
             }
           }
         }
-        if (csvrow[13] == 'Men Clothes') {
+        if (csvrow[13] == 'Men Clothes'|| csvrow[15] == 'Men Sportswear') {
           for (const element of MenClothes) {
             if (csvrow[15].toLowerCase().includes(" " + element) || csvrow[15].toLowerCase().includes(element)) {
               objetos[1]['Men Clothes'][element].push(csvrow)
