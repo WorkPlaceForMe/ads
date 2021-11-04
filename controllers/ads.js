@@ -141,8 +141,10 @@ async function filler(resultsVista, serv, img_width, img_height, site, url, uid,
                         if (obj.class == 'person' && bool) {
                             clothing.findAndCountAll({
                                 where: {
+                                    label:{
                                     gender: 'Woman',
                                     garment: 'sport'
+                                    }
                                 },
                             })
                                 .then(result => {
@@ -246,8 +248,10 @@ async function filler(resultsVista, serv, img_width, img_height, site, url, uid,
                         if (obj.class == 'person' && bool) {
                             clothing.findAndCountAll({
                                 where: {
+                                    label:{
                                     gender: 'Men',
                                     garment: 'sport'
+                                    }
                                 },
                             })
                                 .then(result => {
@@ -365,7 +369,7 @@ async function filler(resultsVista, serv, img_width, img_height, site, url, uid,
                                     const count = result.count
                                     const row = result.rows
                                     let int = Math.floor(Math.random() * count)
-                                    if (resultsAffiliate.length < 2) {
+                                    if (resultsAffiliate.length < 2  && !bool) {
                                         resultsAffiliate.push({
                                             vista: obj, affiliate: row[int].dataValues,
                                             add: { id: parseInt(row[int].dataValues['Merchant_Product_ID']), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
