@@ -51,7 +51,7 @@ exports.getAds = Controller(async (req, res) => {
                 let formData = new FormData()
                 formData.append('upload', request(url))
 
-                formData.append('subscriptions', 'face,fashion,Object,tags1,tags2')
+                formData.append('subscriptions', 'face,fashion,Object')
 
                 const request_config = {
                     method: 'post',
@@ -184,8 +184,6 @@ exports.getAds = Controller(async (req, res) => {
                                         }
                                     }
                                 }
-        
-                                if (resultsAffiliate.length < 2) {
                                     for (const obj of subscriptions['Object']) {
                                         if (objetos[0][obj.class] != undefined && obj.confidence > 0.6) {
                                             if (objetos[0][obj.class].length != 0) {
@@ -214,11 +212,10 @@ exports.getAds = Controller(async (req, res) => {
                                         }
                                     }
 
-                                }
                             }
                             setTimeout(() => {
                                 resolve(resultsAffiliate);
-                              }, 1000);
+                              }, 2000);
                         })
 
 
