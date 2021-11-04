@@ -138,8 +138,10 @@ async function filler(resultsVista, serv, img_width, img_height, site, url, uid,
                         if (obj.class == 'person' && bool) {
                             clothing.findAndCountAll({
                                 where: {
+                                    label:{
                                     gender: 'Woman',
                                     garment: 'sport'
+                                    }
                                 },
                             })
                                 .then(result => {
@@ -240,8 +242,10 @@ async function filler(resultsVista, serv, img_width, img_height, site, url, uid,
                         if (obj.class == 'person' && bool) {
                             clothing.findAndCountAll({
                                 where: {
+                                    label:{
                                     gender: 'Men',
                                     garment: 'sport'
+                                    }
                                 },
                             })
                                 .then(result => {
