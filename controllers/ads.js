@@ -11,6 +11,7 @@ const auth = require('../helper/auth')
 const util = require('util')
 const cache = require('../helper/cacheManager')
 const db1 = require('../campaigns-db/database')
+const { resolve } = require('path')
 const products = db1.products
 const clothing = db1.clothing
 const imgsPage = db1.imgsPage
@@ -105,239 +106,70 @@ async function addImg(time, imgName, idGeneration, site) {
     })
 }
 async function filler(resultsVista, serv, img_width, img_height, site, url, uid, objetos, mobile) {
-    return new Promise((resolve) => {
+    return new Promise(async (resolve) => {
         const resultsAffiliate = []
         for (const subscriptions of resultsVista) {
             let bool = false;
             for (const some of subscriptions['tags2'].tags2.tags2) {
                 if (some['IAB'].includes('IAB17')) {
                     bool = true
-                    products.findAndCountAll({
-                        where: {
-                            label: 'sport'
-                        }
-                    }).then(result => {
-                        const count = result.count
-                        const row = result.rows
-                        let int = Math.floor(Math.random() * count)
-                        if (resultsAffiliate.length < 2) {
-                            resultsAffiliate.push({
-                                vista: some, affiliate: row[int].dataValues,
-                                add: { id: parseInt(row[int].dataValues['Merchant_Product_ID']), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
-                                serv: serv,
-                                size: { w: img_width, h: img_height },
-                                mobile: mobile
-                            })
-                        }
-                    })
+                    if (resultsAffiliate < 1) {
+                        await products.findAndCountAll({
+                            where: {
+                                label: 'sport'
+                            }
+                        }).then(result => {
+                            const count = result.count
+                            const row = result.rows
+                            console.log("pushing")
+                            let int = Math.floor(Math.random() * count)
+                            if (resultsAffiliate < 1) {
+                                resultsAffiliate.push({
+                                    vista: some, affiliate: row[int].dataValues,
+                                    add: { id: parseInt(row[int].dataValues['Merchant_Product_ID']), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
+                                    serv: serv,
+                                    size: { w: img_width, h: img_height },
+                                    mobile: mobile
+                                })
+                            }
+                        })
+
+                    }
                 }
             }
-
-
             if (subscriptions['face'].length != 0) {
-
                 if (subscriptions['face'][0].deep_face.gender[0]['label'] == 'Female') {
-                    for (const obj of subscriptions['fashion']) {
-                        if (obj.class == 'person' && bool) {
-                            clothing.findAndCountAll({
-                                where: {
-                                    label:{
-                                    gender: 'Woman',
-                                    garment: 'sport'
-                                    }
-                                },
+                    const gender = subscriptions['face'][0].deep_face.gender[0]['label']
+                    const sub = subscriptions['fashion']
+                    await clothing_Filler(sub, serv, img_width, img_height, site, url, uid, mobile, bool, gender, subscriptions['face'][0])
+                        .then((result) => {
+                            result.forEach(element => {
+                                resultsAffiliate.push(element)
                             })
-                                .then(result => {
-                                    const count = result.count
-                                    const row = result.rows
-                                    let int = Math.floor(Math.random() * count)
-                                    if (resultsAffiliate.length < 2) {
-                                        resultsAffiliate.push({
-                                            vista: obj, affiliate: row[int].dataValues,
-                                            add: { id: parseInt(row[int].dataValues['Merchant_Product_ID']), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
-                                            serv: serv,
-                                            size: { w: img_width, h: img_height }
-                                        })
-                                    }
-                                })
-                        }
-                        if (obj.class == 'person' && obj.deep_fashion_color.skirt_length) {
-                            if (obj.deep_fashion_color.skirt_length[0].confidence >= 0.4) {
-                                clothing.findAndCountAll({
-                                    where: {
-                                        label: {
-                                            gender: 'Woman',
-                                            garment: 'dress'
-                                        }
-                                    },
-                                })
-                                    .then(result => {
-                                        const count = result.count
-                                        const row = result.rows
-                                        let int = Math.floor(Math.random() * count)
-                                        if (resultsAffiliate.length < 2 && !bool) {
-                                            resultsAffiliate.push({
-                                                vista: subscriptions['face'][0], affiliate: row[int].dataValues,
-                                                add: { id: parseInt(row[int].dataValues['Merchant_Product_ID']), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
-                                                serv: serv,
-                                                size: { w: img_width, h: img_height },
-                                                mobile: mobile
-                                            })
-                                        }
-                                    })
-                            }
-                        }
-                        if (obj.class == 'upper') {
-                            clothing.findAndCountAll({
-                                where: {
-                                    label: {
-                                        gender: 'Woman',
-                                        garment: 'shirt'
-                                    }
-                                },
-                            })
-                                .then(result => {
-                                    const count = result.count
-                                    const row = result.rows
-                                    let int = Math.floor(Math.random() * count)
-                                    if (resultsAffiliate.length < 2 && !bool) {
-                                        resultsAffiliate.push({
-                                            vista: subscriptions['face'][0], affiliate: row[int].dataValues,
-                                            add: { id: parseInt(row[int].dataValues['Merchant_Product_ID']), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
-                                            serv: serv,
-                                            size: { w: img_width, h: img_height },
-                                            mobile: mobile
-                                        })
-                                    }
-                                })
-                        }
-                        if (obj.class == 'lower') {
-                            let item = 'pants'
-                            if (obj.deep_fashion_color.pant_length) {
-                                if (obj.deep_fashion_color.pant_length[0].label == "ShortPant") {
-                                    item = 'shorts'
-                                }
-                            }
-                            clothing.findAndCountAll({
-                                where: {
-                                    label: {
-                                        gender: 'Woman',
-                                        garment: item
-                                    }
-                                },
-                            })
-                                .then(result => {
-                                    const count = result.count
-                                    const row = result.rows
-                                    let int = Math.floor(Math.random() * count)
-                                    if (resultsAffiliate.length < 2 && !bool) {
-                                        resultsAffiliate.push({
-                                            vista: subscriptions['face'][0], affiliate: row[int].dataValues,
-                                            add: { id: parseInt(row[int].dataValues['Merchant_Product_ID']), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
-                                            serv: serv,
-                                            size: { w: img_width, h: img_height },
-                                            mobile: mobile
-                                        })
-                                    }
-                                })
-                        }
-                    }
+                        })
+
                 }
                 if (subscriptions['face'][0].deep_face.gender[0]['label'] == 'Male') {
-                    for (const obj of subscriptions['fashion']) {
-                        if (obj.class == 'person' && bool) {
-                            clothing.findAndCountAll({
-                                where: {
-                                    label:{
-                                    gender: 'Men',
-                                    garment: 'sport'
-                                    }
-                                },
+                    const gender = subscriptions['face'][0].deep_face.gender[0]['label']
+                    const sub = subscriptions['fashion']
+                    await clothing_Filler(sub, serv, img_width, img_height, site, url, uid, mobile, bool, gender, subscriptions['face'][0])
+                        .then((result) => {
+                            result.forEach(element => {
+                                resultsAffiliate.push(element)
                             })
-                                .then(result => {
-                                    const count = result.count
-                                    const row = result.rows
-                                    let int = Math.floor(Math.random() * count)
-                                    if (resultsAffiliate.length < 2) {
-                                        resultsAffiliate.push({
-                                            vista: obj, affiliate: row[int].dataValues,
-                                            add: { id: parseInt(row[int].dataValues['Merchant_Product_ID']), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
-                                            serv: serv,
-                                            size: { w: img_width, h: img_height }
-                                        })
-                                    }
-                                })
+                        })
 
-                        }
-                        if (obj.class == 'upper') {
-                            let item = 'shirt'
-                            if (obj.deep_fashion_color.sleeve_length) {
-                                if (obj.deep_fashion_color.sleeve_length[0].label == "ExtraLongSleeves") {
-                                    item = 'jacket'
-                                }
-                            }
-                            clothing.findAndCountAll({
-                                where: {
-                                    label: {
-                                        gender: 'Men',
-                                        garment: item
-                                    }
-                                },
-                            })
-                                .then(result => {
-                                    const count = result.count
-                                    const row = result.rows
-                                    let int = Math.floor(Math.random() * count)
-                                    if (resultsAffiliate.length < 2 && !bool) {
-                                        resultsAffiliate.push({
-                                            vista: subscriptions['face'][0], affiliate: row[int].dataValues,
-                                            add: { id: parseInt(row[int].dataValues['Merchant_Product_ID']), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
-                                            serv: serv,
-                                            size: { w: img_width, h: img_height },
-                                            mobile: mobile
-                                        })
-                                    }
-                                })
-                        }
-                        if (obj.class == 'lower') {
-                            let item = 'pants'
-                            if (obj.deep_fashion_color.pant_length) {
-                                if (obj.deep_fashion_color.pant_length[0].label == "ShortPant") {
-                                    item = 'short'
-                                }
-                            }
-                            clothing.findAndCountAll({
-                                where: {
-                                    label: {
-                                        gender: 'Men',
-                                        garment: item
-                                    }
-                                },
-                            })
-                                .then(result => {
-                                    const count = result.count
-                                    const row = result.rows
-                                    let int = Math.floor(Math.random() * count)
-                                    if (resultsAffiliate.length < 2 && !bool) {
-                                        resultsAffiliate.push({
-                                            vista: subscriptions['face'][0], affiliate: row[int].dataValues,
-                                            add: { id: parseInt(row[int].dataValues['Merchant_Product_ID']), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
-                                            serv: serv,
-                                            size: { w: img_width, h: img_height },
-                                            mobile: mobile
-                                        })
-                                    }
-                                })
-                        }
-                    }
                 }
             }
-
-            if (resultsAffiliate.length < 2) {
-                for (const obj of subscriptions['Object']) {
-                    if (objetos[0][obj.class] != undefined && obj.confidence > 0.6) {
-                        if (objetos[0][obj.class] == "bottle") {
-                            products.findAndCountAll({
+            for (const obj of subscriptions['Object']) {
+                 if (obj.class != 'person') {
+                    if (objetos[0][obj.class] != undefined) {
+                        if (obj.class == 'bottle')
+                            console.log(obj)
+                        if (obj.class == "bottle") {
+                            console.log("ahi botellaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+                            if (resultsAffiliate.length < 2) {
+                            await products.findAndCountAll({
                                 where: {
                                     label: "cream"
                                 }
@@ -346,49 +178,141 @@ async function filler(resultsVista, serv, img_width, img_height, site, url, uid,
                                     const count = result.count
                                     const row = result.rows
                                     let int = Math.floor(Math.random() * count)
-                                    if (resultsAffiliate.length < 2 && !bool) {
-                                        resultsAffiliate.push({
-                                            vista: obj, affiliate: row[int].dataValues,
-                                            add: { id: parseInt(row[int].dataValues['Merchant_Product_ID']), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
-                                            serv: serv,
-                                            size: { w: img_width, h: img_height }
-                                        })
-                                    }
+                                    resultsAffiliate.push({
+                                        vista: obj, affiliate: row[int].dataValues,
+                                        add: { id: parseInt(row[int].dataValues['Merchant_Product_ID']), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
+                                        serv: serv,
+                                        size: { w: img_width, h: img_height }
+                                    })
                                 }).catch((err) => {
                                     console.trace(err)
                                     console.error(err)
                                 })
+                            }
                         }
-                        if (objetos[0][obj.class].length != 0) {
-                            products.findAndCountAll({
-                                where: {
-                                    label: obj.class
-                                }
-                            })
-                                .then(result => {
-                                    const count = result.count
-                                    const row = result.rows
-                                    let int = Math.floor(Math.random() * count)
-                                    if (resultsAffiliate.length < 2  && !bool) {
-                                        resultsAffiliate.push({
-                                            vista: obj, affiliate: row[int].dataValues,
-                                            add: { id: parseInt(row[int].dataValues['Merchant_Product_ID']), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
-                                            serv: serv,
-                                            size: { w: img_width, h: img_height },
-                                            mobile: mobile
+                        if (objetos[0][obj.class].length != 0 && obj.class != 'bottle') {
+                            if (resultsAffiliate.length < 2) {
+                                await object_Filler(obj, serv, img_width, img_height, site, url, uid, mobile)
+                                    .then((result) => {
+                                        result.forEach(element => {
+                                            resultsAffiliate.push(element)
                                         })
-                                    }
-                                }).catch((err) => {
-                                    console.trace(err)
-                                    console.error(err)
-                                })
+                                    })
+                            }
                         }
                     }
                 }
             }
         }
-        setTimeout(() => {
-            resolve(resultsAffiliate);
-        }, 2000);
+
+        resolve(resultsAffiliate);
+    })
+}
+
+const clothing_Filler = async (sub, serv, img_width, img_height, site, url, uid, mobile, bool, gender, face) => {
+    const resultsAffiliate_Temp = []
+    return new Promise(async (resolve) => {
+        for (const obj in sub) {
+            if (resultsAffiliate_Temp.length < 2) {
+                if (sub[obj] != undefined) {
+                    if (sub[obj].class == 'upper') {
+                        await clothing.findAndCountAll({
+                            where: {
+                                label: {
+                                    gender: gender,
+                                    garment: 'shirt'
+                                }
+                            },
+                        })
+                            .then(result => {
+                                const count = result.count
+                                const row = result.rows
+                                let int = Math.floor(Math.random() * count)
+                                resultsAffiliate_Temp.push({
+                                    vista: sub[obj], affiliate: row[int].dataValues,
+                                    add: { id: parseInt(row[int].dataValues['Merchant_Product_ID']), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
+                                    serv: serv,
+                                    size: { w: img_width, h: img_height },
+                                    mobile: mobile
+                                })
+                            }).catch((err) => {
+                                console.error(err)
+                            })
+                    }
+                    if (sub[obj].class == 'lower') {
+                        await clothing.findAndCountAll({
+                            where: {
+                                label: {
+                                    gender: gender,
+                                    garment: 'pants'
+                                }
+                            },
+                        })
+                            .then(result => {
+                                const count = result.count
+                                const row = result.rows
+                                let int = Math.floor(Math.random() * count)
+                                resultsAffiliate_Temp.push({
+                                    vista: sub[obj], affiliate: row[int].dataValues,
+                                    add: { id: parseInt(row[int].dataValues['Merchant_Product_ID']), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
+                                    serv: serv,
+                                    size: { w: img_width, h: img_height },
+                                    mobile: mobile
+                                })
+                            })
+                    }
+                    if (sub[obj].class == 'person' && bool) {
+                        await clothing.findAndCountAll({
+                            where: {
+                                label: {
+                                    gender: gender,
+                                    garment: 'sports'
+                                }
+                            },
+                        })
+                            .then(result => {
+                                const count = result.count
+                                const row = result.rows
+                                let int = Math.floor(Math.random() * count)
+                                resultsAffiliate_Temp.push({
+                                    vista: sub[obj], affiliate: row[int].dataValues,
+                                    add: { id: parseInt(row[int].dataValues['Merchant_Product_ID']), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
+                                    serv: serv,
+                                    size: { w: img_width, h: img_height }
+                                })
+                            })
+                    }
+                }
+            }
+        }
+        resolve(resultsAffiliate_Temp)
+    })
+}
+
+const object_Filler = async (obj, serv, img_width, img_height, site, url, uid, mobile) => {
+    await clothing_Filler()
+    return new Promise(async (resolve) => {
+        const resultsAffiliate_Temp = []
+        await products.findAndCountAll({
+            where: {
+                label: obj.class
+            }
+        })
+            .then(result => {
+                const count = result.count
+                const row = result.rows
+                let int = Math.floor(Math.random() * count)
+                resultsAffiliate_Temp.push({
+                    vista: obj, affiliate: row[int].dataValues,
+                    add: { id: parseInt(row[int].dataValues['Merchant_Product_ID']), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
+                    serv: serv,
+                    size: { w: img_width, h: img_height },
+                    mobile: mobile
+                })
+            }).catch((err) => {
+                console.error(err)
+            })
+        resolve(resultsAffiliate_Temp)
+
     })
 }

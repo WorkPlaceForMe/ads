@@ -174,7 +174,7 @@ async function readCsv(path, id) {
                 Sub_Category_Name: element[17],
                 Price_Unit: element[18],
                 label: {
-                  gender: 'Woman',
+                  gender: 'Female',
                   garment: Garment
                 }
               }).catch((err) => {
@@ -201,7 +201,7 @@ async function readCsv(path, id) {
                 Sub_Category_Name: element[17],
                 Price_Unit: element[18],
                 label: {
-                  gender: 'Men',
+                  gender: 'Male',
                   garment: Garment
                 }
               }).catch((err) => {
