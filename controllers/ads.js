@@ -143,9 +143,6 @@ async function filler(resultsVista, serv, img_width, img_height, site, url, uid,
                 result.forEach(element => {
                     resultsAffiliate.push(element)
                 })
-
-
-
             }
             if (subscriptions['face'][0].deep_face.gender[0]['label'] == 'Male') {
                 const gender = subscriptions['face'][0].deep_face.gender[0]['label']
@@ -154,7 +151,6 @@ async function filler(resultsVista, serv, img_width, img_height, site, url, uid,
                 result.forEach(element => {
                     resultsAffiliate.push(element)
                 })
-
             }
         }
         for (const obj of subscriptions['Object']) {
