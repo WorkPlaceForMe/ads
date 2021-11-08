@@ -38,13 +38,18 @@ exports.convert = async (arr) => {
         if(item.y <= 0){
             item.y = 100
         }
+        const dif = 15
+        if(item.x >= (arr[0].vista.boundingBox.left + arr[0].vista.boundingBox.width/2 - dif) && item.x <= (arr[0].vista.boundingBox.left + arr[0].vista.boundingBox.width/2 + dif) && item.x != (arr[0].vista.boundingBox.left + arr[0].vista.boundingBox.width/2) && item.y >= (arr[0].vista.boundingBox.top - dif) && item.y <= (arr[0].vista.boundingBox.top + dif)){
+            item.x = item.x + 60
+        }
 
         let close = ''
 
         if(obj.mobile == 1){
             close = `<button class='closeBut' aria-label="Close" style="float: right;padding: 0; background-color: transparent; border: 0; -webkit-appearance: none; width: 20px; font-size: 20px"> <span aria-hidden="true">&times;</span></button>`;
+            item.url = obj.affiliate['Product_URL_Mobile_encoded']
         }
-        
+
         const adsinfo = [{
             imgSize: {w: obj.size.w, h:obj.size.h},
             focal_point: [item.x,item.y],

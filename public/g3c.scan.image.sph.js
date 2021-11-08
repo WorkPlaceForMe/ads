@@ -150,7 +150,7 @@ $(document).on('click', '.closeBut', function () {
 				E +
 				"' class='but' style='background:url(" + serv + "/api/pictures/"
 
-				h = h + iconAndSize('iconBorder.gif', false) + "padding: 35px 40px;cursor: pointer;'>&nbsp;</span></div></a>"
+				h = h + iconAndSize('iconBorder.gif', false) + "padding: 35px 40px;cursor: pointer; opacity:0.8; '>&nbsp;</span></div></a>"
 
 			a(e).append(h)
 			var i = document.createElement('div')
@@ -170,14 +170,14 @@ $(document).on('click', '.closeBut', function () {
 			a('.mark span').click(
 				function () {
 					const wrap = `markPoint_${a(this).attr('id').split('_')[1]}`			
-					a(this).css(
-						'display',
-						'none'
-					),
-						a('.wrapper').css('z-index', '50'),
-						a('.mark').css('z-index', '200'),
-						a(this).css('z-index', '200'),
-						a('#' + wrap).css('z-index', '100'),
+					// a(this).css(
+					// 	'display',
+					// 	'none'
+					// ),
+						a('.wrapper').css('display', 'none'),
+						a('.mark').css('z-index', '100'),
+						a(this).css('z-index', '100'),
+						a('#' + wrap).css('z-index', '200'),
 						a('#' + wrap).css('display', '')
 						
 				}
