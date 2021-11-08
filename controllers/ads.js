@@ -79,6 +79,7 @@ exports.getAds = Controller(async (req, res) => {
                 }
                 const objetos = await readCsv.readCsv(aut['idP'])
                 const resultsAffiliate = await filler(resultsVista, serv, img_width, img_height, site, url, uid, objetos, mobile)
+                console.log(resultsAffiliate,'======================results===============================')
                 const sendingResults = await convert(resultsAffiliate)
 
                 await cache.setAsync(`${mobile}_${img_width}_${img_height}_${url}`, JSON.stringify(sendingResults));
@@ -106,24 +107,23 @@ async function addImg(time, imgName, idGeneration, site) {
     })
 }
 async function filler(resultsVista, serv, img_width, img_height, site, url, uid, objetos, mobile) {
-    return new Promise(async (resolve) => {
+    return new Promise( (resolve) => {
         const resultsAffiliate = []
         for (const subscriptions of resultsVista) {
             let bool = false;
             for (const some of subscriptions['tags2'].tags2.tags2) {
                 if (some['IAB'].includes('IAB17')) {
                     bool = true
-                    if (resultsAffiliate < 1) {
-                        await products.findAndCountAll({
+                    if (resultsAffiliate.length < 2) {
+                        products.findAndCountAll({
                             where: {
                                 label: 'sport'
                             }
                         }).then(result => {
                             const count = result.count
                             const row = result.rows
-                            console.log("pushing")
                             let int = Math.floor(Math.random() * count)
-                            if (resultsAffiliate < 1) {
+                            if (resultsAffiliate.length < 2) {
                                 resultsAffiliate.push({
                                     vista: some, affiliate: row[int].dataValues,
                                     add: { id: parseInt(row[int].dataValues['Merchant_Product_ID']), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
@@ -142,7 +142,7 @@ async function filler(resultsVista, serv, img_width, img_height, site, url, uid,
 
                     const gender = subscriptions['face'][0].deep_face.gender[0]['label']
                     const sub = subscriptions['fashion']
-                    await clothing_Filler(sub, serv, img_width, img_height, site, url, uid, mobile, bool, gender, subscriptions['face'][0])
+                    clothing_Filler(sub, serv, img_width, img_height, site, url, uid, mobile, bool, gender, subscriptions['face'][0])
                         .then((result) => {
                             result.forEach(element => {
                                 resultsAffiliate.push(element)
@@ -154,7 +154,7 @@ async function filler(resultsVista, serv, img_width, img_height, site, url, uid,
                 if (subscriptions['face'][0].deep_face.gender[0]['label'] == 'Male') {
                     const gender = subscriptions['face'][0].deep_face.gender[0]['label']
                     const sub = subscriptions['fashion']
-                    await clothing_Filler(sub, serv, img_width, img_height, site, url, uid, mobile, bool, gender, subscriptions['face'][0])
+                    clothing_Filler(sub, serv, img_width, img_height, site, url, uid, mobile, bool, gender, subscriptions['face'][0])
                         .then((result) => {
                             result.forEach(element => {
                                 resultsAffiliate.push(element)
@@ -169,9 +169,8 @@ async function filler(resultsVista, serv, img_width, img_height, site, url, uid,
                         if (obj.class == 'bottle')
                             console.log(obj)
                         if (obj.class == "bottle") {
-                            console.log("ahi botellaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
                             if (resultsAffiliate.length < 2) {
-                            await products.findAndCountAll({
+                            products.findAndCountAll({
                                 where: {
                                     label: "cream"
                                 }
@@ -194,7 +193,7 @@ async function filler(resultsVista, serv, img_width, img_height, site, url, uid,
                         }
                         if (objetos[0][obj.class].length != 0 && obj.class != 'bottle') {
                             if (resultsAffiliate.length < 2) {
-                                await object_Filler(obj, serv, img_width, img_height, site, url, uid, mobile)
+                                object_Filler(obj, serv, img_width, img_height, site, url, uid, mobile)
                                     .then((result) => {
                                         result.forEach(element => {
                                             resultsAffiliate.push(element)
@@ -213,12 +212,12 @@ async function filler(resultsVista, serv, img_width, img_height, site, url, uid,
 
 const clothing_Filler = async (sub, serv, img_width, img_height, site, url, uid, mobile, bool, gender, face) => {
     const resultsAffiliate_Temp = []
-    return new Promise(async (resolve) => {
+    return new Promise((resolve) => {
         for (const obj in sub) {
             if (resultsAffiliate_Temp.length < 2) {
                 if (sub[obj] != undefined) {
                     if (sub[obj].class == 'upper') {
-                        await clothing.findAndCountAll({
+                         clothing.findAndCountAll({
                             where: {
                                 label: {
                                     gender: gender,
@@ -230,6 +229,7 @@ const clothing_Filler = async (sub, serv, img_width, img_height, site, url, uid,
                                 const count = result.count
                                 const row = result.rows
                                 let int = Math.floor(Math.random() * count)
+                                // console.log(row[int],result.count)
                                 resultsAffiliate_Temp.push({
                                     vista: sub[obj], affiliate: row[int].dataValues,
                                     add: { id: parseInt(row[int].dataValues['Merchant_Product_ID']), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
@@ -242,7 +242,7 @@ const clothing_Filler = async (sub, serv, img_width, img_height, site, url, uid,
                             })
                     }
                     if (sub[obj].class == 'lower') {
-                        await clothing.findAndCountAll({
+                        clothing.findAndCountAll({
                             where: {
                                 label: {
                                     gender: gender,
@@ -264,7 +264,7 @@ const clothing_Filler = async (sub, serv, img_width, img_height, site, url, uid,
                             })
                     }
                     if (sub[obj].class == 'person' && bool) {
-                        await clothing.findAndCountAll({
+                        clothing.findAndCountAll({
                             where: {
                                 label: {
                                     gender: gender,
@@ -293,9 +293,9 @@ const clothing_Filler = async (sub, serv, img_width, img_height, site, url, uid,
 
 const object_Filler = async (obj, serv, img_width, img_height, site, url, uid, mobile) => {
     await clothing_Filler()
-    return new Promise(async (resolve) => {
+    return new Promise( (resolve) => {
         const resultsAffiliate_Temp = []
-        await products.findAndCountAll({
+        products.findAndCountAll({
             where: {
                 label: obj.class
             }
