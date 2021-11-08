@@ -151,6 +151,9 @@ async function filler(resultsVista, serv, img_width, img_height, site, url, uid,
                                     const count = result.count
                                     const row = result.rows
                                     let int = Math.floor(Math.random() * count)
+                                    while(row[int].dataValues.available == 0){
+                                        int ++
+                                    }
                                     if (resultsAffiliate.length < 2) {
                                         resultsAffiliate.push({
                                             vista: obj, affiliate: row[int].dataValues,
@@ -175,6 +178,9 @@ async function filler(resultsVista, serv, img_width, img_height, site, url, uid,
                                         const count = result.count
                                         const row = result.rows
                                         let int = Math.floor(Math.random() * count)
+                                        while(row[int].dataValues.available == 0){
+                                            int ++
+                                        }
                                         if (resultsAffiliate.length < 2 && !bool) {
                                             resultsAffiliate.push({
                                                 vista: subscriptions['face'][0], affiliate: row[int].dataValues,
@@ -200,6 +206,9 @@ async function filler(resultsVista, serv, img_width, img_height, site, url, uid,
                                     const count = result.count
                                     const row = result.rows
                                     let int = Math.floor(Math.random() * count)
+                                    while(row[int].dataValues.available == 0){
+                                        int ++
+                                    }
                                     if (resultsAffiliate.length < 2 && !bool) {
                                         resultsAffiliate.push({
                                             vista: subscriptions['face'][0], affiliate: row[int].dataValues,
@@ -230,6 +239,9 @@ async function filler(resultsVista, serv, img_width, img_height, site, url, uid,
                                     const count = result.count
                                     const row = result.rows
                                     let int = Math.floor(Math.random() * count)
+                                    while(row[int].dataValues.available == 0){
+                                        int ++
+                                    }
                                     if (resultsAffiliate.length < 2 && !bool) {
                                         resultsAffiliate.push({
                                             vista: subscriptions['face'][0], affiliate: row[int].dataValues,
@@ -258,6 +270,9 @@ async function filler(resultsVista, serv, img_width, img_height, site, url, uid,
                                     const count = result.count
                                     const row = result.rows
                                     let int = Math.floor(Math.random() * count)
+                                    while(row[int].dataValues.available == 0){
+                                        int ++
+                                    }
                                     if (resultsAffiliate.length < 2) {
                                         resultsAffiliate.push({
                                             vista: obj, affiliate: row[int].dataValues,
@@ -288,6 +303,9 @@ async function filler(resultsVista, serv, img_width, img_height, site, url, uid,
                                     const count = result.count
                                     const row = result.rows
                                     let int = Math.floor(Math.random() * count)
+                                    while(row[int].dataValues.available == 0){
+                                        int ++
+                                    }
                                     if (resultsAffiliate.length < 2 && !bool) {
                                         resultsAffiliate.push({
                                             vista: subscriptions['face'][0], affiliate: row[int].dataValues,
@@ -318,6 +336,9 @@ async function filler(resultsVista, serv, img_width, img_height, site, url, uid,
                                     const count = result.count
                                     const row = result.rows
                                     let int = Math.floor(Math.random() * count)
+                                    while(row[int].dataValues.available == 0){
+                                        int ++
+                                    }
                                     if (resultsAffiliate.length < 2 && !bool) {
                                         resultsAffiliate.push({
                                             vista: subscriptions['face'][0], affiliate: row[int].dataValues,
@@ -346,6 +367,9 @@ async function filler(resultsVista, serv, img_width, img_height, site, url, uid,
                                     const count = result.count
                                     const row = result.rows
                                     let int = Math.floor(Math.random() * count)
+                                    while(row[int].dataValues.available == 0){
+                                        int ++
+                                    }
                                     if (resultsAffiliate.length < 2 && !bool) {
                                         resultsAffiliate.push({
                                             vista: obj, affiliate: row[int].dataValues,
@@ -369,6 +393,9 @@ async function filler(resultsVista, serv, img_width, img_height, site, url, uid,
                                     const count = result.count
                                     const row = result.rows
                                     let int = Math.floor(Math.random() * count)
+                                    while(row[int].dataValues.available == 0){
+                                        int ++
+                                    }
                                     if (resultsAffiliate.length < 2  && !bool) {
                                         resultsAffiliate.push({
                                             vista: obj, affiliate: row[int].dataValues,
