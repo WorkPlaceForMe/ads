@@ -1,5 +1,5 @@
 [
-    {
+    {   "bottle":[],
         "cream":[],
         "bicycle": [],
         "motorbike": [],
@@ -36,7 +36,6 @@
         "baseball_glove": [],
         "skateboard": [],
         "surfboard": [],
-        "bottle": [],
         "wine_glass": [],
         "cup": [],
         "fork": [],
@@ -81,7 +80,7 @@
     },
     {
         "Women Clothes": {
-            "sport":[],
+            "sports":[],
             "skirt": [],
             "dress": [],
             "shirt": [],
@@ -89,7 +88,7 @@
             "pants": []
         },
         "Men Clothes": {
-            "sport":[],
+            "sports":[],
             "shirt": [],
             "pants": [],
             "jacket": [],
