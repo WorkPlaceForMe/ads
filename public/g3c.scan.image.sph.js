@@ -122,7 +122,7 @@ $(document).on('click', '.closeBut', function () {
 			if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
 					if(window.screen.width <= 400){
 							width = 330
-					}					
+					}
 					if(window.screen.width <= 360){
 							width = 300
 					}
@@ -132,7 +132,18 @@ $(document).on('click', '.closeBut', function () {
 					c.mx = 270
 				}
 			}
-			const diffe = 20;
+
+			if(c.my<55){
+				c.my = 55
+			}
+			if(c.my > (g.size.h - 55)){
+				c.my = g.size.h - 95
+			}
+			if(c.mx > (g.size.w - 55)){
+				c.mx = g.size.w - 55
+			}
+
+			const diffe = 40;
 			if(i!=0){
 				if(c.mx >= (left1- diffe) && c.mx <= (left1 + diffe) && c.my >= (top1- diffe) && c.my <= (top1 + diffe)){
 					c.my = c.my + 90
@@ -254,15 +265,6 @@ $(document).on('click', '.closeBut', function () {
 						k = !1,
 						l = f[g].adsinfo[h]
 
-						if(c.my<55){
-							c.my = 55
-						}
-						if(c.my > (f[g].adsinfo[0].imgSize.h - 55)){
-							c.my = f[g].adsinfo[0].imgSize.h - 95
-						}
-						if(c.mx > (f[g].adsinfo[0].imgSize.w - 55)){
-							c.mx = f[g].adsinfo[0].imgSize.w - 55
-						}
 						const diff = 20
 						if(g != 0 && l.focal_point[0] >= (f[g - 1].adsinfo[0].focal_point[0]- diff) && l.focal_point[0] <= (f[g - 1].adsinfo[0].focal_point[0] + diff) && l.focal_point[1] >= (f[g - 1].adsinfo[0].focal_point[1]- diff) && l.focal_point[1] <= (f[g - 1].adsinfo[0].focal_point[1] + diff)){
 							l.focal_point[1] = l.focal_point[1] + 150
