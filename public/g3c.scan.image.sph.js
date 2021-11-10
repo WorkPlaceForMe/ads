@@ -8,6 +8,9 @@ const uuid = new Date().getTime()
 let serv = document.currentScript.getAttribute('src').split('/')
 serv = `${serv[0]}//${serv[2]}`
 
+let top1 = 0;
+let left1 = 0;
+
 
 $(document).ready(function () {
 	$.ajax({
@@ -99,7 +102,7 @@ $(document).on('click', '.closeBut', function () {
 			error: function () {}
 		})
 	}
-	function d(b, c, d, e) {
+	function d(b, c, d, e, i) {
 		var f = b,
 			g = {
 				description: f.description,
@@ -113,12 +116,7 @@ $(document).on('click', '.closeBut', function () {
 				size: f.imgSize
 			}
 		if ('indoorroom' != g.object && 'person' != g.object && f.keywords != ' ') {
-			if(c.my<55){
-				c.my = 55
-			}
-			if(c.my > (g.size.h - 55)){
-				c.my = g.size.h - 95
-			}
+
 			let width = 350;
 			let posX = c.mx - 120 + 'px';
 			if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
@@ -134,11 +132,16 @@ $(document).on('click', '.closeBut', function () {
 					c.mx = 270
 				}
 			}
-			if(c.mx > (g.size.w - 55)){
-				c.mx = g.size.w - 55
+			const diffe = 20;
+			if(i!=0){
+				if(c.mx >= (left1- diffe) && c.mx <= (left1 + diffe) && c.my >= (top1- diffe) && c.my <= (top1 + diffe)){
+					c.my = c.my + 90
+				}
 			}
 			var topvl = c.my
 			var leftvl = c.mx
+			top1 = topvl
+			left1 = leftvl
 			var h =
 				"<a title='SHOP NOW!'class='but1' id ='"+ g.id +"'><div class='mark' id='mark_" + E + "' style='position:absolute;top:" +
 				topvl +
@@ -211,9 +214,9 @@ $(document).on('click', '.closeBut', function () {
 						'background-size',
 						'0px'
 					),
-					a('.wrapper').css('z-index', '250'),
-					a('.mark').css('z-index', '200'),
-					a(this).css('z-index', '200'),
+					a('.wrapper').css('z-index', '200'),
+					a('.mark').css('z-index', '100'),
+					a(this).css('z-index', '100'),
 					a('#' + b).css('z-index', '250'),
 					a('#' + b).css('display', '')
 				}
@@ -250,14 +253,29 @@ $(document).on('click', '.closeBut', function () {
 						j = null,
 						k = !1,
 						l = f[g].adsinfo[h]
+
+						if(c.my<55){
+							c.my = 55
+						}
+						if(c.my > (f[g].adsinfo[0].imgSize.h - 55)){
+							c.my = f[g].adsinfo[0].imgSize.h - 95
+						}
+						if(c.mx > (f[g].adsinfo[0].imgSize.w - 55)){
+							c.mx = f[g].adsinfo[0].imgSize.w - 55
+						}
+						const diff = 20
+						if(g != 0 && l.focal_point[0] >= (f[g - 1].adsinfo[0].focal_point[0]- diff) && l.focal_point[0] <= (f[g - 1].adsinfo[0].focal_point[0] + diff) && l.focal_point[1] >= (f[g - 1].adsinfo[0].focal_point[1]- diff) && l.focal_point[1] <= (f[g - 1].adsinfo[0].focal_point[1] + diff)){
+							l.focal_point[1] = l.focal_point[1] + 150
+						}
+
 					l.focal_point !== b
 						? ((i = (l.focal_point[0] * c.cur_width) / c.ori_width),
-						  (j = l.focal_point[1] * (c.cur_height / c.ori_height)),
-						  (k = !0))
+						(j = l.focal_point[1] * (c.cur_height / c.ori_height)),
+						(k = !0))
 						: ((i = c.cur_width - 20 * (h + 1)), (j = 130), (k = !1)),
 						(c.mx = i),
 						(c.my = j),
-						d(l, c, k, e)
+						d(l, c, k, e, g)
 				}
 	}
 	function g(b) {

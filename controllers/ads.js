@@ -79,6 +79,9 @@ exports.getAds = Controller(async (req, res) => {
                 }
                 const objetos = await readCsv.readCsv(aut['idP'])
                 const resultsAffiliate = await filler(resultsVista, serv, img_width, img_height, site, url, uid, objetos, mobile)
+                if(resultsAffiliate.length > 2){
+                    resultsAffiliate.pop()
+                }
                 const sendingResults = await convert(resultsAffiliate)
 
                 await cache.setAsync(`${mobile}_${img_width}_${img_height}_${url}`, JSON.stringify(sendingResults));

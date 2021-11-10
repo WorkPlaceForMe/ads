@@ -38,10 +38,6 @@ exports.convert = async (arr) => {
         if(item.y <= 0){
             item.y = 100
         }
-        const dif = 15
-        if(item.x >= (arr[0].vista.boundingBox.left + arr[0].vista.boundingBox.width/2 - dif) && item.x <= (arr[0].vista.boundingBox.left + arr[0].vista.boundingBox.width/2 + dif) && item.x != (arr[0].vista.boundingBox.left + arr[0].vista.boundingBox.width/2) && item.y >= (arr[0].vista.boundingBox.top - dif) && item.y <= (arr[0].vista.boundingBox.top + dif)){
-            item.x = item.x + 60
-        }
 
         let close = ''
 
