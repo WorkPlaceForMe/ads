@@ -25,6 +25,7 @@ const products = db1.products
 const clothing = db1.clothing
 const publishers = db1.publishers
 const readCsv = require('./controllers/readCsv')
+const { delay } = require('bluebird')
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
@@ -52,35 +53,40 @@ if (conf.get('install') == true) {
   })
 }
 
-async function check(){
-  const update = await products.findOne({
-    order: [['createdAt', 'DESC']]
-  })
+async function check(ids = {}){
   const time = 604800 //604800 1 week
-  let creation = update.dataValues.createdAt.getTime() / 1000
-  let now =  new Date().getTime() / 1000
-  while(creation + time >= now){
-    now =  new Date().getTime() / 1000
-    continue;
-  }
-  console.log('dropping tables')
-  await clothing.destroy({
-    where: {},
-    truncate: true
-  })
-  await products.destroy({
-    where: {},
-    truncate: true
-  })
-  
-  const ids = await publishers.findAll({
+  const idsCheck = await publishers.findAll({
     attributes: ['publisherId']
   })
-  for(const id of ids){
-    await readCsv.readCsv(id.dataValues.publisherId)
-    console.log(id.dataValues.publisherId)
+  if(Object.keys(ids).length === 0 || Object.keys(ids).length != idsCheck.length){
+    for(const id of idsCheck){
+        const update = await products.findOne({
+          // where: { publisherId: id.dataValues.publisherId },
+          order: [['createdAt', 'DESC']]
+        })
+        if(update == null){
+          await readCsv.readCsv(id.dataValues.publisherId)
+          ids[id.dataValues.publisherId] = new Date().getTime() / 1000
+        }else{
+          ids[id.dataValues.publisherId] = update.dataValues.createdAt.getTime() / 1000;
+        }
+    }
   }
-
+  let now =  new Date().getTime() / 1000
+  for(const id in ids){
+    if(ids[id] + time <= now){
+      await clothing.destroy({
+        // where: { publisherId: id.dataValues.publisherId },
+        truncate: true
+      })
+      await products.destroy({
+        // where: { publisherId: id.dataValues.publisherId },
+        truncate: true
+      })
+      await readCsv.readCsv(id)
+    }
+  }
+  await delay(86400000) //1 day 86400000
   return check()
 }
 
