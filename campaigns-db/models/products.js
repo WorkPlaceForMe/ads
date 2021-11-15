@@ -53,6 +53,10 @@ module.exports = (sequelize, Sequelize) => {
     type: Sequelize.STRING,
     allowNull: true
   },
+  Page_ID:{
+    type: Sequelize.INTEGER,
+    allowNull: true
+  },
   label: {
     type: Sequelize.STRING,
     allowNull: true

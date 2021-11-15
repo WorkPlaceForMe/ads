@@ -74,10 +74,10 @@ exports.getAds = Controller(async (req, res) => {
 
                 console.log('=====================> VISTA RESPONSE <========================')
                 let resultsVista = []
+                const objetos = await readCsv.readCsv(aut['idP'])
                 if (response.data) {
                     resultsVista.push(response.data.results)
                 }
-                const objetos = await readCsv.readCsv(aut['idP'])
                 const resultsAffiliate = await filler(resultsVista, serv, img_width, img_height, site, url, uid, objetos, mobile)
                 const sendingResults = await convert(resultsAffiliate)
 
@@ -109,32 +109,32 @@ async function filler(resultsVista, serv, img_width, img_height, site, url, uid,
     const resultsAffiliate = []
     for (const subscriptions of resultsVista) {
         let bool = false;
-        for (const some of subscriptions['tags2'].tags2.tags2) {
-            if (some['IAB'].includes('IAB17')) {
-                bool = true
-                if (resultsAffiliate < 1) {
-                    const result = await products.findAndCountAll({
-                        where: {
-                            label: 'sport'
-                        }
-                    })
-                    const count = result.count
-                    const row = result.rows
-                    console.log("pushing")
-                    let int = Math.floor(Math.random() * count)
-                    if (resultsAffiliate < 2) {
-                        resultsAffiliate.push({
-                            vista: some, affiliate: row[int].dataValues,
-                            add: { id: parseInt(row[int].dataValues['Merchant_Product_ID']), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
-                            serv: serv,
-                            size: { w: img_width, h: img_height },
-                            mobile: mobile
-                        })
-                    }
+        // for (const some of subscriptions['tags2'].tags2.tags2) {
+        //     if (some['IAB'].includes('IAB17')) {
+        //         bool = true
+        //         if (resultsAffiliate < 1) {
+        //             const result = await products.findAndCountAll({
+        //                 where: {
+        //                     label: 'sport'
+        //                 }
+        //             })
+        //             const count = result.count
+        //             const row = result.rows
+        //             console.log("pushing")
+        //             let int = Math.floor(Math.random() * count)
+        //             if (resultsAffiliate < 2) {
+        //                 resultsAffiliate.push({
+        //                     vista: some, affiliate: row[int].dataValues,
+        //                     add: { id: parseInt(row[int].dataValues['Merchant_Product_ID']), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
+        //                     serv: serv,
+        //                     size: { w: img_width, h: img_height },
+        //                     mobile: mobile
+        //                 })
+        //             }
 
-                }
-            }
-        }
+        //         }
+        //     }
+        // }
         if (subscriptions['face'].length != 0) {
             if (subscriptions['face'][0].deep_face.gender[0]['label'] == 'Female') {
                 const gender = subscriptions['face'][0].deep_face.gender[0]['label']
@@ -199,7 +199,7 @@ const clothing_Filler = async (sub, serv, img_width, img_height, site, url, uid,
     for (const obj in sub) {
         if (resultsAffiliate_Temp.length < 2) {
             if (sub[obj] != undefined) {
-                if (sub[obj].class == 'upper') {
+                if (sub[obj].class == 'upper' && sub[obj].confidence > 0.6) {
                     const result = await clothing.findAndCountAll({
                         where: {
                             label: {
@@ -219,7 +219,7 @@ const clothing_Filler = async (sub, serv, img_width, img_height, site, url, uid,
                         mobile: mobile
                     })
                 }
-                if (sub[obj].class == 'lower' ) {
+                if (sub[obj].class == 'lower' && sub[obj].confidence > 0.6) {
                     const result = await clothing.findAndCountAll({
                         where: {
                             label: {
@@ -239,7 +239,7 @@ const clothing_Filler = async (sub, serv, img_width, img_height, site, url, uid,
                         mobile: mobile
                     })
                 }
-                if (sub[obj].class == 'person' && bool ) {
+                if (sub[obj].class == 'person' && bool && sub[obj].confidence > 0.6) {
                     const result = await clothing.findAndCountAll({
                         where: {
                             label: {
