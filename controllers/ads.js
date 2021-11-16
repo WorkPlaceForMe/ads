@@ -5,13 +5,11 @@ const FormData = require('form-data')
 const request = require('request')
 const readCsv = require('./readCsv')
 const convert = require('../helper/convertObject').convert
-const db = require('../helper/dbconnection')
 const dateFormat = require('dateformat');
 const auth = require('../helper/auth')
 const util = require('util')
 const cache = require('../helper/cacheManager')
 const db1 = require('../campaigns-db/database')
-const { resolve } = require('path')
 const products = db1.products
 const clothing = db1.clothing
 const imgsPage = db1.imgsPage
@@ -49,10 +47,10 @@ exports.getAds = Controller(async (req, res) => {
             return res.status(400).json({ success: false, message: "Unauthorized" })
         } else {
             let formData = new FormData()
-            formData.append('upload', request(url))
+            const image = await request(url)
+            formData.append('upload', image)
 
             formData.append('subscriptions', 'face,fashion,Object,tags2,themes')
-
             const request_config = {
                 method: 'post',
                 url: vista_url + apiEndpoint,
@@ -82,6 +80,11 @@ exports.getAds = Controller(async (req, res) => {
                 if(resultsAffiliate.length > 2){
                     resultsAffiliate.pop()
                 }
+
+                if(url == 'http://localhost:3310/api/pictures/test2.jpg'){
+                    console.log(url, resultsAffiliate, util.inspect(resultsVista, false, null, true))
+                }
+
                 const sendingResults = await convert(resultsAffiliate)
 
                 await cache.setAsync(`${mobile}_${img_width}_${img_height}_${url}`, JSON.stringify(sendingResults));
@@ -92,7 +95,7 @@ exports.getAds = Controller(async (req, res) => {
             catch (err) {
                 if (err.response)
                     console.log(err.response.status, url)
-                console.log(err)
+                console.log(err.response.data)
                 await cache.setAsync(`${mobile}_${img_width}_${img_height}_${url}`, JSON.stringify({}));
                 return res.status(500).json({ success: false, message: "Vista Image failled", error: err, img: url })
             }
@@ -123,7 +126,6 @@ async function filler(resultsVista, serv, img_width, img_height, site, url, uid,
                     })
                     const count = result.count
                     const row = result.rows
-                    console.log("pushing")
                     let int = Math.floor(Math.random() * count)
                     if (resultsAffiliate < 2) {
                         resultsAffiliate.push({
