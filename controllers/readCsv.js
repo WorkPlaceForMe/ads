@@ -16,9 +16,9 @@ const clothing = db.clothing
 
 
 exports.readCsv = async function (idPbl) {
- 
   const val1 = await db.sequelize.query('SELECT EXISTS (SELECT 1 FROM ads2.products );')
   const val2 = await db.sequelize.query('SELECT EXISTS (SELECT 1 FROM ads2.clothings);')
+  let cachedDown = await cache.getAsync(`downloading-${idPbl}`);
   if (Object.values(val1[0][0])[0] && Object.values(val2[0][0])[0]) {
      let dataValues = {
           products: [],
@@ -32,9 +32,11 @@ exports.readCsv = async function (idPbl) {
           raw: true
         })
         dataValues.products = Products
+        dataValues.clothing = Clothing
+        return dataValues
+
   }
-  let cachedDown = await cache.getAsync(`downloading-${idPbl}`);
-  if (cachedDown == 'false' || !cachedDown) {
+  else if (cachedDown == 'false' || !cachedDown) {
     await cache.setAsync(`downloading-${idPbl}`, true);
     return new Promise(function (resolve, reject) {
       const ids = {
@@ -66,6 +68,7 @@ exports.readCsv = async function (idPbl) {
         }
 
       }).catch((err) => {
+        console.error(err)
         reject(err)
       })
     })
@@ -126,12 +129,13 @@ async function readCsv(path, id) {
           })
           dataValues['products'].push(product.dataValues)
         }
-        else if (csvrow[15].toLowerCase().includes(" " + element) || csvrow[15].toLowerCase() == element) {
+         else if (csvrow[15].toLowerCase().includes(" " + element) || csvrow[15].toLowerCase() == element) {
           const product = await create_products(csvrow, element, id)
           console.log(product.dataValues)
           dataValues['products'].push(product.dataValues)
         } else if (csvrow[17].toLowerCase().includes(" " + element) || csvrow[17].toLowerCase() == element) {
           const product = await create_products(csvrow, element, id)
+          console.log(product)
           dataValues['products'].push(product.dataValues)
         } else if (csvrow[13].toLowerCase().includes(" " + element) || csvrow[13].toLowerCase() == element) {
           const product = await create_products(csvrow, element, id)
