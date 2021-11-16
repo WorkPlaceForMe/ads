@@ -50,7 +50,7 @@ exports.getAds = Controller(async (req, res) => {
             const image = await request(url)
             formData.append('upload', image)
 
-            formData.append('subscriptions', 'face,fashion,Object,tags2,themes')
+            formData.append('subscriptions', 'face,fashion,Object,tags2,themes,sport')
             const request_config = {
                 method: 'post',
                 url: vista_url + apiEndpoint,
@@ -79,10 +79,6 @@ exports.getAds = Controller(async (req, res) => {
                 const resultsAffiliate = await filler(resultsVista, serv, img_width, img_height, site, url, uid, objetos, mobile)
                 if(resultsAffiliate.length > 2){
                     resultsAffiliate.pop()
-                }
-
-                if(url == 'http://localhost:3310/api/pictures/test2.jpg'){
-                    console.log(url, resultsAffiliate, util.inspect(resultsVista, false, null, true))
                 }
 
                 const sendingResults = await convert(resultsAffiliate)
