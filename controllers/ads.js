@@ -47,7 +47,12 @@ exports.getAds = Controller(async (req, res) => {
             return res.status(400).json({ success: false, message: "Unauthorized" })
         } else {
             let formData = new FormData()
-            const image = await request(url)
+            const image = await request({
+                url: url,
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36'
+                }
+            })
             formData.append('upload', image)
 
             formData.append('subscriptions', 'face,fashion,Object,tags2,themes,sport')
