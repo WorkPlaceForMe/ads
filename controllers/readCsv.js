@@ -2,15 +2,11 @@ const axios = require('axios')
 const aff = require('../helper/affiliate')
 const jwt = require('jsonwebtoken')
 const conf = require('../middleware/prop')
-const fs = require('fs');
 const cache = require('../helper/cacheManager')
 const parseCsv = require('csv-parse');
 const objetos = require('../csv/objetos2.json');
 const { Readable } = require("stream");
 const db = require('../campaigns-db/database');
-const { set, OBJECT } = require('../helper/cacheManager');
-const { Console } = require('console');
-const { where } = require('sequelize/lib/sequelize');
 const products = db.products
 const clothing = db.clothing
 
@@ -19,6 +15,7 @@ exports.readCsv = async function (idPbl) {
   const val1 = await db.sequelize.query('SELECT EXISTS (SELECT 1 FROM ads2.products );')
   const val2 = await db.sequelize.query('SELECT EXISTS (SELECT 1 FROM ads2.clothings);')
   let cachedDown = await cache.getAsync(`downloading-${idPbl}`);
+  console.log(Object.values(val1[0][0])[0] && Object.values(val2[0][0])[0])
   if (Object.values(val1[0][0])[0] && Object.values(val2[0][0])[0]) {
      let dataValues = {
           products: [],
@@ -36,7 +33,8 @@ exports.readCsv = async function (idPbl) {
         return dataValues
 
   }
-  else if (cachedDown == 'false' || !cachedDown) {
+  else{
+    if (cachedDown == 'false' || !cachedDown) {
     await cache.setAsync(`downloading-${idPbl}`, true);
     return new Promise(function (resolve, reject) {
       const ids = {
@@ -93,6 +91,7 @@ exports.readCsv = async function (idPbl) {
     dataValues.products = Products
     return (dataValues)
   }
+}
 }
 
 async function download(url) {
