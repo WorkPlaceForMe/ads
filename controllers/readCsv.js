@@ -12,11 +12,12 @@ const clothing = db.clothing
 
 
 exports.readCsv = async function (idPbl) {
-  const val1 = await db.sequelize.query('SELECT EXISTS (SELECT 1 FROM ads2.products );')
-  const val2 = await db.sequelize.query('SELECT EXISTS (SELECT 1 FROM ads2.clothings);')
+  const val1 = await db.sequelize.query(`SELECT EXISTS (SELECT 1 FROM ${conf.get('database')}.products );`)
+  const val2 = await db.sequelize.query(`SELECT EXISTS (SELECT 1 FROM ${conf.get('database')}.clothings);`)
   let cachedDown = await cache.getAsync(`downloading-${idPbl}`);
-  console.log(Object.values(val1[0][0])[0] && Object.values(val2[0][0])[0])
-  if (Object.values(val1[0][0])[0] && Object.values(val2[0][0])[0]) {
+  console.log(Object.values(val1[0][0])[0], Object.values(val2[0][0])[0])
+  if (Object.values(val1[0][0])[0] == 1 && Object.values(val2[0][0])[0] == 1) {
+    console.log('=====================')
      let dataValues = {
           products: [],
           clothing: []
@@ -34,6 +35,7 @@ exports.readCsv = async function (idPbl) {
 
   }
   else{
+    console.log(cachedDown)
     if (cachedDown == 'false' || !cachedDown) {
     await cache.setAsync(`downloading-${idPbl}`, true);
     return new Promise(function (resolve, reject) {
