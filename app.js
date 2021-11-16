@@ -29,6 +29,17 @@ app.use(cors())
 
 require("./helper/cacheManager");
 
+sequelize.products.sync({force:true}).then(()=>{
+  console.log('products sync')
+}).catch(err =>{
+  console.error('no se concecto',err)
+})
+
+sequelize.clothing.sync({force:true}).then(()=>{
+  console.log('clothing sync')
+}).catch(err =>{
+  console.error('no se concecto',err)
+})
 
 if (conf.get('install') == true) {
   console.log("Installing DB")
