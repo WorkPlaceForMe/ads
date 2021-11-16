@@ -1,4 +1,3 @@
-module.exports = (sequelize, Sequelize) => {
     const clothing = sequelize.define("clothing", {
       Merchant_Product_ID: {
         type: Sequelize.INTEGER,
@@ -53,8 +52,8 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.STRING,
         allowNull: true
       },
-      label:{
-        type: Sequelize.JSON,
+      Page_ID:{
+        type: Sequelize.INTEGER,
         allowNull: true
       }
     });
