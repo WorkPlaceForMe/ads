@@ -73,7 +73,7 @@ async function check(ids = {}){
   if(Object.keys(ids).length === 0 || Object.keys(ids).length != idsCheck.length){
     for(const id of idsCheck){
         const update = await products.findOne({
-          // where: { publisherId: id.dataValues.publisherId },
+          where: { Page_ID: id.dataValues.publisherId },
           order: [['createdAt', 'DESC']]
         })
         if(update == null){
@@ -88,11 +88,11 @@ async function check(ids = {}){
   for(const id in ids){
     if(ids[id] + time <= now){
       await clothing.destroy({
-        // where: { publisherId: id.dataValues.publisherId },
+        where: { Page_ID: id.dataValues.publisherId },
         truncate: true
       })
       await products.destroy({
-        // where: { publisherId: id.dataValues.publisherId },
+        where: { Page_ID: id.dataValues.publisherId },
         truncate: true
       })
       await readCsv.readCsv(id)
