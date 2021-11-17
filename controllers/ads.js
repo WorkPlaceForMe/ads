@@ -77,11 +77,19 @@ exports.getAds = Controller(async (req, res) => {
                     resultsVista.push(response.data.results)
                 }
                 const resultsAffiliate = await filler(resultsVista, serv, img_width, img_height, site, url, uid, objetos, mobile)
+                let convertings = []
                 if(resultsAffiliate.length > 2){
-                    resultsAffiliate.pop()
+                    for(let i = 0; resultsAffiliate.length > i; i++){
+                        if(i >= 2){
+                            break;
+                        }
+                        convertings.push(resultsAffiliate[i])
+                    }
+                }else{
+                    convertings = resultsAffiliate
                 }
 
-                const sendingResults = await convert(resultsAffiliate)
+                const sendingResults = await convert(convertings)
 
                 await cache.setAsync(`${mobile}_${img_width}_${img_height}_${url}`, JSON.stringify(sendingResults));
                 res.status(200).send({
