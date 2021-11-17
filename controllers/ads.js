@@ -234,7 +234,7 @@ const clothing_Filler = async (sub, objetos, serv, img_width, img_height, site, 
                         const count = prendras.length
                         let int = Math.floor(Math.random() * count)
                         console.log('pushing')
-                        prendrassAffiliate_Temp.push({
+                        resultsAffiliate_Temp.push({
                             vista: obj, affiliate: prendras[int],
                             add: { id: parseInt(prendras[int]['Merchant_Product_ID']), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
                             serv: serv,
