@@ -14,79 +14,68 @@ exports.readCsv = async function (idPbl) {
   const val2 = await db.sequelize.query(`SELECT EXISTS (SELECT 1 FROM ${conf.get('database')}.clothings);`)
   let cachedDown = await cache.getAsync(`downloading-${idPbl}`);
   if (Object.values(val1[0][0])[0] == 1 && Object.values(val2[0][0])[0] == 1) {
-     let dataValues = {
-          products: [],
-          clothing: []
-        }
-        const Clothing = await clothing.findAll({
-          raw: true
-        })
-        dataValues.clothing = Clothing
-        const Products = await products.findAll({
-          raw: true
-        })
-        dataValues.products = Products
-        dataValues.clothing = Clothing
-        return dataValues
-
-  }
-  else{
-    console.log(cachedDown)
-    if (cachedDown == 'false' || !cachedDown) {
-    await cache.setAsync(`downloading-${idPbl}`, true);
-    return new Promise((resolve, reject)=>{
-      const ids = {
-        shopee: 677
-      }
-      aff.getAff.then(async function (credentials) {
-        const token = jwt.sign(
-          { sub: credentials.userUid },
-          credentials.secretKey,
-          {
-            algorithm: "HS256"
-          }
-        )
-        let affiliateEndpoint = `${conf.get('accesstrade_endpoint')}/v1/publishers/me/sites/${idPbl}/campaigns/677/productfeed/url`
-        axios.get(affiliateEndpoint, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'X-Accesstrade-User-Type': 'publisher'
-          }
-        }).then((affiliateResponse) => {
-          download(affiliateResponse.data.baseUrl, idPbl).then((rs) => {
-            readCsv(rs, idPbl)
-              .then((results =>
-                resolve(results))).catch((err) => {
-                  console.error(err)
-                  reject(err)
-                })
-          })
-        })
-      })
-    })
-  }
-  else {
-    cachedDown = await cache.getAsync(`downloading-${idPbl}`)
-    while (cachedDown == 'true') {
-      cachedDown = await cache.getAsync(`downloading-${idPbl}`)
-      continue;
-    }
-    const dataValues = {
-      products: [],
-      clothing: []
-    }
     const Clothing = await clothing.findAll({
       raw: true
     })
-    dataValues.clothing = Clothing
     const Products = await products.findAll({
       raw: true
     })
-    dataValues.products = Products
-    dataValues.clothing = Clothing
+    const dataValues = Clothing.concat(Products)
+    
     return dataValues
   }
-}
+  else {
+    console.log(cachedDown)
+    if (cachedDown == 'false' || !cachedDown) {
+      await cache.setAsync(`downloading-${idPbl}`, true);
+      return new Promise((resolve, reject) => {
+        const ids = {
+          shopee: 677
+        }
+        aff.getAff.then(async function (credentials) {
+          const token = jwt.sign(
+            { sub: credentials.userUid },
+            credentials.secretKey,
+            {
+              algorithm: "HS256"
+            }
+          )
+          let affiliateEndpoint = `${conf.get('accesstrade_endpoint')}/v1/publishers/me/sites/${idPbl}/campaigns/677/productfeed/url`
+          axios.get(affiliateEndpoint, {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'X-Accesstrade-User-Type': 'publisher'
+            }
+          }).then((affiliateResponse) => {
+            download(affiliateResponse.data.baseUrl, idPbl)
+              .then((rs) => {
+                readCsv(rs, idPbl)
+                  .then((results =>
+                    resolve(results))).catch((err) => {
+                      console.error(err)
+                      reject(err)
+                    })
+              })
+          })
+        })
+      })
+    }
+    else {
+      cachedDown = await cache.getAsync(`downloading-${idPbl}`)
+      while (cachedDown == 'true') {
+        cachedDown = await cache.getAsync(`downloading-${idPbl}`)
+        continue;
+      }
+      const Clothing = await clothing.findAll({
+        raw: true
+      })
+      const Products = await products.findAll({
+        raw: true
+      })
+      const dataValues = Clothing.concat(Products)
+      return dataValues
+    }
+  }
 }
 
 async function readCsv(path, id) {
@@ -145,7 +134,7 @@ async function readCsv(path, id) {
       const todo = await Promise.all(promises)
       const dataValues = todo.map(objects => objects.dataValues)
       console.log('done with shopee')
-      await cache.setAsync(`downloading-${id}`, false); 
+      await cache.setAsync(`downloading-${id}`, false);
       return dataValues
     });
 }

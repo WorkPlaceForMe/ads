@@ -71,10 +71,7 @@ async function check(ids = {}){
   await delay(86400000) //1 day 86400000 in milliseonds
   return check()
 }
-<<<<<<< HEAD
 
-=======
->>>>>>> 1a5c08ba5457082f7e0470c2fdf83c77cbade8c3
 if (conf.get('install') == true) {
   console.log("Installing DB")
   mysql
@@ -92,14 +89,8 @@ if (conf.get('install') == true) {
       })
     })
   })
-<<<<<<< HEAD
 }else {
   check()
-=======
-}
-else{
-check()
->>>>>>> 1a5c08ba5457082f7e0470c2fdf83c77cbade8c3
 }
 
 // view engine setup
