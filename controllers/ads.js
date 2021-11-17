@@ -294,7 +294,7 @@ const clothing_Filler = async (sub, objetos, serv, img_width, img_height, site, 
 
 const object_Filler = async (obj, objetos, serv, img_width, img_height, site, url, uid, mobile) => {
     const resultsAffiliate_Temp = []
-    const result = objetos.filter(obj2 => obj2.label == obj)
+    const result = objetos.filter(obj2 => obj2.label == obj.class)
     const count = result.length
     let int = Math.floor(Math.random() * count)
     resultsAffiliate_Temp.push({
