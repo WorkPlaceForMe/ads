@@ -13,15 +13,16 @@ exports.readCsv = async function (idPbl) {
   const val1 = await db.sequelize.query(`SELECT EXISTS (SELECT 1 FROM ${conf.get('database')}.products );`)
   const val2 = await db.sequelize.query(`SELECT EXISTS (SELECT 1 FROM ${conf.get('database')}.clothings);`)
   let cachedDown = await cache.getAsync(`downloading-${idPbl}`);
-  if (Object.values(val1[0][0])[0] == 1 && Object.values(val2[0][0])[0] == 1){
-    const Clothing = await clothing.findAll({
-      raw: true
-    })
-    const Products = await products.findAll({
-      raw: true
-    })
-    const dataValues = Clothing.concat(Products)
-    return dataValues
+  if (Object.values(val1[0][0])[0] == 1 && Object.values(val2[0][0])[0] == 1) {
+        const Clothing = await clothing.findAll({
+          raw: true
+        })
+        const Products = await products.findAll({
+          raw: true
+        })
+        const dataValues = Clothing.concat(Products)
+        return dataValues
+
   }
   else{
     console.log(cachedDown)

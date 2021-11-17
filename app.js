@@ -34,37 +34,17 @@ app.use(cors())
 
 require("./helper/cacheManager");
 
-sequelize.products.sync({force:true}).then(()=>{
-  console.log('products sync')
-}).catch(err =>{
-  console.error('no se concecto',err)
-})
+// sequelize.products.sync({force:true}).then(()=>{
+//   console.log('products sync')
+// }).catch(err =>{
+//   console.error('no se concecto',err)
+// })
 
-sequelize.clothing.sync({force:true}).then(()=>{
-  console.log('clothing sync')
-}).catch(err =>{
-  console.error('no se concecto',err)
-})
-
-if (conf.get('install') == true) {
-  console.log("Installing DB")
-  mysql
-  .createConnection({
-    user: conf.get('user'),
-    password: conf.get('password'),
-    host: conf.get('host')
-  })
-  .then(connection => {
-    connection.query('CREATE DATABASE IF NOT EXISTS ' + conf.get('database') + ' CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;').then(() => {
-      sequelize.sequelize.sync({force: true}).then(()=>{
-        console.log('sequelize is connected')
-      }).catch(err =>{
-        console.error('no se concecto',err)
-      })
-    })
-  })
-}
-
+// sequelize.clothing.sync({force:true}).then(()=>{
+//   console.log('clothing sync')
+// }).catch(err =>{
+//   console.error('no se concecto',err)
+// })
 async function check(ids = {}){
   const time = 604800000 //604800 1 week in milliseconds
   const idsCheck = await publishers.findAll({
@@ -101,9 +81,27 @@ async function check(ids = {}){
   await delay(86400000) //1 day 86400000 in milliseonds
   return check()
 }
-
+if (conf.get('install') == true) {
+  console.log("Installing DB")
+  mysql
+  .createConnection({
+    user: conf.get('user'),
+    password: conf.get('password'),
+    host: conf.get('host')
+  })
+  .then(connection => {
+    connection.query('CREATE DATABASE IF NOT EXISTS ' + conf.get('database') + ' CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;').then(() => {
+      sequelize.sequelize.sync({force: true}).then(()=>{
+        console.log('sequelize is connected')
+      }).catch(err =>{
+        console.error('no se concecto',err)
+      })
+    })
+  })
+}
+else{
 check()
-
+}
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'))
