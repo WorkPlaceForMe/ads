@@ -5,15 +5,11 @@ const FormData = require('form-data')
 const request = require('request')
 const readCsv = require('./readCsv')
 const convert = require('../helper/convertObject').convert
-const db = require('../helper/dbconnection')
 const dateFormat = require('dateformat');
 const auth = require('../helper/auth')
 const util = require('util')
 const cache = require('../helper/cacheManager')
 const db1 = require('../campaigns-db/database')
-const { resolve } = require('path')
-const products = db1.products
-const clothing = db1.clothing
 const imgsPage = db1.imgsPage
 
 
@@ -104,7 +100,7 @@ async function filler(resultsVista, serv, img_width, img_height, site, url, uid,
     const resultsAffiliate = []
     for (const subscriptions of resultsVista) {
         if (subscriptions['sport'] != []) {
-            for (some of subscriptions['sport']) {
+            for(const some of subscriptions['sport']) {
                 const Products_Sport = objetos.products.filter(obj =>
                     obj.label == 'sport')
                 const count = Products_Sport.length
@@ -178,7 +174,7 @@ const clothing_Filler = async (sub, objetos, serv, img_width, img_height, site, 
     const resultsAffiliate_Temp = []
     for (const obj of sub) {
         if (resultsAffiliate_Temp.length < 2) {
-            if (gender = "Male") {
+            if(gender == "Male") {
                 if (obj.class == 'upper' && obj.confidence > 0.6) {
                     if (obj.deep_fashion_tf.collar_design[0] == 'Shirt') {
                         const result = objetos.clothing.filter(obj => {
@@ -244,7 +240,7 @@ const clothing_Filler = async (sub, objetos, serv, img_width, img_height, site, 
                     }
                 }
             }
-            if (gender = "Female") {
+            if(gender == "Female") {
                 if (obj.class == 'upper' && obj.confidence > 0.6) {
                     if (obj.deep_fashion_tf.collar_design[0] == 'Shirt') {
                         const result = objetos.clothing.filter(obj => {

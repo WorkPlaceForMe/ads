@@ -13,7 +13,6 @@ const portS = conf.get('portS')
 const https = require('https');
 const http = require('http');
 const fs = require('fs');
-const shell = require("shelljs");
 const options = {
   key: fs.readFileSync('key.pem'),
   cert: fs.readFileSync('cert.pem')
@@ -21,6 +20,12 @@ const options = {
 const sequelize = require('./campaigns-db/database')
 const httpsServer = https.createServer(options, app);
 const httpServer = http.createServer(app);
+const db1 = require('./campaigns-db/database')
+const products = db1.products
+const clothing = db1.clothing
+const publishers = db1.publishers
+const readCsv = require('./controllers/readCsv')
+const { delay } = require('bluebird')
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
@@ -59,6 +64,46 @@ if (conf.get('install') == true) {
     })
   })
 }
+
+async function check(ids = {}){
+  const time = 604800 //604800 1 week
+  const idsCheck = await publishers.findAll({
+    attributes: ['publisherId']
+  })
+  if(Object.keys(ids).length === 0 || Object.keys(ids).length != idsCheck.length){
+    for(const id of idsCheck){
+        const update = await products.findOne({
+          // where: { publisherId: id.dataValues.publisherId },
+          order: [['createdAt', 'DESC']]
+        })
+        if(update == null){
+          await readCsv.readCsv(id.dataValues.publisherId)
+          ids[id.dataValues.publisherId] = new Date().getTime() / 1000
+        }else{
+          ids[id.dataValues.publisherId] = update.dataValues.createdAt.getTime() / 1000;
+        }
+    }
+  }
+  let now =  new Date().getTime() / 1000
+  for(const id in ids){
+    if(ids[id] + time <= now){
+      await clothing.destroy({
+        // where: { publisherId: id.dataValues.publisherId },
+        truncate: true
+      })
+      await products.destroy({
+        // where: { publisherId: id.dataValues.publisherId },
+        truncate: true
+      })
+      await readCsv.readCsv(id)
+    }
+  }
+  await delay(86400000) //1 day 86400000
+  return check()
+}
+
+check()
+
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'))
