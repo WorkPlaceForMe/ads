@@ -12,27 +12,8 @@ const clothing = db.clothing
 exports.readCsv = async function (idPbl) {
   const val1 = await db.sequelize.query(`SELECT EXISTS (SELECT 1 FROM ${conf.get('database')}.products );`)
   const val2 = await db.sequelize.query(`SELECT EXISTS (SELECT 1 FROM ${conf.get('database')}.clothings);`)
-  if (Object.values(val1[0][0])[0] == 1 && Object.values(val2[0][0])[0] == 1) {
-    console.log('entroooooo')
-    const dataValues = {
-      products: [],
-      clothing: []
-    }
-    const Clothing = await clothing.findAll({
-      raw: true
-    })
-    dataValues.clothing = Clothing
-    const Products = await products.findAll({
-      raw: true
-    })
-    dataValues.products = Products
-    dataValues.clothing = Clothing
-    return dataValues
-  }
   let cachedDown = await cache.getAsync(`downloading-${idPbl}`);
-  console.log(Object.values(val1[0][0])[0], Object.values(val2[0][0])[0])
   if (Object.values(val1[0][0])[0] == 1 && Object.values(val2[0][0])[0] == 1) {
-    console.log('=====================')
      let dataValues = {
           products: [],
           clothing: []
@@ -162,22 +143,10 @@ async function readCsv(path, id) {
     })
     .on('end', async () => {
       const todo = await Promise.all(promises)
-      const dataValues = {
-        products: [],
-        clothing: []
-      };
-      for (obj of todo) {
-        if (obj.dataValues['Type'] == 'products') {
-          dataValues.products.push(obj.dataValues)
-        }
-        else {
-          dataValues.clothing.push(obj.dataValues)
-        }
-      }
+      const dataValues = todo.map(objects => objects.dataValues)
       console.log('done with shopee')
-      await cache.setAsync(`downloading-${id}`, false);
-      if (dataValues.clothing.length > 3 && dataValues.clothing.length > 3)
-        return dataValues
+      await cache.setAsync(`downloading-${id}`, false); 
+      return dataValues
     });
 }
 
