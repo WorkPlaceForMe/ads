@@ -30,7 +30,28 @@ exports.readCsv = async function (idPbl) {
     return dataValues
   }
   let cachedDown = await cache.getAsync(`downloading-${idPbl}`);
-  if (cachedDown == 'false' || !cachedDown) {
+  console.log(Object.values(val1[0][0])[0], Object.values(val2[0][0])[0])
+  if (Object.values(val1[0][0])[0] == 1 && Object.values(val2[0][0])[0] == 1) {
+    console.log('=====================')
+     let dataValues = {
+          products: [],
+          clothing: []
+        }
+        const Clothing = await clothing.findAll({
+          raw: true
+        })
+        dataValues.clothing = Clothing
+        const Products = await products.findAll({
+          raw: true
+        })
+        dataValues.products = Products
+        dataValues.clothing = Clothing
+        return dataValues
+
+  }
+  else{
+    console.log(cachedDown)
+    if (cachedDown == 'false' || !cachedDown) {
     await cache.setAsync(`downloading-${idPbl}`, true);
     return new Promise((resolve, reject)=>{
       const ids = {
@@ -84,6 +105,7 @@ exports.readCsv = async function (idPbl) {
     dataValues.clothing = Clothing
     return dataValues
   }
+}
 }
 
 async function readCsv(path, id) {
