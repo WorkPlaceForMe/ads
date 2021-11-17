@@ -34,7 +34,6 @@ app.use(cors())
 
 require("./helper/cacheManager");
 
-
 async function check(ids = {}){
   const time = 604800000 //604800 1 week in milliseconds
   const idsCheck = await publishers.findAll({
@@ -72,6 +71,7 @@ async function check(ids = {}){
   return check()
 }
 
+
 if (conf.get('install') == true) {
   console.log("Installing DB")
   mysql
@@ -82,7 +82,7 @@ if (conf.get('install') == true) {
   })
   .then(connection => {
     connection.query('CREATE DATABASE IF NOT EXISTS ' + conf.get('database') + ' CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;').then(() => {
-      sequelize.sequelize.sync({force: true}).then(()=>{
+      sequelize.sequelize.sync({force: false}).then(()=>{
         console.log('sequelize is connected')
       }).catch(err =>{
         console.error('no se concecto',err)
@@ -92,6 +92,45 @@ if (conf.get('install') == true) {
 }else {
   check()
 }
+
+async function check(ids = {}){
+  const time = 604800 //604800 1 week
+  const idsCheck = await publishers.findAll({
+    attributes: ['publisherId']
+  })
+  if(Object.keys(ids).length === 0 || Object.keys(ids).length != idsCheck.length){
+    for(const id of idsCheck){
+        const update = await products.findOne({
+          // where: { publisherId: id.dataValues.publisherId },
+          order: [['createdAt', 'DESC']]
+        })
+        if(update == null){
+          await readCsv.readCsv(id.dataValues.publisherId)
+          ids[id.dataValues.publisherId] = new Date().getTime() / 1000
+        }else{
+          ids[id.dataValues.publisherId] = update.dataValues.createdAt.getTime() / 1000;
+        }
+    }
+  }
+  let now =  new Date().getTime() / 1000
+  for(const id in ids){
+    if(ids[id] + time <= now){
+      await clothing.destroy({
+        // where: { publisherId: id.dataValues.publisherId },
+        truncate: true
+      })
+      await products.destroy({
+        // where: { publisherId: id.dataValues.publisherId },
+        truncate: true
+      })
+      await readCsv.readCsv(id)
+    }
+  }
+  await delay(86400000) //1 day 86400000
+  return check()
+}
+
+check()
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'))

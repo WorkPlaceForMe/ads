@@ -45,10 +45,16 @@ exports.getAds = Controller(async (req, res) => {
             return res.status(400).json({ success: false, message: "Unauthorized" })
         } else {
             let formData = new FormData()
-            formData.append('upload', request(url))
 
-            formData.append('subscriptions', 'face,fashion,Object,tags2,sport')
+            const image = await request({
+                url: url,
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36'
+                }
+            })
+            formData.append('upload', image)
 
+            formData.append('subscriptions', 'face,fashion,Object,tags2,themes,sport')
             const request_config = {
                 method: 'post',
                 url: vista_url + apiEndpoint,
@@ -71,6 +77,10 @@ exports.getAds = Controller(async (req, res) => {
                     resultsVista.push(response.data.results)
                 }
                 const resultsAffiliate = await filler(resultsVista, serv, img_width, img_height, site, url, uid, objetos, mobile)
+                if(resultsAffiliate.length > 2){
+                    resultsAffiliate.pop()
+                }
+
                 const sendingResults = await convert(resultsAffiliate)
 
                 await cache.setAsync(`${mobile}_${img_width}_${img_height}_${url}`, JSON.stringify(sendingResults));
@@ -81,7 +91,7 @@ exports.getAds = Controller(async (req, res) => {
             catch (err) {
                 if (err.response)
                     console.log(err.response.status, url)
-                console.log(err)
+                console.log(err.response.data)
                 await cache.setAsync(`${mobile}_${img_width}_${img_height}_${url}`, JSON.stringify({}));
                 return res.status(500).json({ success: false, message: "Vista Image failled", error: err, img: url })
             }
@@ -112,6 +122,7 @@ async function filler(resultsVista, serv, img_width, img_height, site, url, uid,
                     size: { w: img_width, h: img_height },
                     mobile: mobile
                 })
+
             }
         }
         if (subscriptions['face'].length != 0) {
