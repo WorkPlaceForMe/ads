@@ -1,5 +1,5 @@
 module.exports = (sequelize, Sequelize) => {
-    const clothing = sequelize.define("clothing", {
+const clothing = sequelize.define("clothing", {
       Merchant_Product_ID: {
         type: Sequelize.INTEGER,
         primaryKey: true,
@@ -53,10 +53,19 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.STRING,
         allowNull: true
       },
-      label:{
-        type: Sequelize.JSON,
+      Page_ID:{
+        type: Sequelize.INTEGER,
+        allowNull: true
+      },
+      Gender:{
+        type: Sequelize.STRING,
+        allowNull: true
+      },
+      Type:{
+        type: Sequelize.STRING,
         allowNull: true
       }
+      
     });
   
     return clothing;
