@@ -29,13 +29,13 @@ app.use(cors())
 
 require("./helper/cacheManager");
 
-sequelize.products.sync().then(()=>{
+sequelize.products.sync({force:true}).then(()=>{
   console.log('products sync')
 }).catch(err =>{
   console.error('no se concecto',err)
 })
 
-sequelize.clothing.sync().then(()=>{
+sequelize.clothing.sync({force:true}).then(()=>{
   console.log('clothing sync')
 }).catch(err =>{
   console.error('no se concecto',err)
