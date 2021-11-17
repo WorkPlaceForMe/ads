@@ -60,6 +60,10 @@ module.exports = (sequelize, Sequelize) => {
   label: {
     type: Sequelize.STRING,
     allowNull: true
+  },
+  Type:{
+    type: Sequelize.STRING,
+    allowNull: true
   }
     });
   

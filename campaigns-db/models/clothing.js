@@ -56,7 +56,16 @@ module.exports = (sequelize, Sequelize) => {
       Page_ID:{
         type: Sequelize.INTEGER,
         allowNull: true
+      },
+      Gender:{
+        type: Sequelize.STRING,
+        allowNull: true
+      },
+      Type:{
+        type: Sequelize.STRING,
+        allowNull: true
       }
+      
     });
   
     return clothing;
