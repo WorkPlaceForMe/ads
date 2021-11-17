@@ -66,7 +66,7 @@ if (conf.get('install') == true) {
 }
 
 async function check(ids = {}){
-  const time = 604800 //604800 1 week
+  const time = 604800000 //604800 1 week in milliseconds
   const idsCheck = await publishers.findAll({
     attributes: ['publisherId']
   })
@@ -98,7 +98,7 @@ async function check(ids = {}){
       await readCsv.readCsv(id)
     }
   }
-  await delay(86400000) //1 day 86400000
+  await delay(86400000) //1 day 86400000 in milliseonds
   return check()
 }
 
