@@ -34,6 +34,44 @@ app.use(cors())
 
 require("./helper/cacheManager");
 
+async function check(ids = {}){
+  const time = 604800000 //604800 1 week in milliseconds
+  const idsCheck = await publishers.findAll({
+    attributes: ['publisherId']
+  })
+  if(Object.keys(ids).length === 0 || Object.keys(ids).length != idsCheck.length){
+    for(const id of idsCheck){
+        const update = await products.findOne({
+          where: { Page_ID: id.dataValues.publisherId },
+          order: [['createdAt', 'DESC']]
+        })
+        if(update == null){
+          await readCsv.readCsv(id.dataValues.publisherId)
+          ids[id.dataValues.publisherId] = new Date().getTime() / 1000
+        }else{
+          ids[id.dataValues.publisherId] = update.dataValues.createdAt.getTime() / 1000;
+        }
+    }
+  }
+  let now =  new Date().getTime() / 1000
+  for(const id in ids){
+    if(ids[id] + time <= now){
+      await clothing.destroy({
+        where: { Page_ID: id.dataValues.publisherId },
+        truncate: true
+      })
+      await products.destroy({
+        where: { Page_ID: id.dataValues.publisherId },
+        truncate: true
+      })
+      await readCsv.readCsv(id)
+    }
+  }
+  await delay(86400000) //1 day 86400000 in milliseonds
+  return check()
+}
+
+
 if (conf.get('install') == true) {
   console.log("Installing DB")
   mysql
@@ -51,6 +89,8 @@ if (conf.get('install') == true) {
       })
     })
   })
+}else {
+  check()
 }
 
 async function check(ids = {}){
