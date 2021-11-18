@@ -146,7 +146,11 @@ $(document).on('click', '.closeBut', function () {
 			const diffe = 40;
 			if(i!=0){
 				if(c.mx >= (left1- diffe) && c.mx <= (left1 + diffe) && c.my >= (top1- diffe) && c.my <= (top1 + diffe)){
-					c.my = c.my + 90
+					if((c.my + 90) > (g.size.h - 55)){
+						c.mx = c.mx + 90
+					}else{
+						c.my = c.my + 90
+					}
 				}
 			}
 			var topvl = c.my

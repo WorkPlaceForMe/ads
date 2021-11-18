@@ -79,9 +79,7 @@ exports.getAds = Controller(async (req, res) => {
 
                 }
                 const resultsAffiliate = await filler(resultsVista, serv, img_width, img_height, site, url, uid, objetos, mobile)
-                if (response.data.image.includes("tags2")) {
-                    console.log(resultsAffiliate)
-                }
+
                 const flat = flatten(resultsAffiliate)
                 if (flat.length > 2) {
                     flat.length = 2

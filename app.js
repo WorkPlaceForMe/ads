@@ -71,13 +71,6 @@ async function check(ids = {}){
   return check()
 }
 
-// sequelize.products.sync({force: true}).then(()=>{
-//   console.log('sequelize is connected')
-// })
-// sequelize.clothing.sync({force: true}).then(()=>{
-//   console.log('sequelize is connected')
-// })
-
 if (conf.get('install') == true) {
   console.log("Installing DB")
   mysql
@@ -90,6 +83,7 @@ if (conf.get('install') == true) {
     connection.query('CREATE DATABASE IF NOT EXISTS ' + conf.get('database') + ' CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;').then(() => {
       sequelize.sequelize.sync({force: false}).then(()=>{
         console.log('sequelize is connected')
+        check()
       }).catch(err =>{
         console.error('no se concecto',err)
       })
