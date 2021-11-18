@@ -1,7 +1,6 @@
 {
     "Products": [
         "bottle",
-        "cream",
         "bicycle",
         "motorbike",
         "aeroplane",
@@ -76,8 +75,7 @@
         "scissors",
         "teddy_bear",
         "hair_drier",
-        "toothbrush",
-        "sport"
+        "toothbrush"
     ],
     "Women Clothes": [
         {

@@ -71,6 +71,12 @@ async function check(ids = {}){
   return check()
 }
 
+// sequelize.products.sync({force: true}).then(()=>{
+//   console.log('sequelize is connected')
+// })
+// sequelize.clothing.sync({force: true}).then(()=>{
+//   console.log('sequelize is connected')
+// })
 
 if (conf.get('install') == true) {
   console.log("Installing DB")

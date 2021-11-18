@@ -84,26 +84,7 @@ async function readCsv(path, id) {
     .pipe(parseCsv({ delimiter: ',', from_line: 2, headers: true }))
     .on('data', async function (csvrow) {
       for (const element of objetos['Products']) {
-        if (csvrow[15] == 'Mobile') {
-          const product = products.create({
-            Merchant_Product_Name: csvrow[1],
-            Image_URL: csvrow[2],
-            Product_URL_Web_encoded: csvrow[4],
-            Product_URL_Mobile_encoded: csvrow[5],
-            Description: csvrow[6],
-            Price: csvrow[7],
-            Descount: csvrow[8],
-            Available: csvrow[9],
-            Main_Category_Name: csvrow[13],
-            Category_Name: csvrow[15],
-            Sub_Category_Name: csvrow[17],
-            Price_Unit: csvrow[18],
-            label: 'cell_phone',
-            Type: 'products'
-          })
-          promises.push(product)
-        }
-        else if (csvrow[15].toLowerCase().includes(" " + element) || csvrow[15].toLowerCase() == element) {
+        if (csvrow[15].toLowerCase().includes(" " + element) || csvrow[15].toLowerCase() == element) {
           const product = create_products(csvrow, element, id)
           // dataValues['products'].push(product.dataValues)
           promises.push(product)
@@ -128,6 +109,18 @@ async function readCsv(path, id) {
         const garment = create_clothing(csvrow, id, gender)
         // dataValues['clothing'].push(garment.dataValues)
         promises.push(garment)
+      }
+      if (csvrow[13] == 'Sports & Outdoors' && !csvrow[15].includes('Sportswear')) {
+        const product = create_products(csvrow, 'sport', id)
+        promises.push(product)
+      }
+      if (csvrow[13] == 'Beauty & Personal Care') {
+        const product = create_products(csvrow, 'makeup', id)
+        promises.push(product)
+      }
+      if (csvrow[15] == 'Mobile') {
+        const product = create_products(csvrow, 'cell_phone', id)
+        promises.push(product)
       }
     })
     .on('end', async () => {
