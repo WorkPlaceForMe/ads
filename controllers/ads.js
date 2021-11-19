@@ -79,7 +79,6 @@ exports.getAds = Controller(async (req, res) => {
 
                 }
                 const resultsAffiliate = await filler(resultsVista, serv, img_width, img_height, site, url, uid, objetos, mobile)
-
                 const flat = flatten(resultsAffiliate)
                 if (flat.length > 2) {
                     flat.length = 2
@@ -109,8 +108,9 @@ async function addImg(time, imgName, idGeneration, site) {
         site: site,
     })
 }
-async function filler(resultsVista, serv, img_width, img_height, site, url, uid, objetos, mobile) {
+function filler(resultsVista, serv, img_width, img_height, site, url, uid, objetos, mobile) {
     const resultsAffiliate = []
+   return new Promise((resolve)=>{
     if (resultsVista[0].sport.length != 0) {
         const bool = true
         for (const obj of resultsVista[0].sport) {
@@ -129,7 +129,6 @@ async function filler(resultsVista, serv, img_width, img_height, site, url, uid,
             }
         }
     }
-
     if (resultsVista[0]['face'].length != 0 && resultsVista[0]['fashion'][0].confidence > 0.6) {
         const gender = resultsVista[0].face[0].deep_gender.gender[0].label
         for (const obj of resultsVista[0]['fashion']) {
@@ -160,10 +159,8 @@ async function filler(resultsVista, serv, img_width, img_height, site, url, uid,
             }
         }
     }
-
-
-    return (resultsAffiliate);
-
+    resolve(resultsAffiliate);
+    })
 }
 
 const clothing_Filler = (obj, gender, objetos, serv, img_width, img_height, site, url, uid, mobile) => {
@@ -363,8 +360,8 @@ const sport_makeup_Filler = (bool, obj, objetos, serv, img_width, img_height, si
     return (resultsAffiliate_Temp)
 }
 
-function flatten(ary) {
-    return ary.reduce(function (a, b) {
+const flatten = ary =>{
+    return ary.reduce((a, b)=>{
         if (Array.isArray(b)) {
             return a.concat(flatten(b))
         }
