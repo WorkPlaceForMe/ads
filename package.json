@@ -6,6 +6,10 @@
     "start": "node -max-old-space-size=4096 app.js",
     "dev": "nodemon app.js"
   },
+  "authors": {
+    "author":"Alex Kaiser",
+    "co-author":"Rodrigo Garcia"
+  },
   "dependencies": {
     "ansi-regex": "^5.0.1",
     "axios": "^0.21.2",

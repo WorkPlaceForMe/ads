@@ -9,8 +9,9 @@ const { Readable } = require("stream");
 const db = require('../campaigns-db/database');
 const products = db.products
 const clothing = db.clothing
+
 exports.readCsv = async function (idPbl) {
-  const val1 = await db.sequelize.query(`SELECT EXISTS (SELECT 1 FROM ${conf.get('database')}.products );`)
+  const val1 = await db.sequelize.query(`SELECT EXISTS (SELECT 1 FROM ${conf.get('database')}.products);`)
   const val2 = await db.sequelize.query(`SELECT EXISTS (SELECT 1 FROM ${conf.get('database')}.clothings);`)
   let cachedDown = await cache.getAsync(`downloading-${idPbl}`);
   if (Object.values(val1[0][0])[0] == 1 && Object.values(val2[0][0])[0] == 1) {
@@ -23,16 +24,16 @@ exports.readCsv = async function (idPbl) {
     const dataValues = Clothing.concat(Products)
     
     return dataValues
-  }
-  else {
+  }else {
     console.log(cachedDown)
     if (cachedDown == 'false' || !cachedDown) {
       await cache.setAsync(`downloading-${idPbl}`, true);
-      return new Promise((resolve, reject) => {
+      // return new Promise((resolve, reject) => {
         const ids = {
           shopee: 677
         }
-        aff.getAff.then(async function (credentials) {
+        try{
+          const credentials = await aff.getAff()
           const token = jwt.sign(
             { sub: credentials.userUid },
             credentials.secretKey,
@@ -47,20 +48,48 @@ exports.readCsv = async function (idPbl) {
               'X-Accesstrade-User-Type': 'publisher'
             }
           }).then((affiliateResponse) => {
+            console.log(`Downloading ${idPbl}`)
             download(affiliateResponse.data.baseUrl, idPbl)
               .then((rs) => {
                 readCsv(rs, idPbl)
-                  .then((results =>
-                    resolve(results))).catch((err) => {
+                  .then((results) =>{
+                    return(results)}).catch((err) => {
                       console.error(err)
-                      reject(err)
+                      return(err)
                     })
               })
           })
-        })
-      })
-    }
-    else {
+        }catch(err){
+          console.log(err)
+        }
+        // aff.getAff.then(async function (credentials) {
+        //   const token = jwt.sign(
+        //     { sub: credentials.userUid },
+        //     credentials.secretKey,
+        //     {
+        //       algorithm: "HS256"
+        //     }
+        //   )
+        //   let affiliateEndpoint = `${conf.get('accesstrade_endpoint')}/v1/publishers/me/sites/${idPbl}/campaigns/677/productfeed/url`
+        //   axios.get(affiliateEndpoint, {
+        //     headers: {
+        //       'Authorization': `Bearer ${token}`,
+        //       'X-Accesstrade-User-Type': 'publisher'
+        //     }
+        //   }).then((affiliateResponse) => {
+        //     download(affiliateResponse.data.baseUrl, idPbl)
+        //       .then((rs) => {
+        //         readCsv(rs, idPbl)
+        //           .then((results =>
+        //             resolve(results))).catch((err) => {
+        //               console.error(err)
+        //               reject(err)
+        //             })
+        //       })
+        //   })
+        // })
+      // })
+    }else {
       cachedDown = await cache.getAsync(`downloading-${idPbl}`)
       while (cachedDown == 'true') {
         cachedDown = await cache.getAsync(`downloading-${idPbl}`)
@@ -175,7 +204,6 @@ const create_clothing = (csvrow, id, gender) => {
 }
 
 const download = async (url) => {
-  console.log(`Downloading shopee`)
   const resp = await axios.get(url)
   const Csv = Readable.from(resp.data)
   return (Csv)
