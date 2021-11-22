@@ -188,3 +188,50 @@ const flatten = ary =>{
   }, [])
 }
 
+exports.download = async function (idPbl) {
+  await cache.setAsync(`downloading-${idPbl}`, true);
+  try{
+    const credentials = await aff.getAff()
+    const token = jwt.sign(
+      { sub: credentials.userUid },
+      credentials.secretKey,
+      {
+        algorithm: "HS256"
+      }
+    )
+    let affiliateEndpoint = `${conf.get('accesstrade_endpoint')}/v1/publishers/me/sites/${idPbl}/campaigns/677/productfeed/url`
+    axios.get(affiliateEndpoint, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'X-Accesstrade-User-Type': 'publisher'
+      }
+    }).then((affiliateResponse) => {
+      console.log(`Downloading ${idPbl}`)
+      download(affiliateResponse.data.baseUrl, idPbl)
+        .then((rs) => {
+          readCsv(rs, idPbl)
+            .then((results) =>{
+              return(results)}).catch((err) => {
+                console.error(err)
+                return(err)
+              })
+        })
+    })
+  }catch(err){
+    console.log(err)
+    return err
+  }
+}
+
+exports.read = async function (idPbl){
+    const Clothing = await clothing.findAll({
+      raw: true,
+      where: { Page_ID: idPbl },
+    })
+    const Products = await products.findAll({
+      raw: true,
+      where: { Page_ID: idPbl },
+    })
+    const dataValues = Clothing.concat(Products)
+    return dataValues
+}
