@@ -12,7 +12,7 @@ const clothing = db.clothing
 
 exports.readCsv = async function (idPbl) {
   let cachedDown = await cache.getAsync(`downloading-${idPbl}`);
-  const val1 = products.count({whare})
+  const val1 = products.count()
   const val2 = clothing.count()
   const enter = await Promise.all([val1,val2])
   if (enter[0] >0 && enter[1] >1) {

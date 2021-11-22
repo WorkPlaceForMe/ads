@@ -8,10 +8,8 @@ const publishers = seq.publishers
 
 exports.create = async function(id,site,term){
     return new Promise((resolve, reject) =>{
-
     const affiliateEndpoint = `${conf.get('accesstrade_endpoint')}/v1/publishers/me/sites`
     const affiliateEndpointCampaings = `${conf.get('accesstrade_endpoint')}/v1/campaigns/affiliate`
-
     aff.getAff.then(async function(credentials){
         const token = jwt.sign(
             { sub: credentials.userUid},
@@ -20,7 +18,6 @@ exports.create = async function(id,site,term){
             algorithm: "HS256"
             }
         )
-
         try{
             const affiliateResponse = await axios.put(affiliateEndpoint, 
                 {
@@ -47,7 +44,6 @@ exports.create = async function(id,site,term){
             })
 
             await addPublisher(id,site,affiliateResponse.data.id)
-
             try{
                 const campaingResponse = await axios.post(affiliateEndpointCampaings, 
                     {
