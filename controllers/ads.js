@@ -34,67 +34,65 @@ exports.getAds = Controller(async (req, res) => {
             results: JSON.parse(cachedImg)
         })
 
-    await addImg(dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url, uid, site).then(async () => {
-        let checker = site.split('/')[2];
-        if (checker.includes('www.')) {
-            checker = checker.split('w.')[1]
+    await addImg(dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url, uid, site)
+    let checker = site.split('/')[2];
+    if (checker.includes('www.')) {
+        checker = checker.split('w.')[1]
+    }
+    const aut = await auth(checker, site.split('/')[0])
+    if (aut['enabled'] == false) {
+        console.log("Cancelling")
+        return res.status(400).json({ success: false, message: "Unauthorized" })
+    }
+    else {
+        let formData = new FormData()
+        formData.append('upload', request(url))
+        formData.append('subscriptions', 'face,fashion,Object,tags2,sport')
+        const request_config = {
+            method: 'post',
+            url: vista_url + apiEndpoint,
+            headers: {
+                'Content-Type': `multipart/form-data; boundary=${formData._boundary}`
+            },
+            auth: {
+                username: user,
+                password: password
+            },
+            data: formData
         }
-        const aut = await auth(checker, site.split('/')[0])
-        if (aut['enabled'] == false) {
-            console.log("Cancelling")
-            return res.status(400).json({ success: false, message: "Unauthorized" })
-        } else {
-            let formData = new FormData()
+        console.log("Sending request")
+        try {
+            console.log('=====================> VISTA RESPONSE <========================')
+            const response = await axios(request_config)
+            const objetos = await readCsv.readCsv(aut['idP'])
+            let resultsVista = []
+            if (response.data) {
+                resultsVista.push(response.data.results)
 
-            formData.append('upload', request(url))
-
-            formData.append('subscriptions', 'face,fashion,Object,tags2,sport')
-            const request_config = {
-                method: 'post',
-                url: vista_url + apiEndpoint,
-                headers: {
-                    'Content-Type': `multipart/form-data; boundary=${formData._boundary}`
-                },
-                auth: {
-                    username: user,
-                    password: password
-                },
-                data: formData
             }
-            console.log("Sending request")
-            try {
-                const response = await axios(request_config)
-                console.log('=====================> VISTA RESPONSE <========================')
-                const objetos = await readCsv.readCsv(aut['idP'])
-                let resultsVista = []
-
-                if (response.data) {
-                    resultsVista.push(response.data.results)
-
-                }
-                const resultsAffiliate = await filler(resultsVista, serv, img_width, img_height, site, url, uid, objetos, mobile)
-                const flat = flatten(resultsAffiliate)
-                if (flat.length > 2) {
-                    flat.length = 2
-                }
-                const sendingResults = await convert(flat)
-
-                await cache.setAsync(`${mobile}_${img_width}_${img_height}_${url}`, JSON.stringify(sendingResults));
-                res.status(200).send({
-                    results: sendingResults
-                })
+            const resultsAffiliate = await filler(resultsVista, serv, img_width, img_height, site, url, uid, objetos, mobile)
+            const flat = flatten(resultsAffiliate)
+            if (flat.length > 2) {
+                flat.length = 2
             }
-            catch (err) {
-                if (err.response)
-                    console.log(err.response.status, url)
-                await cache.setAsync(`${mobile}_${img_width}_${img_height}_${url}`, JSON.stringify({}));
-                return res.status(500).json({ success: false, message: "Vista Image failled", error: err, img: url })
-            }
+            const sendingResults = await convert(flat)
+
+            await cache.setAsync(`${mobile}_${img_width}_${img_height}_${url}`, JSON.stringify(sendingResults));
+            res.status(200).send({
+                results: sendingResults
+            })
         }
-    })
+        catch (err) {
+            if (err.response)
+                console.log(err.response.status, url)
+            await cache.setAsync(`${mobile}_${img_width}_${img_height}_${url}`, JSON.stringify({}));
+            console.trace(err)
+            return res.status(500).json({ success: false, message: "Vista Image failled", error: err, img: url })
+        }
+    }
 })
 
-async function addImg(time, imgName, idGeneration, site) {
+const addImg = (time, imgName, idGeneration, site) => {
     return imgsPage.create({
         time: time,
         img: imgName,
@@ -102,58 +100,61 @@ async function addImg(time, imgName, idGeneration, site) {
         site: site,
     })
 }
-function filler(resultsVista, serv, img_width, img_height, site, url, uid, objetos, mobile) {
+const filler = (resultsVista, serv, img_width, img_height, site, url, uid, objetos, mobile) => {
     const resultsAffiliate = []
-   return new Promise((resolve)=>{
-    if (resultsVista[0].sport.length != 0) {
-        const bool = true
-        for (const obj of resultsVista[0].sport) {
-            const result = sport_makeup_Filler(bool, obj, objetos, serv, img_width, img_height, site, url, uid, mobile)
-            if (result.length != 0) {
-                resultsAffiliate.push(result)
-            }
-        }
-    }
-    else if (resultsVista[0].tags2.tags2.tags2[0].label.includes("LIPSTICK" || "HAIR" || "FACE" || "PERFUME" || "PAINTBRUSH") || resultsVista[0].tags2.tags2.tags2[0].IAB.includes("IAB17-")) {
-        const bool = false
-        for (const obj of resultsVista[0].tags2.tags2.tags2) {
-            const result = sport_makeup_Filler(bool, obj, objetos, serv, img_width, img_height, site, url, uid, mobile)
-            if (result.length != 0) {
-                resultsAffiliate.push(result)
-            }
-        }
-    }
-    if (resultsVista[0]['face'].length != 0 && resultsVista[0]['fashion'][0].confidence > 0.6) {
-        const gender = resultsVista[0].face[0].deep_gender.gender[0].label
-        for (const obj of resultsVista[0]['fashion']) {
-            const result = clothing_Filler(obj, gender, objetos, serv, img_width, img_height, site, url, uid, mobile)
-            if (result.length != 0) {
-                resultsAffiliate.push(result)
-            }
-        }
-    }
-    for (const obj of resultsVista[0]['Object']) {
-        if (obj.class != 'person') {
-            if (obj.class == "bottle") {
-                const result = objetos.filter(obj2 => obj2.label == 'makeup' && obj2.Type == "products")
-                const count = result.length
-                let int = Math.floor(Math.random() * count)
-                resultsAffiliate.push({
-                    vista: obj, affiliate: result[int],
-                    add: { id: parseInt(result[int]['Merchant_Product_ID']), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
-                    serv: serv,
-                    size: { w: img_width, h: img_height }
-                })
-            }
-            else {
-                const result = object_Filler(obj, objetos, serv, img_width, img_height, site, url, uid, mobile)
+    return new Promise((resolve) => {
+        if (resultsVista[0].sport.length != 0) {
+            const bool = true
+            for (const obj of resultsVista[0].sport) {
+                const result = sport_makeup_Filler(bool, obj, objetos, serv, img_width, img_height, site, url, uid, mobile)
                 if (result.length != 0) {
                     resultsAffiliate.push(result)
                 }
             }
         }
-    }
-    resolve(resultsAffiliate);
+        else if (resultsVista[0].tags2.tags2.tags2[0].label.includes("LIPSTICK" || "HAIR" || "FACE" || "PERFUME" || "PAINTBRUSH") || resultsVista[0].tags2.tags2.tags2[0].IAB.includes("IAB17-")) {
+            const bool = false
+            for (const obj of resultsVista[0].tags2.tags2.tags2) {
+                const result = sport_makeup_Filler(bool, obj, objetos, serv, img_width, img_height, site, url, uid, mobile)
+                if (result.length != 0) {
+                    resultsAffiliate.push(result)
+                }
+            }
+        }
+        if (resultsVista[0]['face'].length != 0 && resultsVista[0]['fashion'][0].confidence > 0.6) {
+            const gender = resultsVista[0].face[0].deep_gender.gender[0].label
+            for (const obj of resultsVista[0]['fashion']) {
+                const result = clothing_Filler(obj, gender, objetos, serv, img_width, img_height, site, url, uid, mobile)
+                if (result.length != 0) {
+                    resultsAffiliate.push(result)
+                }
+            }
+        }
+        for (const obj of resultsVista[0]['Object']) {
+            if (obj.class != 'person') {
+                if (obj.class == "bottle") {
+                    const result = objetos.filter(obj2 => obj2.label == 'makeup' && obj2.Type == "products")
+                    const count = result.length-1
+                    if(count == -1){
+                        return []
+                    }
+                    let int = Math.floor(Math.random() * count)
+                    resultsAffiliate.push({
+                        vista: obj, affiliate: result[int],
+                        add: { id: parseInt(result[int]['Merchant_Product_ID']), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
+                        serv: serv,
+                        size: { w: img_width, h: img_height }
+                    })
+                }
+                else {
+                    const result = object_Filler(obj, objetos, serv, img_width, img_height, site, url, uid, mobile)
+                    if (result.length != 0) {
+                        resultsAffiliate.push(result)
+                    }
+                }
+            }
+        }
+        resolve(resultsAffiliate);
     })
 }
 
@@ -164,7 +165,10 @@ const clothing_Filler = (obj, gender, objetos, serv, img_width, img_height, site
             if (obj.class == 'upper' && obj.confidence > 0.6) {
                 if (obj.deep_fashion_tf.collar_design[0] == 'Shirt') {
                     const result = objetos.filter(obj2 => obj2.Gender == gender && obj2.Category_Name == 'Shirts')
-                    const count = result.length
+                    const count = result.length-1
+                    if(count == -1){
+                        return []
+                    }
                     let int = Math.floor(Math.random() * count)
                     resultsAffiliate_Temp.push({
                         vista: obj, affiliate: result[int],
@@ -176,7 +180,10 @@ const clothing_Filler = (obj, gender, objetos, serv, img_width, img_height, site
                 }
                 else {
                     const result = objetos.filter(obj2 => obj2.Gender == gender && obj2.Category_Name == 'T-Shirts')
-                    const count = result.length
+                    const count = result.length-1
+                    if(count == -1){
+                        return []
+                    }
                     let int = Math.floor(Math.random() * count)
                     resultsAffiliate_Temp.push({
                         vista: obj, affiliate: result[int],
@@ -190,7 +197,10 @@ const clothing_Filler = (obj, gender, objetos, serv, img_width, img_height, site
             if (obj.class == 'lower' && obj.confidence > 0.6) {
                 if (obj.deep_fashion_tf.pant_length[0] == 'FullLength') {
                     const result = objetos.filter(obj2 => obj2.Gender == gender && obj2.Category_Name == 'Long Pants')
-                    const count = result.length
+                    const count = result.length-1
+                    if(count == -1){
+                        return []
+                    }
                     let int = Math.floor(Math.random() * count)
                     resultsAffiliate_Temp.push({
                         vista: obj, affiliate: result[int],
@@ -202,7 +212,10 @@ const clothing_Filler = (obj, gender, objetos, serv, img_width, img_height, site
                 }
                 else {
                     const result = objetos.filter(obj2 => obj2.Gender == gender && obj2.Category_Name == 'Shorts')
-                    const count = result.length
+                    const count = result.length-1
+                    if(count == -1){
+                        return []
+                    }
                     let int = Math.floor(Math.random() * count)
                     resultsAffiliate_Temp.push({
                         vista: obj, affiliate: result[int],
@@ -250,7 +263,10 @@ const clothing_Filler = (obj, gender, objetos, serv, img_width, img_height, site
             if (obj.class == 'lower' && obj.confidence > 0.6) {
                 if (obj.deep_fashion_tf.pant_length[0] == 'FullLength') {
                     const result = objetos.filter(obj2 => obj2.Gender == gender && obj2.Sub_Category_Name == 'Pants')
-                    const count = result.length
+                    const count = result.length-1
+                    if(count == -1){
+                        return []
+                    }
                     let int = Math.floor(Math.random() * count)
                     resultsAffiliate_Temp.push({
                         vista: obj, affiliate: result[int],
@@ -262,7 +278,10 @@ const clothing_Filler = (obj, gender, objetos, serv, img_width, img_height, site
                 }
                 else {
                     const result = objetos.filter(obj2 => obj2.Gender == gender && obj2.Category_Name == 'Jeans')
-                    const count = result.length
+                    const count = result.length-1
+                    if(count == -1){
+                        return []
+                    }
                     let int = Math.floor(Math.random() * count)
                     resultsAffiliate_Temp.push({
                         vista: obj, affiliate: result[int],
@@ -282,8 +301,11 @@ const object_Filler = (obj, objetos, serv, img_width, img_height, site, url, uid
     const resultsAffiliate_Temp = []
     if (resultsAffiliate_Temp.length < 2) {
         const result = objetos.filter(obj2 => obj2.label == obj.class && obj2.Type == "products")
-        const count = result.length
-        let int = Math.floor(Math.random() * count)
+        const count = result.length-1
+        if(count == -1){
+            return []
+        }
+        const int = Math.floor(Math.random() * count)
         resultsAffiliate_Temp.push({
             vista: obj, affiliate: result[int],
             add: { id: parseInt(result[int]['Merchant_Product_ID']), site: site, date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url: url, uid: uid },
@@ -301,7 +323,10 @@ const sport_makeup_Filler = (bool, obj, objetos, serv, img_width, img_height, si
         if (bool) {
             if (obj.class.includes('Beauty')) {
                 const result = objetos.filter(obj2 => obj2.label == 'makeup' && obj2.Type == "products")
-                const count = result.length
+                const count = result.length-1
+                if(count == -1){
+                    return []
+                }
                 let int = Math.floor(Math.random() * count)
                 resultsAffiliate_Temp.push({
                     vista: obj, affiliate: result[int],
@@ -313,7 +338,10 @@ const sport_makeup_Filler = (bool, obj, objetos, serv, img_width, img_height, si
             }
             if (obj.class.includes('Sports')) {
                 const result = objetos.filter(obj2 => obj2.label == 'sport' && obj2.Type == "products")
-                const count = result.length
+                const count = result.length-1
+                if(count == -1){
+                    return []
+                }
                 let int = Math.floor(Math.random() * count)
                 resultsAffiliate_Temp.push({
                     vista: obj, affiliate: result[int],
@@ -327,7 +355,10 @@ const sport_makeup_Filler = (bool, obj, objetos, serv, img_width, img_height, si
         else {
             if (obj.label.includes("LIPSTICK" || "HAIR" || "FACE" || "PERFUME" || "PAINTBRUSH")) {
                 const result = objetos.filter(obj2 => obj2.label == 'makeup' && obj2.Type == "products")
-                const count = result.length
+                const count = result.length-1
+                if(count == -1){
+                    return []
+                }
                 let int = Math.floor(Math.random() * count)
                 resultsAffiliate_Temp.push({
                     vista: obj, affiliate: result[int],
@@ -339,7 +370,10 @@ const sport_makeup_Filler = (bool, obj, objetos, serv, img_width, img_height, si
             }
             if (obj.IAB.includes('IAB17')) {
                 const result = objetos.filter(obj2 => obj2.label == 'sport' && obj2.Type == "products")
-                const count = result.length
+                const count = result.length-1
+                if(count == -1){
+                    return []
+                }
                 let int = Math.floor(Math.random() * count)
                 resultsAffiliate_Temp.push({
                     vista: obj, affiliate: result[int],
@@ -354,8 +388,8 @@ const sport_makeup_Filler = (bool, obj, objetos, serv, img_width, img_height, si
     return (resultsAffiliate_Temp)
 }
 
-const flatten = ary =>{
-    return ary.reduce((a, b)=>{
+const flatten = ary => {
+    return ary.reduce((a, b) => {
         if (Array.isArray(b)) {
             return a.concat(flatten(b))
         }

@@ -43,7 +43,6 @@ exports.create = async function(id,site,term){
             })
 
             await addPublisher(id,site,affiliateResponse.data.id)
-
             try{
                 const campaingResponse = await axios.post(affiliateEndpointCampaings, 
                     {
