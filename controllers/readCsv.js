@@ -62,33 +62,6 @@ exports.readCsv = async function (idPbl) {
         }catch(err){
           console.log(err)
         }
-        // aff.getAff.then(async function (credentials) {
-        //   const token = jwt.sign(
-        //     { sub: credentials.userUid },
-        //     credentials.secretKey,
-        //     {
-        //       algorithm: "HS256"
-        //     }
-        //   )
-        //   let affiliateEndpoint = `${conf.get('accesstrade_endpoint')}/v1/publishers/me/sites/${idPbl}/campaigns/677/productfeed/url`
-        //   axios.get(affiliateEndpoint, {
-        //     headers: {
-        //       'Authorization': `Bearer ${token}`,
-        //       'X-Accesstrade-User-Type': 'publisher'
-        //     }
-        //   }).then((affiliateResponse) => {
-        //     download(affiliateResponse.data.baseUrl, idPbl)
-        //       .then((rs) => {
-        //         readCsv(rs, idPbl)
-        //           .then((results =>
-        //             resolve(results))).catch((err) => {
-        //               console.error(err)
-        //               reject(err)
-        //             })
-        //       })
-        //   })
-        // })
-      // })
     }else {
       cachedDown = await cache.getAsync(`downloading-${idPbl}`)
       while (cachedDown == 'true') {
