@@ -2,17 +2,14 @@ const conf = require('../middleware/prop')
 const axios = require('axios')
 const aff = require('./affiliate')
 const jwt = require('jsonwebtoken')
-const db = require('./dbconnection')
 const seq = require('../campaigns-db/database')
 const publishers = seq.publishers
 
 exports.create = async function(id,site,term){
-    return new Promise((resolve, reject) =>{
-
     const affiliateEndpoint = `${conf.get('accesstrade_endpoint')}/v1/publishers/me/sites`
     const affiliateEndpointCampaings = `${conf.get('accesstrade_endpoint')}/v1/campaigns/affiliate`
-
-    aff.getAff.then(async function(credentials){
+    try{
+        const credentials = await aff.getAff()
         const token = jwt.sign(
             { sub: credentials.userUid},
             credentials.secretKey,
@@ -20,8 +17,7 @@ exports.create = async function(id,site,term){
             algorithm: "HS256"
             }
         )
-
-        try{
+            try{
             const affiliateResponse = await axios.put(affiliateEndpoint, 
                 {
                     "name": site,
@@ -65,18 +61,19 @@ exports.create = async function(id,site,term){
                         }
                 })
 
-                resolve(campaingResponse.data)
+                return(campaingResponse.data)
             } catch(err) {
                 console.error(err)
-                reject(err)
+                return(err)
             }
 
         } catch(err) {
             console.error(err)
-            reject(err)
+            return(err)
         }
-    }).catch((err)=>{console.error(err)})
-})
+    }catch(err){
+        console.error(err)
+    }
 }
 
 const addPublisher = async function(id,site,idAffiliate){
