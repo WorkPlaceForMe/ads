@@ -76,7 +76,7 @@ exports.create = async function(id,site,term){
     }
 }
 
-const addPublisher = async function(id,site,idAffiliate){
+const addPublisher = function(id,site,idAffiliate){
     return publishers.create({
         id: id,
         name: site,
