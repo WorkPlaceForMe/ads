@@ -234,7 +234,10 @@ const clothing_Filler = (obj, gender, objetos, serv, img_width, img_height, site
                         if (obj2.Gender == gender && obj2.Sub_Category_Name == 'Shirts')
                             return true
                     })
-                    const count = prendras.length
+                    const count = prendras.length - 1
+                    if(count == -1){
+                        return []
+                    }
                     let int = Math.floor(Math.random() * count)
                     resultsAffiliate_Temp.push({
                         vista: obj, affiliate: prendras[int],
@@ -249,7 +252,10 @@ const clothing_Filler = (obj, gender, objetos, serv, img_width, img_height, site
                         if (obj2.Gender == gender && obj2.Category_Name == 'Tops')
                             return true
                     })
-                    const count = prendras.length
+                    const count = prendras.length - 1
+                    if(count == -1){
+                        return []
+                    }
                     let int = Math.floor(Math.random() * count)
                     resultsAffiliate_Temp.push({
                         vista: obj, affiliate: prendras[int],
