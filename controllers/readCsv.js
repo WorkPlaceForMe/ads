@@ -12,10 +12,14 @@ const clothing = db.clothing
 
 exports.readCsv = async function (idPbl) {
   let cachedDown = await cache.getAsync(`downloading-${idPbl}`);
-  const val1 = products.count()
-  const val2 = clothing.count()
+  const val1 = products.findOne(
+    {where: { Page_ID : idPbl}}
+  )
+  const val2 = clothing.findOne(
+    {where: { Page_ID : idPbl}}
+  )
   const enter = await Promise.all([val1, val2])
-  if (enter[0] > 0 && enter[1] > 1) {
+  if (enter[0] != null && enter[1] != null) {
     const Clothing = clothing.findAll({
       raw: true,
       where: { Page_ID: idPbl },
@@ -28,7 +32,8 @@ exports.readCsv = async function (idPbl) {
     const flat = flatten(dataValues)
     return flat
   }
-  else if (cachedDown == 'false' || !cachedDown) {
+  else {
+    if (cachedDown == 'false' || !cachedDown) {
     await cache.setAsync(`downloading-${idPbl}`, true);
     const ids = {
       shopee: 677
@@ -71,6 +76,7 @@ exports.readCsv = async function (idPbl) {
     const flat = flatten(dataValues)
     return flat
   }
+}
 }
 
 async function readCsv(Readable, id) {
