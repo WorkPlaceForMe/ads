@@ -121,12 +121,14 @@ const filler = (resultsVista, serv, img_width, img_height, site, url, uid, objet
                 }
             }
         }
-        if (resultsVista[0]['face'].length != 0 && resultsVista[0]['fashion'][0].confidence > 0.6) {
-            const gender = resultsVista[0].face[0].deep_gender.gender[0].label
-            for (const obj of resultsVista[0]['fashion']) {
-                const result = clothing_Filler(obj, gender, objetos, serv, img_width, img_height, site, url, uid, mobile)
-                if (result.length != 0) {
-                    resultsAffiliate.push(result)
+        if (resultsVista[0]['fashion'].label != 0) {
+            if (resultsVista[0]['face'].length != 0 && resultsVista[0]['fashion'][0].confidence > 0.6) {
+                const gender = resultsVista[0].face[0].deep_gender.gender[0].label
+                for (const obj of resultsVista[0]['fashion']) {
+                    const result = clothing_Filler(obj, gender, objetos, serv, img_width, img_height, site, url, uid, mobile)
+                    if (result.length != 0) {
+                        resultsAffiliate.push(result)
+                    }
                 }
             }
         }
@@ -134,8 +136,8 @@ const filler = (resultsVista, serv, img_width, img_height, site, url, uid, objet
             if (obj.class != 'person') {
                 if (obj.class == "bottle") {
                     const result = objetos.filter(obj2 => obj2.label == 'makeup' && obj2.Type == "products")
-                    const count = result.length-1
-                    if(count == -1){
+                    const count = result.length - 1
+                    if (count == -1) {
                         return []
                     }
                     let int = Math.floor(Math.random() * count)
@@ -165,8 +167,8 @@ const clothing_Filler = (obj, gender, objetos, serv, img_width, img_height, site
             if (obj.class == 'upper' && obj.confidence > 0.6) {
                 if (obj.deep_fashion_tf.collar_design[0] == 'Shirt') {
                     const result = objetos.filter(obj2 => obj2.Gender == gender && obj2.Category_Name == 'Shirts')
-                    const count = result.length-1
-                    if(count == -1){
+                    const count = result.length - 1
+                    if (count == -1) {
                         return []
                     }
                     let int = Math.floor(Math.random() * count)
@@ -180,8 +182,8 @@ const clothing_Filler = (obj, gender, objetos, serv, img_width, img_height, site
                 }
                 else {
                     const result = objetos.filter(obj2 => obj2.Gender == gender && obj2.Category_Name == 'T-Shirts')
-                    const count = result.length-1
-                    if(count == -1){
+                    const count = result.length - 1
+                    if (count == -1) {
                         return []
                     }
                     let int = Math.floor(Math.random() * count)
@@ -197,8 +199,8 @@ const clothing_Filler = (obj, gender, objetos, serv, img_width, img_height, site
             if (obj.class == 'lower' && obj.confidence > 0.6) {
                 if (obj.deep_fashion_tf.pant_length[0] == 'FullLength') {
                     const result = objetos.filter(obj2 => obj2.Gender == gender && obj2.Category_Name == 'Long Pants')
-                    const count = result.length-1
-                    if(count == -1){
+                    const count = result.length - 1
+                    if (count == -1) {
                         return []
                     }
                     let int = Math.floor(Math.random() * count)
@@ -212,8 +214,8 @@ const clothing_Filler = (obj, gender, objetos, serv, img_width, img_height, site
                 }
                 else {
                     const result = objetos.filter(obj2 => obj2.Gender == gender && obj2.Category_Name == 'Shorts')
-                    const count = result.length-1
-                    if(count == -1){
+                    const count = result.length - 1
+                    if (count == -1) {
                         return []
                     }
                     let int = Math.floor(Math.random() * count)
@@ -235,7 +237,7 @@ const clothing_Filler = (obj, gender, objetos, serv, img_width, img_height, site
                             return true
                     })
                     const count = prendras.length - 1
-                    if(count == -1){
+                    if (count == -1) {
                         return []
                     }
                     let int = Math.floor(Math.random() * count)
@@ -253,7 +255,7 @@ const clothing_Filler = (obj, gender, objetos, serv, img_width, img_height, site
                             return true
                     })
                     const count = prendras.length - 1
-                    if(count == -1){
+                    if (count == -1) {
                         return []
                     }
                     let int = Math.floor(Math.random() * count)
@@ -269,8 +271,8 @@ const clothing_Filler = (obj, gender, objetos, serv, img_width, img_height, site
             if (obj.class == 'lower' && obj.confidence > 0.6) {
                 if (obj.deep_fashion_tf.pant_length[0] == 'FullLength') {
                     const result = objetos.filter(obj2 => obj2.Gender == gender && obj2.Sub_Category_Name == 'Pants')
-                    const count = result.length-1
-                    if(count == -1){
+                    const count = result.length - 1
+                    if (count == -1) {
                         return []
                     }
                     let int = Math.floor(Math.random() * count)
@@ -284,8 +286,8 @@ const clothing_Filler = (obj, gender, objetos, serv, img_width, img_height, site
                 }
                 else {
                     const result = objetos.filter(obj2 => obj2.Gender == gender && obj2.Category_Name == 'Jeans')
-                    const count = result.length-1
-                    if(count == -1){
+                    const count = result.length - 1
+                    if (count == -1) {
                         return []
                     }
                     let int = Math.floor(Math.random() * count)
@@ -306,9 +308,9 @@ const clothing_Filler = (obj, gender, objetos, serv, img_width, img_height, site
 const object_Filler = (obj, objetos, serv, img_width, img_height, site, url, uid, mobile) => {
     const resultsAffiliate_Temp = []
     if (resultsAffiliate_Temp.length < 2) {
-        const result = objetos.filter(obj2 => obj2.label == obj.class && obj2.Type == "products")
-        const count = result.length-1
-        if(count == -1){
+        const result = objetos.filter(obj2 => obj2.label == obj.class && obj2.Type == "products" && obj.confidence >= 0.6)
+        const count = result.length - 1
+        if (count == -1) {
             return []
         }
         const int = Math.floor(Math.random() * count)
@@ -329,8 +331,8 @@ const sport_makeup_Filler = (bool, obj, objetos, serv, img_width, img_height, si
         if (bool) {
             if (obj.class.includes('Beauty')) {
                 const result = objetos.filter(obj2 => obj2.label == 'makeup' && obj2.Type == "products")
-                const count = result.length-1
-                if(count == -1){
+                const count = result.length - 1
+                if (count == -1) {
                     return []
                 }
                 let int = Math.floor(Math.random() * count)
@@ -344,8 +346,8 @@ const sport_makeup_Filler = (bool, obj, objetos, serv, img_width, img_height, si
             }
             if (obj.class.includes('Sports')) {
                 const result = objetos.filter(obj2 => obj2.label == 'sport' && obj2.Type == "products")
-                const count = result.length-1
-                if(count == -1){
+                const count = result.length - 1
+                if (count == -1) {
                     return []
                 }
                 let int = Math.floor(Math.random() * count)
@@ -361,8 +363,8 @@ const sport_makeup_Filler = (bool, obj, objetos, serv, img_width, img_height, si
         else {
             if (obj.label.includes("LIPSTICK" || "HAIR" || "FACE" || "PERFUME" || "PAINTBRUSH")) {
                 const result = objetos.filter(obj2 => obj2.label == 'makeup' && obj2.Type == "products")
-                const count = result.length-1
-                if(count == -1){
+                const count = result.length - 1
+                if (count == -1) {
                     return []
                 }
                 let int = Math.floor(Math.random() * count)
@@ -376,8 +378,8 @@ const sport_makeup_Filler = (bool, obj, objetos, serv, img_width, img_height, si
             }
             if (obj.IAB.includes('IAB17')) {
                 const result = objetos.filter(obj2 => obj2.label == 'sport' && obj2.Type == "products")
-                const count = result.length-1
-                if(count == -1){
+                const count = result.length - 1
+                if (count == -1) {
                     return []
                 }
                 let int = Math.floor(Math.random() * count)
