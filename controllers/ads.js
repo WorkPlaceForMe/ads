@@ -112,7 +112,8 @@ const filler = (resultsVista, serv, img_width, img_height, site, url, uid, objet
                 }
             }
         }
-        else if (resultsVista[0].tags2.tags2.tags2[0].label.includes("LIPSTICK" || "HAIR" || "FACE" || "PERFUME" || "PAINTBRUSH") || resultsVista[0].tags2.tags2.tags2[0].IAB.includes("IAB17-")) {
+        else if (resultsVista[0].tags2.tags2.tags2.length != 0){
+            if(resultsVista[0].tags2.tags2.tags2[0].label.includes("LIPSTICK" || "HAIR" || "FACE" || "PERFUME" || "PAINTBRUSH") || resultsVista[0].tags2.tags2.tags2[0].IAB.includes("IAB17-")) {
             const bool = false
             for (const obj of resultsVista[0].tags2.tags2.tags2) {
                 const result = sport_makeup_Filler(bool, obj, objetos, serv, img_width, img_height, site, url, uid, mobile)
@@ -121,7 +122,8 @@ const filler = (resultsVista, serv, img_width, img_height, site, url, uid, objet
                 }
             }
         }
-        if (resultsVista[0]['fashion'].label != 0) {
+        }
+        if (resultsVista[0]['fashion'].length != 0) {
             if (resultsVista[0]['face'].length != 0 && resultsVista[0]['fashion'][0].confidence > 0.6) {
                 const gender = resultsVista[0].face[0].deep_gender.gender[0].label
                 for (const obj of resultsVista[0]['fashion']) {
