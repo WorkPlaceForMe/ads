@@ -121,7 +121,7 @@ const filler = (resultsVista, serv, img_width, img_height, site, url, uid, objet
                 }
             }
         }
-        if (resultsVista[0]['fashion'].label != 0) {
+        if (resultsVista[0]['fashion'].length != 0) {
             if (resultsVista[0]['face'].length != 0 && resultsVista[0]['fashion'][0].confidence > 0.6) {
                 const gender = resultsVista[0].face[0].deep_gender.gender[0].label
                 for (const obj of resultsVista[0]['fashion']) {
