@@ -1,6 +1,7 @@
 app.properties
 public/**
 !public/g3c.scan.image.sph.js
+!public/index.html
 !public/pictures/iconBorder.gif
 !public/pictures/vector2x.png
 adscopeManual.docx
