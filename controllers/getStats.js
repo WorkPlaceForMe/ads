@@ -287,7 +287,7 @@ exports.getStatsUrl = Controller(async(req, res) => {
                             }
                             // console.table(table)
                             const ids = await getPublisherId(req.query.url)
-                            let rewards;
+                            let rewards = {};
                             try{
                                 rewards = await reportAff.report(req.query.init,req.query.fin,ids[0].publisherId)
                             }catch(err){
