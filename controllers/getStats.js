@@ -118,7 +118,7 @@ exports.getStats = Controller(async(req, res) => {
 
                                 const init = new Date(req.query.init).toISOString()
                                 const fin = new Date(req.query.fin).toISOString()
-                                let rewards;
+                                let rewards = {};
                                 if(ids[0].enabled == 'true'){
                                         ids[0].enabled  = true
                                     }else if(ids[0].enabled == 'false'){
