@@ -13,7 +13,6 @@ const portS = conf.get('portS')
 const https = require('https');
 const http = require('http');
 const fs = require('fs');
-const shell = require("shelljs");
 const options = {
   key: fs.readFileSync('key.pem'),
   cert: fs.readFileSync('cert.pem')
@@ -21,6 +20,12 @@ const options = {
 const sequelize = require('./campaigns-db/database')
 const httpsServer = https.createServer(options, app);
 const httpServer = http.createServer(app);
+const db1 = require('./campaigns-db/database')
+const products = db1.products
+const clothing = db1.clothing
+const publishers = db1.publishers
+const readCsv = require('./controllers/readCsv')
+const { delay } = require('bluebird')
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
@@ -29,6 +34,42 @@ app.use(cors())
 
 require("./helper/cacheManager");
 
+async function check(ids = {}){
+  const time = 604800000 //604800 1 week in milliseconds
+  const idsCheck = await publishers.findAll({
+    attributes: ['publisherId']
+  })
+  if(Object.keys(ids).length === 0 || Object.keys(ids).length != idsCheck.length){
+    for(const id of idsCheck){
+        const update = await products.findOne({
+          where: { Page_ID: id.dataValues.publisherId },
+          order: [['createdAt', 'DESC']]
+        })
+        if(update == null){
+          await readCsv.readCsv(id.dataValues.publisherId)
+          ids[id.dataValues.publisherId] = new Date().getTime() / 1000
+        }else{
+          ids[id.dataValues.publisherId] = update.dataValues.createdAt.getTime() / 1000;
+        }
+    }
+  }
+  let now =  new Date().getTime() / 1000
+  for(const id in ids){
+    if(ids[id] + time <= now){
+      await clothing.destroy({
+        where: { Page_ID: id.dataValues.publisherId },
+        truncate: true
+      })
+      await products.destroy({
+        where: { Page_ID: id.dataValues.publisherId },
+        truncate: true
+      })
+      await readCsv.readCsv(id)
+    }
+  }
+  await delay(86400000) //1 day 86400000 in milliseonds
+  return check()
+}
 
 if (conf.get('install') == true) {
   console.log("Installing DB")
@@ -40,13 +81,16 @@ if (conf.get('install') == true) {
   })
   .then(connection => {
     connection.query('CREATE DATABASE IF NOT EXISTS ' + conf.get('database') + ' CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;').then(() => {
-      sequelize.sequelize.sync({force: true}).then(()=>{
+      sequelize.sequelize.sync({force: false}).then(()=>{
         console.log('sequelize is connected')
+        check()
       }).catch(err =>{
         console.error('no se concecto',err)
       })
     })
   })
+}else {
+  check()
 }
 
 // view engine setup

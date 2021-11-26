@@ -2,218 +2,245 @@ const axios = require('axios')
 const aff = require('../helper/affiliate')
 const jwt = require('jsonwebtoken')
 const conf = require('../middleware/prop')
-const fs = require('fs');
 const cache = require('../helper/cacheManager')
 const parseCsv = require('csv-parse');
 const objetos = require('../csv/objetos2.json');
-const arrObjetos = Object.keys(objetos[0])
-const WomenClothes = Object.keys(objetos[1]['Women Clothes'])
-const MenClothes = Object.keys(objetos[1]["Men Clothes"])
 const { Readable } = require("stream");
-const db = require('../campaigns-db/database')
+const db = require('../campaigns-db/database');
 const products = db.products
 const clothing = db.clothing
 
 exports.readCsv = async function (idPbl) {
-  if (fs.existsSync(`./csv/${idPbl}.json`)) {
-    return new Promise((resolve, reject) => {
-      let res = require(`../csv/${idPbl}.json`);
-      resolve(res)
-    })
-  }
   let cachedDown = await cache.getAsync(`downloading-${idPbl}`);
-  if (cachedDown == 'false' || !cachedDown) {
-    await cache.setAsync(`downloading-${idPbl}`, true);
-    return new Promise(function (resolve, reject) {
-      const ids = {
-        //lazada : 520,
-        //trueShopping : 594,
-        shopee: 677
-      }
-      // let result = []
-      aff.getAff.then(async function (credentials) {
-        const token = jwt.sign(
-          { sub: credentials.userUid },
-          credentials.secretKey,
-          {
-            algorithm: "HS256"
-          }
-        )
-        // for(const id in ids){
-        let affiliateEndpoint = `${conf.get('accesstrade_endpoint')}/v1/publishers/me/sites/${idPbl}/campaigns/677/productfeed/url`
-
-        try {
-          const affiliateResponse = await axios.get(affiliateEndpoint, {
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'X-Accesstrade-User-Type': 'publisher'
-            }
-          })
-          console.log(`Downloading shopee`)
-          const rs = await download(affiliateResponse.data.baseUrl, idPbl)
-
-          const results = await readCsv(rs, idPbl)
-          resolve(results)
-
-        } catch (err) {
-          console.error(err)
-        }
-
-      }).catch((err) => {
-        reject(err)
-      })
+  const val1 = products.findOne(
+    {where: { Page_ID : idPbl}}
+  )
+  const val2 = clothing.findOne(
+    {where: { Page_ID : idPbl}}
+  )
+  const enter = await Promise.all([val1, val2])
+  if (enter[0] != null && enter[1] != null) {
+    const Clothing = clothing.findAll({
+      raw: true,
+      where: { Page_ID: idPbl },
     })
+    const Products = products.findAll({
+      raw: true,
+      where: { Page_ID: idPbl },
+    })
+    const dataValues = await Promise.all([Clothing, Products])
+    const flat = flatten(dataValues)
+    return flat
   }
   else {
+    if (cachedDown == 'false' || !cachedDown) {
+    await cache.setAsync(`downloading-${idPbl}`, true);
+    const ids = {
+      shopee: 677
+    }
+    try {
+      const credentials = await aff.getAff()
+      const token = jwt.sign(
+        { sub: credentials.userUid },
+        credentials.secretKey,
+        {
+          algorithm: "HS256"
+        }
+      )
+      let affiliateEndpoint = `${conf.get('accesstrade_endpoint')}/v1/publishers/me/sites/${idPbl}/campaigns/677/productfeed/url`
+      const affiliateResponse = await axios.get(affiliateEndpoint, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'X-Accesstrade-User-Type': 'publisher'
+        }
+      })
+      const rs = await download(affiliateResponse.data.baseUrl, idPbl)
+      const results = await readCsv(rs, idPbl)
+      return results
+    } catch (err) {
+      console.log(err)
+    }
+  } else {
     cachedDown = await cache.getAsync(`downloading-${idPbl}`)
     while (cachedDown == 'true') {
       cachedDown = await cache.getAsync(`downloading-${idPbl}`)
       continue;
     }
-    return new Promise((resolve, reject) => {
-      let res = require(`../csv/${idPbl}.json`);
-      resolve(res)
+    const Clothing = clothing.findAll({
+      raw: true
     })
+    const Products = products.findAll({
+      raw: true
+    })
+    const dataValues = await Promise.all([Clothing, Products])
+    const flat = flatten(dataValues)
+    return flat
+  }
+}
+}
+
+async function readCsv(Readable, id) {
+  const promises = []
+  console.log('piping')
+  var sendDate = (new Date()).getTime();
+  Readable
+    .pipe(parseCsv({ delimiter: ',', from_line: 2, headers: true }))
+    .on('data', function (csvrow) {
+      for (const element of objetos['Products']) {
+        if (csvrow[15].toLowerCase().includes(" " + element) || csvrow[15].toLowerCase() == element) {
+          const product = create_products(csvrow, element, id)
+          promises.push(product)
+        } else if (csvrow[17].toLowerCase().includes(" " + element) || csvrow[17].toLowerCase() == element) {
+          const product = create_products(csvrow, element, id)
+          promises.push(product)
+        } else if (csvrow[13].toLowerCase().includes(" " + element) || csvrow[13].toLowerCase() == element) {
+          const product = create_products(csvrow, element, id)
+          promises.push(product)
+        }
+      }
+      if (csvrow[13] == 'Women Clothes') {
+        const gender = "Female"
+        const garment = create_clothing(csvrow, id, gender)
+        promises.push(garment)
+      }
+      if (csvrow[13] == 'Men Clothes') {
+        const gender = 'Male'
+        const garment = create_clothing(csvrow, id, gender)
+        promises.push(garment)
+      }
+      if (csvrow[13] == 'Sports & Outdoors' && !csvrow[15].includes('Sportswear')) {
+        const product = create_products(csvrow, 'sport', id)
+        promises.push(product)
+      }
+      if (csvrow[13] == 'Beauty & Personal Care') {
+        const product = create_products(csvrow, 'makeup', id)
+        promises.push(product)
+      }
+      if (csvrow[15] == 'Mobile') {
+        const product = create_products(csvrow, 'cell_phone', id)
+        promises.push(product)
+      }
+    })
+    .on('end', async () => {
+      const todo = await Promise.all(promises)
+      console.log('done with shopee')
+      var receiveDate = (new Date()).getTime();
+      var responseTimeMs = receiveDate - sendDate;
+      console.log(responseTimeMs)
+      await cache.setAsync(`downloading-${id}`, false);
+      const dataValues = todo.map(objects => objects.dataValues)
+      return dataValues
+    });
+}
+
+const download = async (url, idPbl) => {
+  var sendDate = (new Date()).getTime();
+  console.log(`Downloading ${idPbl}`)
+  const resp = await axios.get(url)
+  const Csv = Readable.from(resp.data)
+  var receiveDate = (new Date()).getTime();
+  var responseTimeMs = receiveDate - sendDate;
+  console.log(responseTimeMs)
+  return (Csv)
+}
+
+const create_products = (csvrow, element, id) => {
+  const objects = products.create({
+    Merchant_Product_Name: csvrow[1],
+    Image_URL: csvrow[2],
+    Product_URL_Web_encoded: csvrow[4],
+    Product_URL_Mobile_encoded: csvrow[5],
+    Description: csvrow[6],
+    Price: csvrow[7],
+    Descount: csvrow[8],
+    Available: csvrow[9],
+    Main_Category_Name: csvrow[13],
+    Category_Name: csvrow[15],
+    Sub_Category_Name: csvrow[17],
+    Price_Unit: csvrow[18],
+    Page_ID: id,
+    label: element,
+    Type: "products"
+  })
+  return (objects)
+}
+
+const create_clothing = (csvrow, id, gender) => {
+  const garment = clothing.create({
+    Merchant_Product_Name: csvrow[1],
+    Image_URL: csvrow[2],
+    Product_URL_Web_encoded: csvrow[4],
+    Product_URL_Mobile_encoded: csvrow[5],
+    Description: csvrow[6],
+    Price: csvrow[7],
+    Descount: csvrow[8],
+    Available: csvrow[9],
+    Main_Category_Name: csvrow[13],
+    Category_Name: csvrow[15],
+    Sub_Category_Name: csvrow[17],
+    Price_Unit: csvrow[18],
+    Page_ID: id,
+    Gender: gender,
+    Type: 'clothing'
+  })
+  return (garment)
+}
+
+const flatten = ary => {
+  return ary.reduce((a, b) => {
+    if (Array.isArray(b)) {
+      return a.concat(flatten(b))
+    }
+    return a.concat(b)
+  }, [])
+}
+
+exports.download = async function (idPbl) {
+  await cache.setAsync(`downloading-${idPbl}`, true);
+  try {
+    const credentials = await aff.getAff()
+    const token = jwt.sign(
+      { sub: credentials.userUid },
+      credentials.secretKey,
+      {
+        algorithm: "HS256"
+      }
+    )
+    let affiliateEndpoint = `${conf.get('accesstrade_endpoint')}/v1/publishers/me/sites/${idPbl}/campaigns/677/productfeed/url`
+    axios.get(affiliateEndpoint, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'X-Accesstrade-User-Type': 'publisher'
+      }
+    }).then((affiliateResponse) => {
+      console.log(`Downloading ${idPbl}`)
+      download(affiliateResponse.data.baseUrl, idPbl)
+        .then((rs) => {
+          readCsv(rs, idPbl)
+            .then((results) => {
+              return (results)
+            }).catch((err) => {
+              console.error(err)
+              return (err)
+            })
+        })
+    })
+  } catch (err) {
+    console.log(err)
+    return err
   }
 }
 
-async function download(url) {
-  return new Promise((resolve, reject) => {
-    axios.get(url).then(resp => {
-      const Csv = Readable.from(resp.data)
-      resolve(Csv)
-    }).catch(err => {
-      reject(console.error(err))
-    })
+exports.read = async function (idPbl) {
+  const Clothing = await clothing.findAll({
+    raw: true,
+    where: { Page_ID: idPbl },
   })
-}
-
-async function readCsv(path, id) {
-  return new Promise((resolve, reject) => {
-
-    path
-      .pipe(parseCsv({ delimiter: ',', from_line: 2, headers: true }))
-      .on('data', function (csvrow) {
-        // aqui mandar a vista cada row
-        for (const element of arrObjetos) {
-          if (csvrow[15].toLowerCase().includes(" " + element) || csvrow[15].toLowerCase() == element) {
-            objetos[0][element].push(csvrow)
-          } else if (csvrow[17].toLowerCase().includes(" " + element) || csvrow[17].toLowerCase() == element) {
-            objetos[0][element].push(csvrow)
-          } else if (csvrow[13].toLowerCase().includes(" " + element) || csvrow[13].toLowerCase() == element) {
-            objetos[0][element].push(csvrow)
-          }
-        }
-        if (csvrow[15] == 'Mobile') {
-          objetos[0]['cell_phone'].push(csvrow)
-        }
-        if (csvrow[13] == 'Women Clothes' || csvrow[15] == 'Women Sportswear') {
-          for (const element of WomenClothes) {
-            if (csvrow[15].toLowerCase().includes(" " + element) || csvrow[15].toLowerCase().includes(element)) {
-              objetos[1]['Women Clothes'][element].push(csvrow)
-            } else if (csvrow[17].toLowerCase().includes(" " + element) || csvrow[17].toLowerCase().includes(element)) {
-              objetos[1]['Women Clothes'][element].push(csvrow)
-            }
-          }
-        }
-        if (csvrow[13] == 'Men Clothes'|| csvrow[15] == 'Men Sportswear') {
-          for (const element of MenClothes) {
-            if (csvrow[15].toLowerCase().includes(" " + element) || csvrow[15].toLowerCase().includes(element)) {
-              objetos[1]['Men Clothes'][element].push(csvrow)
-            } else if (csvrow[17].toLowerCase().includes(" " + element) || csvrow[17].toLowerCase().includes(element)) {
-              objetos[1]['Men Clothes'][element].push(csvrow)
-            }
-          }
-        }
-      })
-      .on('end', async function () {
-        await fs.promises.writeFile(`./csv/${id}.json`, JSON.stringify(objetos, null, 2), 'utf-8');
-        console.log(`Done with shopee`)
-        const objetos_json = objetos
-        // console.log(typeof (objetos_json))
-        console.log("uploading to Mysql")
-        // await sequelize.sync({force: true}).then(()=>{
-        for (const obj in objetos_json[0]) {
-          objetos_json[0][obj].forEach(async(element) => {
-            if (element != null) {
-            await products.create({
-                Merchant_Product_Name: element[1],
-                Image_URL: element[2],
-                Product_URL_Web_encoded: element[4],
-                Product_URL_Mobile_encoded: element[5],
-                Description: element[6],
-                Price: element[7],
-                Descount: element[8],
-                Available: element[9],
-                Main_Category_Name: element[13],
-                Category_Name: element[15],
-                Sub_Category_Name: element[17],
-                Price_Unit: element[18],
-                label: obj
-              }).catch((err) => {
-                console.error('algo fallo', err)
-                // console.trace(err)
-              })
-            }
-          })
-        }
-        for (const Garment of WomenClothes) {
-          if (objetos_json[1]['Women Clothes'][Garment] != null) {
-            objetos_json[1]['Women Clothes'][Garment].forEach(async(element) => {
-              await clothing.create({
-                Merchant_Product_Name: element[1],
-                Image_URL: element[2],
-                Product_URL_Web_encoded: element[4],
-                Product_URL_Mobile_encoded: element[5],
-                Description: element[6],
-                Price: element[7],
-                Descount: element[8],
-                Available: element[9],
-                Main_Category_Name: element[13],
-                Category_Name: element[15],
-                Sub_Category_Name: element[17],
-                Price_Unit: element[18],
-                label: {
-                  gender: 'Woman',
-                  garment: Garment
-                }
-              }).catch((err) => {
-                console.error('algo fallo con la ropa ', err)
-                // console.trace(err)
-              })
-            });
-          }
-        }
-        for (const Garment of MenClothes) {
-          if (objetos_json[1]['Men Clothes'][Garment] != null) {
-            objetos_json[1]['Men Clothes'][Garment].forEach(async(element) => {
-              await clothing.create({
-                Merchant_Product_Name: element[1],
-                Image_URL: element[2],
-                Product_URL_Web_encoded: element[4],
-                Product_URL_Mobile_encoded: element[5],
-                Description: element[6],
-                Price: element[7],
-                Descount: element[8],
-                Available: element[9],
-                Main_Category_Name: element[13],
-                Category_Name: element[15],
-                Sub_Category_Name: element[17],
-                Price_Unit: element[18],
-                label: {
-                  gender: 'Men',
-                  garment: Garment
-                }
-              }).catch((err) => {
-                console.error('algo fallo con la ropa de hombre', err)
-                // console.trace(err)
-              })
-            });
-          }
-        }
-        await cache.setAsync(`downloading-${id}`, false);
-        // })
-        resolve(objetos)
-      });
+  const Products = await products.findAll({
+    raw: true,
+    where: { Page_ID: idPbl },
   })
+  const dataValues = await Promise.all([Clothing, Products])
+  const flat = flatten(dataValues)
+  return flat
 }

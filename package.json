@@ -6,6 +6,10 @@
     "start": "node -max-old-space-size=4096 app.js",
     "dev": "nodemon app.js"
   },
+  "authors": {
+    "author": "Alex Kaiser",
+    "co-author": "Rodrigo Garcia"
+  },
   "dependencies": {
     "ansi-regex": "^5.0.1",
     "axios": "^0.21.2",
@@ -24,7 +28,9 @@
     "http-errors": "~1.6.3",
     "https": "^1.0.0",
     "jade": "^0.29.0",
+    "json-schema": "^0.4.0",
     "jsonwebtoken": "^8.5.1",
+    "jsprim": "^2.0.2",
     "morgan": "~1.9.1",
     "mysql": "^2.18.1",
     "mysql2": "^2.3.0",
@@ -33,7 +39,7 @@
     "redis": "^3.1.2",
     "request": "^2.88.2",
     "sequelize": "^6.9.0",
-    "sequelize-cli": "^5.0.0",
+    "sequelize-cli": "^6.3.0",
     "shelljs": "^0.8.4",
     "util": "^0.12.3",
     "uuid": "^3.4.0"

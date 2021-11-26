@@ -43,8 +43,9 @@ exports.convert = async (arr) => {
 
         if(obj.mobile == 1){
             close = `<button class='closeBut' aria-label="Close" style="float: right;padding: 0; background-color: transparent; border: 0; -webkit-appearance: none; width: 20px; font-size: 20px"> <span aria-hidden="true">&times;</span></button>`;
+            item.url = obj.affiliate['Product_URL_Mobile_encoded']
         }
-        
+
         const adsinfo = [{
             imgSize: {w: obj.size.w, h:obj.size.h},
             focal_point: [item.x,item.y],

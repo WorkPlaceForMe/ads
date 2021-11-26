@@ -11,7 +11,8 @@ const sequelize = new Sequelize(conf.get('database'),conf.get('user'),conf.get('
       acquire: 1000000 
     },
     charset: 'utf8mb4',
-    collate: 'utf8mb4_general_ci', 
+    collate: 'utf8mb4_general_ci',
+    logging: false
   });
 
 const db = {}

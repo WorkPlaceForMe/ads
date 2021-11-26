@@ -118,7 +118,7 @@ exports.getStats = Controller(async(req, res) => {
 
                                 const init = new Date(req.query.init).toISOString()
                                 const fin = new Date(req.query.fin).toISOString()
-                                let rewards;
+                                let rewards = {};
                                 if(ids[0].enabled == 'true'){
                                         ids[0].enabled  = true
                                     }else if(ids[0].enabled == 'false'){
@@ -287,7 +287,7 @@ exports.getStatsUrl = Controller(async(req, res) => {
                             }
                             // console.table(table)
                             const ids = await getPublisherId(req.query.url)
-                            let rewards;
+                            let rewards = {};
                             try{
                                 rewards = await reportAff.report(req.query.init,req.query.fin,ids[0].publisherId)
                             }catch(err){
