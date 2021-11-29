@@ -3,6 +3,7 @@ const db = require('../helper/dbconnection')
 const readCsv = require('./readCsv')
 const reportAff = require('../helper/reportAff')
 const auth = require('../helper/auth')
+const cache = require('../helper/cacheManager')
 
 exports.getStats = Controller(async(req, res) => {
     let ads = {},
@@ -119,17 +120,27 @@ exports.getStats = Controller(async(req, res) => {
                                 const init = new Date(req.query.init).toISOString()
                                 const fin = new Date(req.query.fin).toISOString()
                                 let rewards = {};
+                                const cacheed = await cache.getAsync(`${init}_${fin}_${ids[0].publisherId}`);
+                                
+                                if (cacheed){
+                                    rewards = cacheed
+                                }else{
+                                    try{
+                                        rewards = await reportAff.report(init,fin,ids[0].publisherId)
+                                        await cache.setAsync(`${init}_${fin}_${ids[0].publisherId}`, JSON.stringify(rewards));
+                                    }catch(err){
+                                        rewards['totalReward'] = 0;
+                                        rewards['totalConversionsCount'] = 0;
+                                        await cache.setAsync(`${init}_${fin}_${ids[0].publisherId}`, JSON.stringify(rewards));
+                                    }
+                                }
+
                                 if(ids[0].enabled == 'true'){
                                         ids[0].enabled  = true
                                     }else if(ids[0].enabled == 'false'){
                                         ids[0].enabled  = false
                                     }
-                                try{
-                                    rewards = await reportAff.report(init,fin,ids[0].publisherId)
-                                }catch(err){
-                                    rewards['totalReward'] = 0;
-                                    rewards['totalConversionsCount'] = 0;
-                                }
+
                                     table[i] = {
                                         url : Object.keys(imgsGrouped)[i],
                                         clicksPerImg: clicksPerImg,
@@ -288,11 +299,18 @@ exports.getStatsUrl = Controller(async(req, res) => {
                             // console.table(table)
                             const ids = await getPublisherId(req.query.url)
                             let rewards = {};
+                            const cacheed = await cache.getAsync(`${req.query.init}_${req.query.fin}_${ids[0].publisherId}`);
+                            
+                            if (cacheed)
+                                return res.status(200).json({success: true, table: table, rewards: cacheed});
+
                             try{
                                 rewards = await reportAff.report(req.query.init,req.query.fin,ids[0].publisherId)
+                                await cache.setAsync(`${req.query.init}_${req.query.fin}_${ids[0].publisherId}`, JSON.stringify(rewards));
                             }catch(err){
                                 rewards['totalReward'] = 0;
                                 rewards['totalConversionsCount'] = 0;
+                                await cache.setAsync(`${req.query.init}_${req.query.fin}_${ids[0].publisherId}`, JSON.stringify(rewards));
                             }
 
                             res.status(200).json({success: true, table: table, rewards: rewards});
