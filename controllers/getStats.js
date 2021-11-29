@@ -251,6 +251,7 @@ exports.getStatsUrl = Controller(async(req, res) => {
                             // console.table(viewsGrouped)
                             // console.table(adsGrouped)
                             let table = []
+                            const ids = await getPublisherId(req.query.url)
                             for(let i = 0; i < Object.keys(imgsGrouped).length; i++){
                                 // const url = Object.keys(imgsGrouped)[i].split('/')[2]
                                 // console.log(url)
@@ -283,6 +284,19 @@ exports.getStatsUrl = Controller(async(req, res) => {
                                 if(Number.isNaN(viewsPerAd)){
                                     viewsPerAd = 0;
                                 }
+
+                                let extension = Object.keys(imgsGrouped)[i].split(req.query.url)[1]
+                                const def = 2
+                                if(ids[0].pages != null){
+                                    if(ids[0].pages[extension] != null){
+                                        ads = ids[0].pages[extension]
+                                    }else{
+                                        ads = def
+                                    }
+                                }else{
+                                    ads = def
+                                }
+                                
                                 table[i] = {
                                     url : Object.keys(imgsGrouped)[i],
                                     clicksPerImg: clicksPerImg,
@@ -293,11 +307,11 @@ exports.getStatsUrl = Controller(async(req, res) => {
                                     images: imgsGrouped[Object.keys(imgsGrouped)[i]],
                                     ads: adsGrouped[Object.keys(imgsGrouped)[i]],
                                     clicks: clicksGrouped[Object.keys(imgsGrouped)[i]],
-                                    views: viewsGrouped[Object.keys(imgsGrouped)[i]] 
+                                    views: viewsGrouped[Object.keys(imgsGrouped)[i]],
+                                    adsNum: ads
                                 }
                             }
                             // console.table(table)
-                            const ids = await getPublisherId(req.query.url)
                             let rewards = {};
                             const cacheed = await cache.getAsync(`${req.query.init}_${req.query.fin}_${ids[0].publisherId}`);
                             
