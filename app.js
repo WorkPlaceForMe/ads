@@ -81,7 +81,7 @@ if (conf.get('install') == true) {
   })
   .then(connection => {
     connection.query('CREATE DATABASE IF NOT EXISTS ' + conf.get('database') + ' CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;').then(() => {
-      sequelize.sequelize.sync({force: false}).then(()=>{
+      sequelize.sequelize.sync({force: false, alter: true}).then(()=>{
         console.log('sequelize is connected')
         check()
       }).catch(err =>{
