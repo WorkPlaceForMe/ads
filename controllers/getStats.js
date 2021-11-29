@@ -286,17 +286,18 @@ exports.getStatsUrl = Controller(async(req, res) => {
                                 }
 
                                 let extension = Object.keys(imgsGrouped)[i].split(req.query.url)[1]
-                                const def = 2
-                                if(ids[0].pages != null){
-                                    if(ids[0].pages[extension] != null){
-                                        ads = ids[0].pages[extension]
+                                const def = 2;
+                                const pages = JSON.parse(ids[0].pages)
+                                if(pages != null){
+                                    if(pages[extension] != null){
+                                        ads = pages[extension]
                                     }else{
                                         ads = def
                                     }
                                 }else{
                                     ads = def
                                 }
-                                
+
                                 table[i] = {
                                     url : Object.keys(imgsGrouped)[i],
                                     clicksPerImg: clicksPerImg,
