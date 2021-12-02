@@ -30,9 +30,24 @@ const { delay } = require('bluebird')
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
 app.use(cookieParser())
-app.use(cors())
+app.use(cors({
+    origin: [`${conf.get('server')}`]
+  }))
 
 require("./helper/cacheManager");
+
+function customHeaders (req, res, next) {
+  app.disable('X-Powered-By')
+  res.setHeader('X-Powered-By', 'Graymatics-server')
+
+  res.setHeader('Content-Security-Policy', "default-src 'self'")
+
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN')
+
+  next()
+}
+
+app.use(customHeaders)
 
 async function check(ids = {}){
   const time = 604800000 //604800 1 week in milliseconds
