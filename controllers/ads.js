@@ -65,9 +65,9 @@ exports.getAds = Controller(async (req, res) => {
             console.log('=====================> VISTA RESPONSE <========================')
             const response = await axios(request_config)
             const objetos = await readCsv.readCsv(aut['idP'])
-            let resultsVista = []
+            let resultsVista
             if (response.data) {
-                resultsVista.push(response.data.results)
+                resultsVista = response.data.results
             }
 
             let extension = site.split(checker)
@@ -109,19 +109,19 @@ const addImg = (time, imgName, idGeneration, site) => {
 const filler = (resultsVista, serv, img_width, img_height, site, url, uid, objetos, mobile) => {
     const resultsAffiliate = []
     return new Promise((resolve) => {
-        if (resultsVista[0].sport.length != 0) {
+        if (resultsVista.sport.length != 0) {
             const bool = true
-            for (const obj of resultsVista[0].sport) {
+            for (const obj of resultsVista.sport) {
                 const result = sport_makeup_Filler(bool, obj, objetos, serv, img_width, img_height, site, url, uid, mobile)
                 if (result.length != 0) {
                     resultsAffiliate.push(result)
                 }
             }
         }
-        else if (resultsVista[0].tags2.tags2.tags2.length != 0){
-            if(resultsVista[0].tags2.tags2.tags2[0].label.includes("LIPSTICK" || "HAIR" || "FACE" || "PERFUME" || "PAINTBRUSH") || resultsVista[0].tags2.tags2.tags2[0].IAB.includes("IAB17-")) {
+        else if (resultsVista.tags2.tags2.tags2.length != 0){
+            if(resultsVista.tags2.tags2.tags2[0].label.includes("LIPSTICK" || "HAIR" || "FACE" || "PERFUME" || "PAINTBRUSH") || resultsVista.tags2.tags2.tags2[0].IAB.includes("IAB17-")) {
             const bool = false
-            for (const obj of resultsVista[0].tags2.tags2.tags2) {
+            for (const obj of resultsVista.tags2.tags2.tags2) {
                 const result = sport_makeup_Filler(bool, obj, objetos, serv, img_width, img_height, site, url, uid, mobile)
                 if (result.length != 0) {
                     resultsAffiliate.push(result)
@@ -129,10 +129,10 @@ const filler = (resultsVista, serv, img_width, img_height, site, url, uid, objet
             }
         }
         }
-        if (resultsVista[0]['fashion'].length != 0) {
-            if (resultsVista[0]['face'].length != 0 && resultsVista[0]['fashion'][0].confidence > 0.6) {
-                const gender = resultsVista[0].face[0].deep_gender.gender[0].label
-                for (const obj of resultsVista[0]['fashion']) {
+        if (resultsVista['fashion'].length != 0) {
+            if (resultsVista['face'].length != 0 && resultsVista['fashion'][0].confidence > 0.6) {
+                const gender = resultsVista.face[0].deep_gender.gender[0].label
+                for (const obj of resultsVista['fashion']) {
                     const result = clothing_Filler(obj, gender, objetos, serv, img_width, img_height, site, url, uid, mobile)
                     if (result.length != 0) {
                         resultsAffiliate.push(result)
@@ -140,7 +140,7 @@ const filler = (resultsVista, serv, img_width, img_height, site, url, uid, objet
                 }
             }
         }
-        for (const obj of resultsVista[0]['Object']) {
+        for (const obj of resultsVista['Object']) {
             if (obj.class != 'person') {
                 if (obj.class == "bottle") {
                     const result = objetos.filter(obj2 => obj2.label == 'makeup' && obj2.Type == "products")
