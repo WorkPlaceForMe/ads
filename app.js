@@ -78,7 +78,7 @@ async function check(ids = {}){
     }
   }
   await delay(86400000) //1 day 86400000 in milliseonds
-  return check()
+  return check(ids)
 }
 
 if (conf.get('install') == true) {
