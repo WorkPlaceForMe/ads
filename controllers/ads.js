@@ -232,7 +232,7 @@ const clothing_Filler = (obj, gender, objetos, serv, img_width, img_height, site
                 }
             }
             if (obj.class == 'lower' && obj.confidence > 0.6) {
-                if (obj.deep_fashion_tf.pant_length[0].label = 'FullLength'|| obj.deep_fashion_tf.pant_length[0].label == 'CroppedPant'|| obj.deep_fashion_tf.pant_length[0].label == '3/4Length' && obj.deep_fashion_color.color[0].label == 'blue'){
+                if (obj.deep_fashion_tf.pant_length[0].label == 'FullLength'|| obj.deep_fashion_tf.pant_length[0].label == 'CroppedPant'|| obj.deep_fashion_tf.pant_length[0].label == '3/4Length' && obj.deep_fashion_color.color[0].label == 'blue'){
                     const result_temp = objetos.filter(obj2 => obj2.Gender == gender && obj2.Category_Name == 'Jeans')
                     const result = result_temp.filter(obj3 => obj3.Sub_Category_Name != 'Short Jeans')
                     const count = result.length - 1
@@ -248,7 +248,7 @@ const clothing_Filler = (obj, gender, objetos, serv, img_width, img_height, site
                         mobile: mobile
                     })
                 }
-                if (obj.deep_fashion_tf.pant_length[0].label = 'FullLength'|| obj.deep_fashion_tf.pant_length[0].label == 'CroppedPant'|| obj.deep_fashion_tf.pant_length[0].label == '3/4Length'){
+                if (obj.deep_fashion_tf.pant_length[0].label == 'FullLength'|| obj.deep_fashion_tf.pant_length[0].label == 'CroppedPant'|| obj.deep_fashion_tf.pant_length[0].label == '3/4Length'){
                     const result = objetos.filter(obj2 => obj2.Gender == gender && obj2.Category_Name == 'Long Pants')
                     const count = result.length - 1
                     if (count == -1) {
@@ -320,7 +320,7 @@ const clothing_Filler = (obj, gender, objetos, serv, img_width, img_height, site
                 }
             }
             if (obj.class == 'lower' && obj.confidence > 0.6) {
-                if (obj.deep_fashion_tf.pant_length[0].label = 'FullLength'|| obj.deep_fashion_tf.pant_length[0].label == 'CroppedPant'|| obj.deep_fashion_tf.pant_length[0].label == '3/4Length') {
+                if (obj.deep_fashion_tf.pant_length[0].label == 'FullLength'|| obj.deep_fashion_tf.pant_length[0].label == 'CroppedPant'|| obj.deep_fashion_tf.pant_length[0].label == '3/4Length') {
                     const result = objetos.filter(obj2 => obj2.Gender == gender && obj2.Sub_Category_Name == 'Shorts')
                     const count = result.length - 1
                     if (count == -1) {
