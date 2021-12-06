@@ -4,6 +4,7 @@ const readCsv = require('./readCsv')
 const reportAff = require('../helper/reportAff')
 const auth = require('../helper/auth')
 const cache = require('../helper/cacheManager')
+const conf = require('../middleware/prop')
 
 exports.getStats = Controller(async(req, res) => {
     let ads = {},
@@ -452,35 +453,35 @@ exports.getStatsAd = Controller(async(req, res) => {
 })
 
 function getAdsPerPage(callback){
-    return db.query(`SELECT count(*) as count, idGeneration as uid, (select site from ads.adsPage where idGeneration = uid limit 1) as site FROM ads.adsPage group by idGeneration order by uid asc`,callback)
+    return db.query(`SELECT count(*) as count, idGeneration as uid, (select site from ${conf.get('database')}.adsPage where idGeneration = uid limit 1) as site FROM ${conf.get('database')}.adsPage group by idGeneration order by uid asc`,callback)
 }
 
 function getImgPerPage(callback){
-    return db.query(`SELECT idGeneration as uid, count(*) as count, (select site from ads.imgsPage where idGeneration = uid limit 1) as site from ads.imgsPage group by idGeneration order by idGeneration asc;`,callback)
+    return db.query(`SELECT idGeneration as uid, count(*) as count, (select site from ${conf.get('database')}.imgsPage where idGeneration = uid limit 1) as site from ${conf.get('database')}.imgsPage group by idGeneration order by idGeneration asc;`,callback)
 }
 
 function getClicksAndViews(callback){
-    return db.query(`SELECT url, COUNT( CASE WHEN type = '2' THEN 1 END ) AS clicks, COUNT( CASE WHEN type = '1' THEN 1 END ) AS views FROM ads.impressions group by url;`,callback)
+    return db.query(`SELECT url, COUNT( CASE WHEN type = '2' THEN 1 END ) AS clicks, COUNT( CASE WHEN type = '1' THEN 1 END ) AS views FROM ${conf.get('database')}.impressions group by url;`,callback)
 }
 
 function getImgsList(site,callback){
-    return db.query(`SELECT img, idGeneration FROM ads.imgsPage where site = '${site}' order by idGeneration desc;`,callback)
+    return db.query(`SELECT img, idGeneration FROM ${conf.get('database')}.imgsPage where site = '${site}' order by idGeneration desc;`,callback)
 }
 
 function getClicksAndViewsPerImg(site,callback){
-    return db.query(`SELECT img, COUNT( CASE WHEN type = '2' THEN 1 END ) AS clicks, COUNT( CASE WHEN type = '1' THEN 1 END ) AS views FROM ads.impressions where url = '${site}' group by img ;`,callback)
+    return db.query(`SELECT img, COUNT( CASE WHEN type = '2' THEN 1 END ) AS clicks, COUNT( CASE WHEN type = '1' THEN 1 END ) AS views FROM ${conf.get('database')}.impressions where url = '${site}' group by img ;`,callback)
 }
 
 function getAdsListPerImg(site,callback){
-    return db.query(`SELECT imgName, idGeneration FROM ads.adsPage where site = '${site}' order by idGeneration desc;`,callback)
+    return db.query(`SELECT imgName, idGeneration FROM ${conf.get('database')}.adsPage where site = '${site}' order by idGeneration desc;`,callback)
 }
 
 function getAdsList(img,site,callback){
-    return db.query(`SELECT imgName, idGeneration,idItem FROM ads.adsPage where site = '${site}' and imgName='${img}' order by idGeneration desc;`,callback)
+    return db.query(`SELECT imgName, idGeneration,idItem FROM ${conf.get('database')}.adsPage where site = '${site}' and imgName='${img}' order by idGeneration desc;`,callback)
 }
 
 function getAdsClicksAndViews(img,site,callback){
-    return db.query(`SELECT idItem,img, COUNT( CASE WHEN type = '2' THEN 1 END ) AS clicks, COUNT( CASE WHEN type = '1' THEN 1 END ) AS views FROM ads.impressions where url = '${site}' and img= '${img}' group by idItem;`,callback)
+    return db.query(`SELECT idItem,img, COUNT( CASE WHEN type = '2' THEN 1 END ) AS clicks, COUNT( CASE WHEN type = '1' THEN 1 END ) AS views FROM ${conf.get('database')}.impressions where url = '${site}' and img= '${img}' group by idItem;`,callback)
 }
 
 const getPublisherId = async function(site){
