@@ -44,6 +44,16 @@ function customHeaders (req, res, next) {
 
 app.use(customHeaders)
 
+app.all(function (req, res, next) {
+  res.header('Access-Control-Allow-Origin', `${conf.get('server')}`)
+  res.header('Access-Control-Allow-Methods', 'GET, POST')
+  res.header(
+    'Access-Control-Allow-Headers',
+    'Origin, X-Requested-With, Content-Type, Accept, x-access-token'
+  )
+  next()
+})
+
 async function check(ids = {}){
   const time = 604800000 //604800 1 week in milliseconds
   const idsCheck = await publishers.findAll({
@@ -105,7 +115,7 @@ if (conf.get('install') == true) {
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'))
-app.set('view engine', 'pug')
+app.set('view engine', 'jade')
 app.use(logger('Date: :date[web] // Url: :remote-addr // Method: :method:url // Status::status // User-agent: :user-agent'))
 app.use(logger('Date: :date[web] // Url: :remote-addr // Method: :method:url // Status::status // User-agent: :user-agent',
     {
