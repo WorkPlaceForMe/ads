@@ -7,6 +7,7 @@ const { getStats, getStatsUrl, getStatsImg, getStatsAd } = require('./getStats')
 const { modify } = require('./modStatus')
 const { auth, check } = require('./auth')
 const { updateAds } = require('./updateAds')
+const { version } = require('./version')
 
 module.exports = {
 	getAds,
@@ -21,5 +22,6 @@ module.exports = {
 	modify,
 	auth,
 	check,
-	updateAds
+	updateAds,
+	version
 }

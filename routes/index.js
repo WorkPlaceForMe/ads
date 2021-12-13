@@ -32,4 +32,6 @@ router.get('/api/check', controllers.check)
 
 router.post('/api/adsNum/:id', controllers.updateAds)
 
+router.get('/api/version', controllers.version)
+
 module.exports = router
