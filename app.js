@@ -31,7 +31,7 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
 app.use(cookieParser())
 app.use(cors({
-    origin: [`${conf.get('server')}`]
+    origin: [`${conf.get('server')}`, 'http://localhost:4200']
   }))
 
 require("./helper/cacheManager");
@@ -123,6 +123,9 @@ app.use(logger('Date: :date[web] // Url: :remote-addr // Method: :method:url // 
     }
   )
 )
+
+app.use('/not-found',express.static('./views/error.html'));
+
 app.use('/system',express.static(path.join(__dirname, 'public')))
 
 app.use('/management',express.static(conf.get('dashboardAis')));
@@ -136,6 +139,19 @@ app.use(routers)
 
 // global error handling
 app.use(handleError)
+
+// 404 re-route
+app.get('*', function(req,res){
+  const path = req._parsedUrl.path.split('/')[1]
+  switch(path) {
+    case 'management':
+      return res.redirect('/management');
+    case 'client':
+      return res.redirect('/client');
+    default:
+      return res.redirect('/not-found');
+  }
+});
 
 httpsServer.listen(portS || 3000, function () {
 	console.log(`App is up on port ${portS || '3000'} on HTTPS`)
