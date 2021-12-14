@@ -187,6 +187,7 @@ exports.getStatsUrl = Controller(async(req, res) => {
             res.status(500).json(err);
             }
         else{
+
             for(const stat of rows){
                 ads[stat.site] = stat.count
             }
@@ -289,14 +290,21 @@ exports.getStatsUrl = Controller(async(req, res) => {
                                 let extension = Object.keys(imgsGrouped)[i].split(req.query.url)[1]
                                 const def = 2;
                                 const pages = JSON.parse(ids[0].pages)
+                                let adsPerImage, imgPerPage
                                 if(pages != null){
-                                    if(pages[extension] != null){
-                                        ads = pages[extension]
+                                    if(pages[0][extension] != null){
+                                        adsPerImage = pages[0][extension]
                                     }else{
-                                        ads = def
+                                        adsPerImage = def
+                                    }
+                                    if(pages[1][extension] != null){
+                                        imgPerPage = pages[1][extension]
+                                    }else{
+                                        imgPerPage = imgsGrouped[Object.keys(imgsGrouped)[i]]
                                     }
                                 }else{
-                                    ads = def
+                                    adsPerImage = def
+                                    imgPerPage = imgsGrouped[Object.keys(imgsGrouped)[i]]
                                 }
 
                                 table[i] = {
@@ -310,7 +318,8 @@ exports.getStatsUrl = Controller(async(req, res) => {
                                     ads: adsGrouped[Object.keys(imgsGrouped)[i]],
                                     clicks: clicksGrouped[Object.keys(imgsGrouped)[i]],
                                     views: viewsGrouped[Object.keys(imgsGrouped)[i]],
-                                    adsNum: ads
+                                    adsNum: adsPerImage,
+                                    imgNum: imgPerPage
                                 }
                             }
                             // console.table(table)
@@ -318,7 +327,7 @@ exports.getStatsUrl = Controller(async(req, res) => {
                             const cacheed = await cache.getAsync(`${req.query.init}_${req.query.fin}_${ids[0].publisherId}`);
                             
                             if (cacheed)
-                                return res.status(200).json({success: true, table: table, rewards: cacheed});
+                                return res.status(200).json({success: true, table: table, rewards: JSON.parse(cacheed)});
 
                             try{
                                 rewards = await reportAff.report(req.query.init,req.query.fin,ids[0].publisherId)

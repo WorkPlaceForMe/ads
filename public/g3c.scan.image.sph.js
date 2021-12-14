@@ -10,7 +10,7 @@ serv = `${serv[0]}//${serv[2]}`
 
 let top1 = 0;
 let left1 = 0;
-
+let images;
 
 $(document).ready(function () {
 	$.ajax({
@@ -19,7 +19,7 @@ $(document).ready(function () {
 		data: `site=${window.location.href}`,
 		dataType: 'json',
 		success: function (a) {
-			
+			images = a.imgs
 		},
 		error: function (e) {console.error(e)}
 	})
@@ -493,15 +493,23 @@ $(document).on('click', '.closeBut', function () {
 		pe = window.location.href
 	window.onload = function () {
 		var b = []
-		for (
-			a('img').each(function () {
+		let imgsTop
+		a('img').each(function () {
 				b.push(new a.GM.IMLayer(a(this).attr('src'), a(this)[0]))
-			}),
-				i = 0;
-			b.length > i;
+			})
+		if(images != -1){
+			imgsTop = images
+		}else{
+			imgsTop = b.length
+		}
+
+		for (i = 0;
+			imgsTop > i;
 			i++
-		)
+		){
 			b[i].imageProcess()
+		}
+			// b[i].imageProcess()
 	}
 })(jQuery)
 

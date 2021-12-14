@@ -36,7 +36,18 @@ exports.check = Controller(async(req, res) => {
                 return res.status(200).json({success: true, message: 'Site registered'});
             }else{
                 const site = rows[0].name
-                res.status(200).json({success: true, site: site, message: 'Site already registered'});
+                let extension = req.query.site.split(checker)
+                let imgs
+                if(rows[0].pages != null){
+                    if(JSON.parse(rows[0].pages)[1][extension[1]] != null){
+                        imgs = JSON.parse(rows[0].pages)[1][extension[1]]
+                    }else{
+                       imgs = -1 
+                    }
+                }else{
+                    imgs = -1
+                }
+                res.status(200).json({success: true, site: site, message: 'Site already registered', imgs: imgs});
             }
         }
     })

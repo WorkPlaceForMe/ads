@@ -71,8 +71,8 @@ exports.getAds = Controller(async (req, res) => {
             }
             let extension = site.split(checker)
             let limit = 2
-            if(aut['pages'] != null){
-                limit = JSON.parse(aut['pages'])[extension[1]]
+            if(aut['pages'] != null && JSON.parse(aut['pages'])[0] != null){
+                limit = JSON.parse(aut['pages'])[0][extension[1]]
             }
             const resultsAffiliate = await filler(resultsVista, serv, img_width, img_height, site, url, uid, objetos, mobile)
             const flat = flatten(resultsAffiliate)
