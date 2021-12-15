@@ -27,6 +27,8 @@ try{
     redisClient.hmsetAsync = promisify(redisClient.hmset).bind(redisClient);
     redisClient.hmgetAsync = promisify(redisClient.hmget).bind(redisClient);
     redisClient.clear = promisify(redisClient.del).bind(redisClient);
+    redisClient.cleardb = promisify(redisClient.flushdb).bind(redisClient);
+    redisClient.scandb = promisify(redisClient.scan).bind(redisClient);
 }catch (e) {
     console.log("redis error", e);
 }

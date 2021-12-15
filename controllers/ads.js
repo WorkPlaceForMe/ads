@@ -61,6 +61,11 @@ exports.getAds = Controller(async (req, res) => {
             data: formData
         }
         console.log("Sending request")
+        let extension = site.split(checker)
+        let limit = 2
+        if(aut['pages'] != null && JSON.parse(aut['pages'])[0] != null){
+            limit = JSON.parse(aut['pages'])[0][extension[1]]
+        }
         try {
             console.log('=====================> VISTA RESPONSE <========================')
             const response = await axios(request_config)
@@ -69,18 +74,13 @@ exports.getAds = Controller(async (req, res) => {
             if (response.data) {
                 resultsVista = response.data.results
             }
-            let extension = site.split(checker)
-            let limit = 2
-            if(aut['pages'] != null && JSON.parse(aut['pages'])[0] != null){
-                limit = JSON.parse(aut['pages'])[0][extension[1]]
-            }
             const resultsAffiliate = await filler(resultsVista, serv, img_width, img_height, site, url, uid, objetos, mobile)
             const flat = flatten(resultsAffiliate)
             if (flat.length > limit) {
                 flat.length = limit
             }
             const sendingResults = await convert(flat)
-            await cache.setAsync(`${mobile}_${img_width}_${img_height}_${url}`, JSON.stringify(sendingResults));
+            await cache.setAsync(`${extension[1]}_${mobile}_${img_width}_${img_height}_${url}`, JSON.stringify(sendingResults), 'EX', 604800);
             res.status(200).send({
                 results: sendingResults
             })
@@ -88,7 +88,7 @@ exports.getAds = Controller(async (req, res) => {
         catch (err) {
             if (err.response)
                 console.log(err.response.status, url)
-            await cache.setAsync(`${mobile}_${img_width}_${img_height}_${url}`, JSON.stringify({}));
+            await cache.setAsync(`${extension[1]}_${mobile}_${img_width}_${img_height}_${url}`, JSON.stringify({}), 'EX', 604800);
             console.trace(err)
             return res.status(500).json({ success: false, message: "Vista Image failled", error: err, img: url })
         }

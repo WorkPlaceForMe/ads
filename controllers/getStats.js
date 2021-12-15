@@ -326,9 +326,9 @@ exports.getStatsUrl = Controller(async(req, res) => {
                             let rewards = {};
                             const cacheed = await cache.getAsync(`${req.query.init}_${req.query.fin}_${ids[0].publisherId}`);
                             
-                            if (cacheed)
+                            if (cacheed){
                                 return res.status(200).json({success: true, table: table, rewards: JSON.parse(cacheed)});
-
+                            }
                             try{
                                 rewards = await reportAff.report(req.query.init,req.query.fin,ids[0].publisherId)
                                 await cache.setAsync(`${req.query.init}_${req.query.fin}_${ids[0].publisherId}`, JSON.stringify(rewards));
