@@ -45,7 +45,7 @@ function customHeaders (req, res, next) {
 app.use(customHeaders)
 
 app.all(function (req, res, next) {
-  res.header('Access-Control-Allow-Origin', `${conf.get('server')}`)
+  res.header('Access-Control-Allow-Origin', `www.${conf.get('server')}`)
   res.header('Access-Control-Allow-Methods', 'GET, POST')
   res.header(
     'Access-Control-Allow-Headers',
