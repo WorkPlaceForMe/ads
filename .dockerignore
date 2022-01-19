@@ -16,3 +16,5 @@ csv/**
 index.html
 startDocker.sh
 .gitignore
+oldDist
+test.js

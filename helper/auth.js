@@ -7,6 +7,7 @@ const db = require('../helper/dbconnection')
         if(data[0].enabled == 'true'){
             resp['enabled'] = true
             resp['idP'] = data[0].publisherId
+            resp['pages'] = data[0].pages
             return resp
         }else {
             resp['enabled'] = false

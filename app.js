@@ -27,12 +27,36 @@ const publishers = db1.publishers
 const readCsv = require('./controllers/readCsv')
 const { delay } = require('bluebird')
 
+let server =  conf.get('server').split('/')
+server[2] = `www.${server[2]}`
+server = server.join('/')
+
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
 app.use(cookieParser())
-app.use(cors())
+app.use(cors({
+    origin: [`${conf.get('server')}`, 'http://localhost:4200']
+  }))
 
 require("./helper/cacheManager");
+
+function customHeaders (req, res, next) {
+  app.disable('X-Powered-By')
+  res.setHeader('X-Powered-By', 'Graymatics-server')
+  next()
+}
+
+app.use(customHeaders)
+
+app.all(function (req, res, next) {
+  res.header('Access-Control-Allow-Origin', server)
+  res.header('Access-Control-Allow-Methods', 'GET, POST')
+  res.header(
+    'Access-Control-Allow-Headers',
+    'Origin, X-Requested-With, Content-Type, Accept, x-access-token'
+  )
+  next()
+})
 
 async function check(ids = {}){
   const time = 604800000 //604800 1 week in milliseconds
@@ -68,7 +92,7 @@ async function check(ids = {}){
     }
   }
   await delay(86400000) //1 day 86400000 in milliseonds
-  return check()
+  return check(ids)
 }
 
 if (conf.get('install') == true) {
@@ -81,7 +105,7 @@ if (conf.get('install') == true) {
   })
   .then(connection => {
     connection.query('CREATE DATABASE IF NOT EXISTS ' + conf.get('database') + ' CHARACTER SET=utf8mb4 COLLATE=utf8mb4_general_ci;').then(() => {
-      sequelize.sequelize.sync({force: false}).then(()=>{
+      sequelize.sequelize.sync({force: false, alter: true}).then(()=>{
         console.log('sequelize is connected')
         check()
       }).catch(err =>{
@@ -95,7 +119,7 @@ if (conf.get('install') == true) {
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'))
-app.set('view engine', 'pug')
+app.set('view engine', 'jade')
 app.use(logger('Date: :date[web] // Url: :remote-addr // Method: :method:url // Status::status // User-agent: :user-agent'))
 app.use(logger('Date: :date[web] // Url: :remote-addr // Method: :method:url // Status::status // User-agent: :user-agent',
     {
@@ -103,6 +127,9 @@ app.use(logger('Date: :date[web] // Url: :remote-addr // Method: :method:url // 
     }
   )
 )
+
+app.use('/not-found',express.static('./views/error.html'));
+
 app.use('/system',express.static(path.join(__dirname, 'public')))
 
 app.use('/management',express.static(conf.get('dashboardAis')));
@@ -116,6 +143,19 @@ app.use(routers)
 
 // global error handling
 app.use(handleError)
+
+// 404 re-route
+app.get('*', function(req,res){
+  const path = req._parsedUrl.path.split('/')[1]
+  switch(path) {
+    case 'management':
+      return res.redirect('/management');
+    case 'client':
+      return res.redirect('/client');
+    default:
+      return res.redirect('/not-found');
+  }
+});
 
 httpsServer.listen(portS || 3000, function () {
 	console.log(`App is up on port ${portS || '3000'} on HTTPS`)

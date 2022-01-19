@@ -4,9 +4,8 @@ const jwt = require('jsonwebtoken')
 const conf = require('../middleware/prop')
 
 exports.report = async function(init,fin,siteId,){
-    return new Promise(function(resolve, reject){
-        
-        aff.getAff.then(async function(credentials){
+    try{
+        const credentials = await aff.getAff()
             const token = jwt.sign(
                 { sub: credentials.userUid},
                 credentials.secretKey,
@@ -45,8 +44,9 @@ exports.report = async function(init,fin,siteId,){
                 }
             }
 
-            resolve(rewards)
-        }).catch((err)=>{console.error(err)})
-    });
+            return(rewards)
+    }catch(err){
+        console.error(err)
+    }
 }
 

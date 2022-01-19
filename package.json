@@ -1,6 +1,6 @@
 {
-  "name": "graymatics-adscape",
-  "version": "2.1.1",
+  "name": "graymatics-adscope",
+  "version": "2.2.6",
   "private": true,
   "scripts": {
     "start": "node -max-old-space-size=4096 app.js",
@@ -23,6 +23,7 @@
     "dateformat": "^4.5.1",
     "debug": "~2.6.9",
     "express": "~4.16.1",
+    "follow-redirects": "^1.14.7",
     "form-data": "^4.0.0",
     "fs": "^0.0.1-security",
     "http-errors": "~1.6.3",
@@ -40,7 +41,7 @@
     "request": "^2.88.2",
     "sequelize": "^6.9.0",
     "sequelize-cli": "^6.3.0",
-    "shelljs": "^0.8.4",
+    "shelljs": "^0.8.5",
     "util": "^0.12.3",
     "uuid": "^3.4.0"
   },

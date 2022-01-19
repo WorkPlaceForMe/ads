@@ -15,6 +15,10 @@ module.exports = (sequelize, Sequelize) => {
         publisherId: {
             type: Sequelize.STRING(45),
             allowNull: true,
+        },
+        pages: {
+            type: Sequelize.JSON,
+            allowNull: true,
         }
     });
   

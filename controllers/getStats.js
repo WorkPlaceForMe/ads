@@ -3,6 +3,8 @@ const db = require('../helper/dbconnection')
 const readCsv = require('./readCsv')
 const reportAff = require('../helper/reportAff')
 const auth = require('../helper/auth')
+const cache = require('../helper/cacheManager')
+const conf = require('../middleware/prop')
 
 exports.getStats = Controller(async(req, res) => {
     let ads = {},
@@ -119,17 +121,27 @@ exports.getStats = Controller(async(req, res) => {
                                 const init = new Date(req.query.init).toISOString()
                                 const fin = new Date(req.query.fin).toISOString()
                                 let rewards = {};
+                                const cacheed = await cache.getAsync(`${init}_${fin}_${ids[0].publisherId}`);
+                                
+                                if (cacheed){
+                                    rewards = cacheed
+                                }else{
+                                    try{
+                                        rewards = await reportAff.report(init,fin,ids[0].publisherId)
+                                        await cache.setAsync(`${init}_${fin}_${ids[0].publisherId}`, JSON.stringify(rewards));
+                                    }catch(err){
+                                        rewards['totalReward'] = 0;
+                                        rewards['totalConversionsCount'] = 0;
+                                        await cache.setAsync(`${init}_${fin}_${ids[0].publisherId}`, JSON.stringify(rewards));
+                                    }
+                                }
+
                                 if(ids[0].enabled == 'true'){
                                         ids[0].enabled  = true
                                     }else if(ids[0].enabled == 'false'){
                                         ids[0].enabled  = false
                                     }
-                                try{
-                                    rewards = await reportAff.report(init,fin,ids[0].publisherId)
-                                }catch(err){
-                                    rewards['totalReward'] = 0;
-                                    rewards['totalConversionsCount'] = 0;
-                                }
+
                                     table[i] = {
                                         url : Object.keys(imgsGrouped)[i],
                                         clicksPerImg: clicksPerImg,
@@ -175,6 +187,7 @@ exports.getStatsUrl = Controller(async(req, res) => {
             res.status(500).json(err);
             }
         else{
+
             for(const stat of rows){
                 ads[stat.site] = stat.count
             }
@@ -240,6 +253,7 @@ exports.getStatsUrl = Controller(async(req, res) => {
                             // console.table(viewsGrouped)
                             // console.table(adsGrouped)
                             let table = []
+                            const ids = await getPublisherId(req.query.url)
                             for(let i = 0; i < Object.keys(imgsGrouped).length; i++){
                                 // const url = Object.keys(imgsGrouped)[i].split('/')[2]
                                 // console.log(url)
@@ -272,6 +286,27 @@ exports.getStatsUrl = Controller(async(req, res) => {
                                 if(Number.isNaN(viewsPerAd)){
                                     viewsPerAd = 0;
                                 }
+
+                                let extension = Object.keys(imgsGrouped)[i].split(req.query.url)[1]
+                                const def = 2;
+                                let adsPerImage, imgPerPage
+                                if(ids[0].pages != null){
+                                    const pages = JSON.parse(ids[0].pages)
+                                    if(pages[0][extension] != null){
+                                        adsPerImage = pages[0][extension]
+                                    }else{
+                                        adsPerImage = def
+                                    }
+                                    if(pages[1][extension] != null){
+                                        imgPerPage = pages[1][extension]
+                                    }else{
+                                        imgPerPage = imgsGrouped[Object.keys(imgsGrouped)[i]]
+                                    }
+                                }else{
+                                    adsPerImage = def
+                                    imgPerPage = imgsGrouped[Object.keys(imgsGrouped)[i]]
+                                }
+
                                 table[i] = {
                                     url : Object.keys(imgsGrouped)[i],
                                     clicksPerImg: clicksPerImg,
@@ -282,17 +317,25 @@ exports.getStatsUrl = Controller(async(req, res) => {
                                     images: imgsGrouped[Object.keys(imgsGrouped)[i]],
                                     ads: adsGrouped[Object.keys(imgsGrouped)[i]],
                                     clicks: clicksGrouped[Object.keys(imgsGrouped)[i]],
-                                    views: viewsGrouped[Object.keys(imgsGrouped)[i]] 
+                                    views: viewsGrouped[Object.keys(imgsGrouped)[i]],
+                                    adsNum: adsPerImage,
+                                    imgNum: imgPerPage
                                 }
                             }
                             // console.table(table)
-                            const ids = await getPublisherId(req.query.url)
                             let rewards = {};
+                            const cacheed = await cache.getAsync(`${req.query.init}_${req.query.fin}_${ids[0].publisherId}`);
+                            
+                            if (cacheed){
+                                return res.status(200).json({success: true, table: table, rewards: JSON.parse(cacheed)});
+                            }
                             try{
                                 rewards = await reportAff.report(req.query.init,req.query.fin,ids[0].publisherId)
+                                await cache.setAsync(`${req.query.init}_${req.query.fin}_${ids[0].publisherId}`, JSON.stringify(rewards));
                             }catch(err){
                                 rewards['totalReward'] = 0;
                                 rewards['totalConversionsCount'] = 0;
+                                await cache.setAsync(`${req.query.init}_${req.query.fin}_${ids[0].publisherId}`, JSON.stringify(rewards));
                             }
 
                             res.status(200).json({success: true, table: table, rewards: rewards});
@@ -419,35 +462,35 @@ exports.getStatsAd = Controller(async(req, res) => {
 })
 
 function getAdsPerPage(callback){
-    return db.query(`SELECT count(*) as count, idGeneration as uid, (select site from ads.adsPage where idGeneration = uid limit 1) as site FROM ads.adsPage group by idGeneration order by uid asc`,callback)
+    return db.query(`SELECT count(*) as count, idGeneration as uid, (select site from ${conf.get('database')}.adsPages where idGeneration = uid limit 1) as site FROM ${conf.get('database')}.adsPages group by idGeneration order by uid asc`,callback)
 }
 
 function getImgPerPage(callback){
-    return db.query(`SELECT idGeneration as uid, count(*) as count, (select site from ads.imgsPage where idGeneration = uid limit 1) as site from ads.imgsPage group by idGeneration order by idGeneration asc;`,callback)
+    return db.query(`SELECT idGeneration as uid, count(*) as count, (select site from ${conf.get('database')}.imgsPages where idGeneration = uid limit 1) as site from ${conf.get('database')}.imgsPages group by idGeneration order by idGeneration asc;`,callback)
 }
 
 function getClicksAndViews(callback){
-    return db.query(`SELECT url, COUNT( CASE WHEN type = '2' THEN 1 END ) AS clicks, COUNT( CASE WHEN type = '1' THEN 1 END ) AS views FROM ads.impressions group by url;`,callback)
+    return db.query(`SELECT url, COUNT( CASE WHEN type = '2' THEN 1 END ) AS clicks, COUNT( CASE WHEN type = '1' THEN 1 END ) AS views FROM ${conf.get('database')}.impressions group by url;`,callback)
 }
 
 function getImgsList(site,callback){
-    return db.query(`SELECT img, idGeneration FROM ads.imgsPage where site = '${site}' order by idGeneration desc;`,callback)
+    return db.query(`SELECT img, idGeneration FROM ${conf.get('database')}.imgsPages where site = '${site}' order by idGeneration desc;`,callback)
 }
 
 function getClicksAndViewsPerImg(site,callback){
-    return db.query(`SELECT img, COUNT( CASE WHEN type = '2' THEN 1 END ) AS clicks, COUNT( CASE WHEN type = '1' THEN 1 END ) AS views FROM ads.impressions where url = '${site}' group by img ;`,callback)
+    return db.query(`SELECT img, COUNT( CASE WHEN type = '2' THEN 1 END ) AS clicks, COUNT( CASE WHEN type = '1' THEN 1 END ) AS views FROM ${conf.get('database')}.impressions where url = '${site}' group by img ;`,callback)
 }
 
 function getAdsListPerImg(site,callback){
-    return db.query(`SELECT imgName, idGeneration FROM ads.adsPage where site = '${site}' order by idGeneration desc;`,callback)
+    return db.query(`SELECT imgName, idGeneration FROM ${conf.get('database')}.adsPages where site = '${site}' order by idGeneration desc;`,callback)
 }
 
 function getAdsList(img,site,callback){
-    return db.query(`SELECT imgName, idGeneration,idItem FROM ads.adsPage where site = '${site}' and imgName='${img}' order by idGeneration desc;`,callback)
+    return db.query(`SELECT imgName, idGeneration,idItem FROM ${conf.get('database')}.adsPages where site = '${site}' and imgName='${img}' order by idGeneration desc;`,callback)
 }
 
 function getAdsClicksAndViews(img,site,callback){
-    return db.query(`SELECT idItem,img, COUNT( CASE WHEN type = '2' THEN 1 END ) AS clicks, COUNT( CASE WHEN type = '1' THEN 1 END ) AS views FROM ads.impressions where url = '${site}' and img= '${img}' group by idItem;`,callback)
+    return db.query(`SELECT idItem,img, COUNT( CASE WHEN type = '2' THEN 1 END ) AS clicks, COUNT( CASE WHEN type = '1' THEN 1 END ) AS views FROM ${conf.get('database')}.impressions where url = '${site}' and img= '${img}' group by idItem;`,callback)
 }
 
 const getPublisherId = async function(site){

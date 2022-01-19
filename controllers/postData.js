@@ -1,10 +1,7 @@
 const Controller = require('../helper/controller')
-const db = require('../helper/dbconnection')
 const dateFormat = require('dateformat');
 const db1 = require('../campaigns-db/database')
 const impressions = db1.impressions
-
-
 
 exports.postData = Controller(async(req, res) => {
 
