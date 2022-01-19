@@ -40,7 +40,7 @@
     "request": "^2.88.2",
     "sequelize": "^6.9.0",
     "sequelize-cli": "^6.3.0",
-    "shelljs": "^0.8.4",
+    "shelljs": "^0.8.5",
     "util": "^0.12.3",
     "uuid": "^3.4.0"
   },
