@@ -34,9 +34,9 @@ server = server.join('/')
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
 app.use(cookieParser())
-app.use(cors({
-    origin: [`${conf.get('server')}`, 'http://localhost:4200']
-  }))
+// app.use(cors({
+//     origin: [`${conf.get('server')}`, 'http://localhost:4200']
+//   }))
 
 require("./helper/cacheManager");
 
@@ -49,7 +49,7 @@ function customHeaders (req, res, next) {
 app.use(customHeaders)
 
 app.all(function (req, res, next) {
-  res.header('Access-Control-Allow-Origin', server)
+  res.header('Access-Control-Allow-Origin', '*')
   res.header('Access-Control-Allow-Methods', 'GET, POST')
   res.header(
     'Access-Control-Allow-Headers',
@@ -164,4 +164,3 @@ httpsServer.listen(portS || 3000, function () {
 httpServer.listen(port || 3000, function () {
 	console.log(`App is up on port ${port || '3000'} on HTTP`)
 });
-
