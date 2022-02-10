@@ -27,18 +27,18 @@ exports.getAds = Controller(async (req, res) => {
     // getting query strings
 
     const { ad_type, img_width, img_height, ad_format, media_type, url, site, uid, serv, mobile } = req.query
-    let cachedImg = await cache.getAsync(`${mobile}_${img_width}_${img_height}_${url}`);
-
+    let checker = site.split('/')[2];
+    if (checker.includes('www.')) {
+        checker = checker.split('w.')[1]
+    }
+    let extension = site.split(checker)
+    let cachedImg = await cache.getAsync(`${extension[1]}_${mobile}_${img_width}_${img_height}_${url}`);
     if (cachedImg)
         return res.status(200).send({
             results: JSON.parse(cachedImg)
         })
 
     await addImg(dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url, uid, site)
-    let checker = site.split('/')[2];
-    if (checker.includes('www.')) {
-        checker = checker.split('w.')[1]
-    }
     const aut = await auth(checker, site.split('/')[0])
     if (aut['enabled'] == false) {
         console.log("Cancelling")
@@ -61,7 +61,7 @@ exports.getAds = Controller(async (req, res) => {
             data: formData
         }
         console.log("Sending request")
-        let extension = site.split(checker)
+        
         let limit = 2
         if(aut['pages'] != null && JSON.parse(aut['pages'])[0] != null){
             limit = JSON.parse(aut['pages'])[0][extension[1]]
