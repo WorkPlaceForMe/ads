@@ -8,20 +8,22 @@ const { modify } = require('./modStatus')
 const { auth, check } = require('./auth')
 const { updateAds } = require('./updateAds')
 const { version } = require('./version')
+const { generateReport } = require('./generateReport')
 
 module.exports = {
-	getAds,
-	getUserDetails,
-	getQuickLink,
-	readCsv,
-	postData,
-	getStats,
-	getStatsUrl,
-	getStatsImg,
-	getStatsAd,
-	modify,
-	auth,
-	check,
-	updateAds,
-	version
+  getAds,
+  getUserDetails,
+  getQuickLink,
+  readCsv,
+  postData,
+  getStats,
+  getStatsUrl,
+  getStatsImg,
+  getStatsAd,
+  modify,
+  auth,
+  check,
+  updateAds,
+  version,
+  generateReport,
 }
