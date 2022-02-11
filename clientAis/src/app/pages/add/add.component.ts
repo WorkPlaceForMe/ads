@@ -38,7 +38,7 @@ export class AddComponent implements OnInit {
             this.registerForm.controls['nickname'].setValue(res['publ'].nickname)
           },
           err => console.error(err)
-    )
+      )
     }else{
       this.facesService.getServer().subscribe(
         res =>  this.snippet = `'<script type="text/javascript" src="${res['server']}/system/g3c.scan.image.sph.js"></script>'`
@@ -46,7 +46,7 @@ export class AddComponent implements OnInit {
     }
 
     this.registerForm = this.formBuilder.group({
-      nickname: ['', Validators.required, Validators.pattern('[a-zA-Z ]*')],
+      nickname: ['', ],
       name: ['', [Validators.required]],
     });
   }
@@ -66,7 +66,6 @@ export class AddComponent implements OnInit {
         if (controls[name].invalid) {
             this.values[name] = 'danger'
         }
-
     }
       return;
   }
@@ -78,7 +77,6 @@ export class AddComponent implements OnInit {
       this.windowRef.close();
     },
     err => {
-      console.log(err)
       this.is_saving = false;
       // this.registerForm.controls[err.error].setErrors({used:true})
       if (err.error.repeated === 'name'){
