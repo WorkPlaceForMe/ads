@@ -8,8 +8,6 @@ adscopeManual.docx
 .prettierrc
 access.log
 node_modules/**
-clientClient
-clientAis
 csv/**
 !csv/objetos2.json
 index.html
