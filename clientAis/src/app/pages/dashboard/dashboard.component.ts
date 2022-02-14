@@ -117,6 +117,18 @@ export class DashboardComponent implements OnInit {
   initDash(){
       this.face.getStats(this.range).subscribe(
         res => {
+          // let nickname = {title: 'Name',
+          //   type: 'string',
+          //   filter: false,
+          //   sort: true
+          // }
+          this.settings['columns']['nickname'] = {
+            title: 'Name',
+            type: 'string',
+            filter: false,
+            sort: true
+          }
+          // this.settings['columns'] = {nickname , ...this.settings['columns']};
           this.settings['columns']['rewards'] = {
             title: 'Rewards',
             type: 'string',
@@ -364,12 +376,6 @@ export class DashboardComponent implements OnInit {
     },
     noDataMessage: 'Loading...',
     columns: {
-      nickname: {
-        title: 'Name',
-        type: 'string',
-        filter: false,
-        sort: true
-      },
       url: {
           title: 'Publisher',
           type: 'custom',
