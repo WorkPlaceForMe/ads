@@ -93,7 +93,7 @@ exports.getAds = Controller(async (req, res) => {
         }
     }
   }
-})
+)
 
 const addImg = (time, imgName, idGeneration, site) => {
   return imgsPage.create({
