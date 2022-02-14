@@ -8,6 +8,7 @@ const { modify } = require('./modStatus')
 const { auth, check } = require('./auth')
 const { updateAds } = require('./updateAds')
 const { version } = require('./version')
+const { generateReport } = require('./generateReport')
 const { register, update, get, del, getServer } = require('./sites')
 
 module.exports = {
@@ -29,5 +30,6 @@ module.exports = {
 	update,
 	get,
 	del,
-	getServer
+	getServer,
+  generateReport
 }

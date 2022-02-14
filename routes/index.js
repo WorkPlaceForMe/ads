@@ -21,6 +21,8 @@ router.get('/api/stats/url', controllers.getStatsUrl)
 
 router.get('/api/stats/url/img', controllers.getStatsImg)
 
+router.get('/api/report', controllers.generateReport)
+
 router.get('/api/stats/url/img/ad', controllers.getStatsAd)
 
 router.get('/api/log/:id', controllers.auth)
