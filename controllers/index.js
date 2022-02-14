@@ -9,6 +9,7 @@ const { auth, check } = require('./auth')
 const { updateAds } = require('./updateAds')
 const { version } = require('./version')
 const { generateReport } = require('./generateReport')
+const { login } = require('./user')
 
 module.exports = {
   getAds,
@@ -26,4 +27,5 @@ module.exports = {
   updateAds,
   version,
   generateReport,
+  login,
 }
