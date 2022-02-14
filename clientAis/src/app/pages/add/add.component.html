@@ -1,0 +1,37 @@
+<div class="row">
+  <div class='col-md-12'>
+    <nb-card>  
+      <nb-card-body>
+
+        <div *ngIf="!edit">
+            <p>To add a new site please add this snippet into the head of the website that is being added:</p>
+            <p>{{snippet}}</p>
+        </div>
+
+        <form [formGroup]="registerForm" (ngSubmit)='onSubmit()'>
+            <div class="form-group">
+              <label for="nickname" class="label">Name</label>
+              <input type="text" class="form-control" formControlName="nickname" [ngClass]="{ 'is-invalid': submitted && f.nickname.errors }" nbInput fullWidth id="nickname" autofocus placeholder="Name" [status]='values.nickname' />
+              <div *ngIf="submitted && f.nickname.errors" class="invalid-feedback">
+                <div *ngIf="f.nickname.errors.required">Name is required</div>
+                <div *ngIf="f.nickname.errors.pattern">Name can not contain numbers or special characters.</div>
+            </div>
+            </div>
+            <div class="form-group">
+              <label for="name" class="label">Publisher Website</label>
+              <input type="text" class="form-control" formControlName="name" [ngClass]="{ 'is-invalid': submitted && f.name.errors }" nbInput fullWidth id="name" autofocus placeholder="Name" [status]='values.name' />
+              <div *ngIf="submitted && f.name.errors" class="invalid-feedback">
+                <div *ngIf="f.name.errors.cantMatch">Publisher has been registered, try another one</div>
+                <div *ngIf="f.name.errors.required">Publisher Website is required</div>
+            </div>
+            </div>
+
+
+    <button [status]="'success'" nbButton class="btn-block" *ngIf="is_saving == false">Save</button>
+    <button [status]="'success'" nbButton class="btn-block" *ngIf="is_saving == true" [nbSpinner]="is_saving" nbSpinnerSize="medium" nbSpinnerStatus="primary">&nbsp;</button>
+    </form>
+      </nb-card-body>
+      </nb-card>
+  </div>
+
+</div>

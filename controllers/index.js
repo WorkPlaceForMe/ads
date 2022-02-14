@@ -9,21 +9,27 @@ const { auth, check } = require('./auth')
 const { updateAds } = require('./updateAds')
 const { version } = require('./version')
 const { generateReport } = require('./generateReport')
+const { register, update, get, del, getServer } = require('./sites')
 
 module.exports = {
-  getAds,
-  getUserDetails,
-  getQuickLink,
-  readCsv,
-  postData,
-  getStats,
-  getStatsUrl,
-  getStatsImg,
-  getStatsAd,
-  modify,
-  auth,
-  check,
-  updateAds,
-  version,
-  generateReport,
+	getAds,
+	getUserDetails,
+	getQuickLink,
+	readCsv,
+	postData,
+	getStats,
+	getStatsUrl,
+	getStatsImg,
+	getStatsAd,
+	modify,
+	auth,
+	check,
+	updateAds,
+	version,
+	register,
+	update,
+	get,
+	del,
+	getServer,
+  generateReport
 }
