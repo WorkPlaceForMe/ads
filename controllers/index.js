@@ -9,6 +9,7 @@ const { auth, check } = require('./auth')
 const { updateAds } = require('./updateAds')
 const { version } = require('./version')
 const { generateReport } = require('./generateReport')
+const { login } = require('./user')
 const { register, update, get, del, getServer } = require('./sites')
 
 module.exports = {
@@ -31,5 +32,6 @@ module.exports = {
 	get,
 	del,
 	getServer,
-  generateReport
+  generateReport,
+  login
 }

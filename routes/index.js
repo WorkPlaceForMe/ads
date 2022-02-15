@@ -37,6 +37,8 @@ router.post('/api/adsNum/:id', controllers.updateAds)
 
 router.get('/api/version', controllers.version)
 
+router.post('/api/login', controllers.login)
+
 router.post('/api/register', [verify.checkDuplicatePubl], controllers.register)
 
 router.get('/api/site/:id', controllers.get)
