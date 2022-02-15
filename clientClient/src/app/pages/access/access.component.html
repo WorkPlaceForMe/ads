@@ -1,0 +1,41 @@
+<div class="container p-4">
+    <div class="displayTable">
+      <div class="displayTableCell">
+        <div class="col-md-6 offset-3">
+            <nb-card>
+                <nb-card-header>
+                    <h3 align='center' style='word-wrap: break-word;'>Input Secret Code</h3>
+                </nb-card-header>
+                <nb-card-body>
+        <div class="authBlock" align='center'>
+    
+              <form [formGroup]="registerForm" (ngSubmit)='onSubmit()'>
+                
+                <div class="col-md-10">
+    
+          <div class="form-group">
+            <input type="text" class="form-control" formControlName="code" [ngClass]="{ 'is-invalid': submitted && f.code.errors }" nbInput fullWidth id="code" autofocus placeholder="Secret Code" [status]='values.code' />
+            <div *ngIf="submitted && f.code.errors" class="invalid-feedback">
+              <div *ngIf="f.code.errors.required">{{errorMessage}}</div>
+          </div>
+    
+          </div>
+          
+    
+          </div>
+    <br>
+    
+          <div class="form-group">
+            <button nbButton [status]="values.login" *ngIf="!loading">Access</button>
+            <button nbButton [status]="'primary'" [nbSpinner]="true" nbSpinnerSize="giant" nbSpinnerStatus="primary" [disabled]="loading" *ngIf="loading">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</button>
+        </div>
+    
+    </form>
+
+      </div>
+    </nb-card-body>
+    </nb-card>
+      </div>
+    </div>
+    </div>
+    </div>

@@ -25,114 +25,72 @@ exports.getAds = Controller(async (req, res) => {
 
   // getting query strings
 
-  const {
-    ad_type,
-    img_width,
-    img_height,
-    ad_format,
-    media_type,
-    url,
-    site,
-    uid,
-    serv,
-    mobile,
-  } = req.query
-  let cachedImg = await cache.getAsync(
-    `${mobile}_${img_width}_${img_height}_${url}`,
-  )
-
-  if (cachedImg)
-    return res.status(200).send({
-      results: JSON.parse(cachedImg),
-    })
-
-  await addImg(dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss'), url, uid, site)
-  let checker = site.split('/')[2]
-  if (checker.includes('www.')) {
-    checker = checker.split('w.')[1]
-  }
-  const aut = await auth(checker, site.split('/')[0])
-  if (aut['enabled'] == false) {
-    console.log('Cancelling')
-    return res.status(400).json({ success: false, message: 'Unauthorized' })
-  } else {
-    let formData = new FormData()
-    formData.append('upload', request(url))
-    formData.append('subscriptions', 'face,fashion,Object,tags2,sport')
-    const request_config = {
-      method: 'post',
-      url: vista_url + apiEndpoint,
-      headers: {
-        'Content-Type': `multipart/form-data; boundary=${formData._boundary}`,
-      },
-      auth: {
-        username: user,
-        password: password,
-      },
-      data: formData,
+    const { ad_type, img_width, img_height, ad_format, media_type, url, site, uid, serv, mobile } = req.query
+    let checker = site.split('/')[2];
+    if (checker.includes('www.')) {
+        checker = checker.split('w.')[1]
     }
-    console.log('Sending request')
     let extension = site.split(checker)
-    let limit = 2
-    if (aut['pages'] != null && JSON.parse(aut['pages'])[0] != null) {
-      limit = JSON.parse(aut['pages'])[0][extension[1]]
+    let cachedImg = await cache.getAsync(`${extension[1]}_${mobile}_${img_width}_${img_height}_${url}`);
+    if (cachedImg)
+        return res.status(200).send({
+            results: JSON.parse(cachedImg)
+        })
+
+    await addImg(dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url, uid, site)
+    const aut = await auth(checker, site.split('/')[0])
+    if (aut['enabled'] == false) {
+        console.log("Cancelling")
+        return res.status(400).json({ success: false, message: "Unauthorized" })
     }
-    try {
-      console.log(
-        '=====================> VISTA RESPONSE <========================',
-      )
-      const response = await axios(request_config)
-      const objetos = await readCsv.readCsv(aut['idP'])
-      console.log('objetos ============================', objetos)
-      let resultsVista
-      if (response.data) {
-        resultsVista = response.data.results
-      }
-      console.log(
-        'resultsVista ====================================',
-        resultsVista,
-      )
-      const resultsAffiliate = await filler(
-        resultsVista,
-        serv,
-        img_width,
-        img_height,
-        site,
-        url,
-        uid,
-        objetos,
-        mobile,
-      )
-      const flat = flatten(resultsAffiliate)
-      if (flat.length > limit) {
-        flat.length = limit
-      }
-      //   console.log('flat ================================ ', flat)
-      const sendingResults = await convert(flat)
-      await cache.setAsync(
-        `${extension[1]}_${mobile}_${img_width}_${img_height}_${url}`,
-        JSON.stringify(sendingResults),
-        'EX',
-        604800,
-      )
-      res.status(200).send({
-        results: sendingResults,
-      })
-    } catch (err) {
-      if (err.response) console.log(err.response.status, url)
-      await cache.setAsync(
-        `${extension[1]}_${mobile}_${img_width}_${img_height}_${url}`,
-        JSON.stringify({}),
-        'EX',
-        604800,
-      )
-      console.trace(err)
-      return res.status(500).json({
-        success: false,
-        message: 'Vista Image failled',
-        error: err,
-        img: url,
-      })
+    else {
+        let formData = new FormData()
+        formData.append('upload', request(url))
+        formData.append('subscriptions', 'face,fashion,Object,tags2,sport')
+        const request_config = {
+            method: 'post',
+            url: vista_url + apiEndpoint,
+            headers: {
+                'Content-Type': `multipart/form-data; boundary=${formData._boundary}`
+            },
+            auth: {
+                username: user,
+                password: password
+            },
+            data: formData
+        }
+        console.log("Sending request")
+        
+        let limit = 2
+        if(aut['pages'] != null && JSON.parse(aut['pages'])[0] != null){
+            limit = JSON.parse(aut['pages'])[0][extension[1]]
+        }
+        try {
+            console.log('=====================> VISTA RESPONSE <========================')
+            const response = await axios(request_config)
+            const objetos = await readCsv.readCsv(aut['idP'])
+            let resultsVista
+            if (response.data) {
+                resultsVista = response.data.results
+            }
+            const resultsAffiliate = await filler(resultsVista, serv, img_width, img_height, site, url, uid, objetos, mobile)
+            const flat = flatten(resultsAffiliate)
+            if (flat.length > limit) {
+                flat.length = limit
+            }
+            const sendingResults = await convert(flat)
+            await cache.setAsync(`${extension[1]}_${mobile}_${img_width}_${img_height}_${url}`, JSON.stringify(sendingResults), 'EX', 604800);
+            res.status(200).send({
+                results: sendingResults
+            })
+        }
+        catch (err) {
+            if (err.response)
+                console.log(err.response.status, url)
+            await cache.setAsync(`${extension[1]}_${mobile}_${img_width}_${img_height}_${url}`, JSON.stringify({}), 'EX', 604800);
+            console.trace(err)
+            return res.status(500).json({ success: false, message: "Vista Image failled", error: err, img: url })
+        }
     }
   }
 })
