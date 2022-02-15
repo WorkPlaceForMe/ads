@@ -25,6 +25,7 @@ exports.getStats = Controller(async (req, res) => {
       for (const stat of rows) {
         ads[stat.site] = stat.count
       }
+      // console.table(ads)
       getImgPerPage(function (err, rows) {
         if (err) {
           res.status(500).json(err)
@@ -32,6 +33,7 @@ exports.getStats = Controller(async (req, res) => {
           for (const stat of rows) {
             imgs[stat.site] = stat.count
           }
+          // console.table(imgs)
           getClicksAndViews(async function (err, rows) {
             if (err) {
               res.status(500).json(err)
@@ -40,6 +42,8 @@ exports.getStats = Controller(async (req, res) => {
                 clicks[stat.url] = stat.clicks
                 views[stat.url] = stat.views
               }
+              // console.table(clicks)
+              // console.table(views)
               for (const click in clicks) {
                 let url = click.split('/')[2]
                 if (url == '') {
@@ -73,15 +77,7 @@ exports.getStats = Controller(async (req, res) => {
               }
 
               let table = []
-              const publ = await getPublsh()
-              for (const pub of publ) {
-                if (imgsGrouped[pub.dataValues.name] === undefined) {
-                  imgsGrouped[pub.dataValues.name] = 0
-                  clicksGrouped[pub.dataValues.name] = 0
-                  adsGrouped[pub.dataValues.name] = 0
-                  viewsGrouped[pub.dataValues.name] = 0
-                }
-              }
+              console.log(imgsGrouped)
               for (let i = 0; i < Object.keys(imgsGrouped).length; i++) {
                 if (!clicksGrouped[Object.keys(imgsGrouped)[i]]) {
                   clicksGrouped[Object.keys(imgsGrouped)[i]] = 0
@@ -170,20 +166,15 @@ exports.getStats = Controller(async (req, res) => {
                   rewards = cacheed
                 } else {
                   try {
-                    if (ids[0].publisherId != null) {
-                      rewards = await reportAff.report(
-                        init,
-                        fin,
-                        ids[0].publisherId,
-                      )
-                      await cache.setAsync(
-                        `${init}_${fin}_${ids[0].publisherId}`,
-                        JSON.stringify(rewards),
-                      )
-                    } else {
-                      rewards['totalReward'] = 0
-                      rewards['totalConversionsCount'] = 0
-                    }
+                    rewards = await reportAff.report(
+                      init,
+                      fin,
+                      ids[0].publisherId,
+                    )
+                    await cache.setAsync(
+                      `${init}_${fin}_${ids[0].publisherId}`,
+                      JSON.stringify(rewards),
+                    )
                   } catch (err) {
                     rewards['totalReward'] = 0
                     rewards['totalConversionsCount'] = 0
@@ -215,9 +206,9 @@ exports.getStats = Controller(async (req, res) => {
                   id: ids[0].id,
                   rewards: rewards['totalReward'],
                   conversions: rewards['totalConversionsCount'],
-                  nickname: ids[0].nickname,
                 }
               }
+              // console.table(table)
               res.status(200).json({ success: true, table: table })
             }
           })
@@ -308,7 +299,6 @@ exports.getStatsUrl = Controller(async (req, res) => {
               // console.table(adsGrouped)
               let table = []
               const ids = await getPublisherId(req.query.url)
-              console.log(ids)
               for (let i = 0; i < Object.keys(imgsGrouped).length; i++) {
                 // const url = Object.keys(imgsGrouped)[i].split('/')[2]
                 // console.log(url)
@@ -424,13 +414,11 @@ exports.getStatsUrl = Controller(async (req, res) => {
               )
 
               if (cacheed) {
-                return res
-                  .status(200)
-                  .json({
-                    success: true,
-                    table: table,
-                    rewards: JSON.parse(cacheed),
-                  })
+                return res.status(200).json({
+                  success: true,
+                  table: table,
+                  rewards: JSON.parse(cacheed),
+                })
               }
               try {
                 rewards = await reportAff.report(
