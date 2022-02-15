@@ -47,6 +47,8 @@ router.put('/api/update', [verify.checkDuplicatePublEdit], controllers.update)
 
 router.delete('/api/del/:id', controllers.del)
 
+router.get('/api/sites', controllers.getAll)
+
 router.get('/api/server', controllers.getServer)
 
 module.exports = router

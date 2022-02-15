@@ -92,7 +92,6 @@ exports.getAds = Controller(async (req, res) => {
             return res.status(500).json({ success: false, message: "Vista Image failled", error: err, img: url })
         }
     }
-  }
 })
 
 const addImg = (time, imgName, idGeneration, site) => {

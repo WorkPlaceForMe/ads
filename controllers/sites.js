@@ -24,6 +24,11 @@ exports.get = Controller(async(req, res) => {
     res.status(200).json({success: true, publ: publ});
 })
 
+exports.getAll = Controller(async(req, res) => {
+    const publ = await publishers.findAll()
+    res.status(200).json({success: true, publ: publ});
+})
+
 exports.getServer = Controller(async(req, res) => {
     const server = conf.get('server')
     res.status(200).json({success: true, server: server});

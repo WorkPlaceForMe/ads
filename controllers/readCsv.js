@@ -15,12 +15,7 @@ exports.readCsv = async function (idPbl) {
   const val1 = products.findOne({ where: { Page_ID: idPbl } })
   const val2 = clothing.findOne({ where: { Page_ID: idPbl } })
   const enter = await Promise.all([val1, val2])
-  console.log(enter, '========================enter')
-  console.log(cachedDown, '=========================cachedDown')
   if (enter[0] != null && enter[1] != null) {
-    console.log(
-      '11111111111111111111111111111111111111111111111111111111111111111111111111111111',
-    )
     const Clothing = clothing.findAll({
       raw: true,
       where: { Page_ID: idPbl },
@@ -34,9 +29,6 @@ exports.readCsv = async function (idPbl) {
     return flat
   } else {
     if (cachedDown == 'false' || !cachedDown) {
-      console.log(
-        '222222222222222222222222222222222222222222222222222222222222',
-      )
       await cache.setAsync(`downloading-${idPbl}`, true)
       const ids = {
         shopee: 677,
@@ -66,7 +58,6 @@ exports.readCsv = async function (idPbl) {
         console.log(err)
       }
     } else {
-      console.log('33333333333333333333333333333333333333333333')
       cachedDown = await cache.getAsync(`downloading-${idPbl}`)
       while (cachedDown == 'true') {
         cachedDown = await cache.getAsync(`downloading-${idPbl}`)

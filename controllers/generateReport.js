@@ -25,6 +25,8 @@ exports.generateReport = Controller(async (req, res) => {
         responseData['stats'] = stats
         getStatsUrl(req)
           .then(async (statsUrl) => {
+            console.log(statsUrl.table)
+            console.log(statsUrl.rewards)
             responseData['stats']['statsUrl'] = statsUrl
             for (let i = 0; i < responseData.stats.statsUrl.table.length; i++) {
               req.query.imgs = responseData.stats.statsUrl.table[i].url
@@ -36,11 +38,12 @@ exports.generateReport = Controller(async (req, res) => {
             }
 
             const webpageRes = [...responseData.stats.statsUrl.table]
-
             const reportData = []
             if (req.query.option === 'webpages') {
               for (const webpage of webpageRes) {
                 delete webpage['images']
+                webpage.totalReward = statsUrl.rewards.totalReward
+                webpage.totalConversionsCount = statsUrl.rewards.totalConversionsCount
                 reportData.push(webpage)
               }
             } else if (req.query.option === 'images') {
@@ -63,7 +66,7 @@ exports.generateReport = Controller(async (req, res) => {
             const readStream = new stream.PassThrough()
             readStream.end(data)
             res.set('Content-disposition', 'attachment; filename=' + filename)
-            res.set('Content-Type', 'text/plain')
+            res.set('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
 
             readStream.pipe(res)
           })
@@ -532,11 +535,15 @@ const getStatsImg = (req) => {
             return reject(err)
           } else {
             let ads = {}
+            
             for (let i = 0; i < rows.length; i++) {
               ads[rows[i].imgName] = (ads[rows[i].imgName] || 0) + 1
-              if (rows[i].idGeneration != rows[i + 1].idGeneration) {
-                break
+              if(i != rows.length - 1){
+                if (rows[i].idGeneration != rows[i + 1].idGeneration) {
+                  break
+                }
               }
+
             }
             getImgsList(urlQuery, function (err, rows) {
               if (err) {
@@ -570,8 +577,10 @@ const getStatsImg = (req) => {
                     ctr: ctr,
                     ads: adsTotal,
                   })
-                  if (rows[i].idGeneration != rows[i + 1].idGeneration) {
-                    break
+                  if(i != rows.length - 1){
+                    if (rows[i].idGeneration != rows[i + 1].idGeneration) {
+                      break
+                    }
                   }
                 }
                 resolve(imgs)

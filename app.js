@@ -106,8 +106,8 @@ async function createAdminUser() {
   const adminCreated = await User.findOne({ where: { username: 'admin' } })
   if (!adminCreated) {
     await User.create({
-      username: 'admin',
-      password: bcrypt.hashSync('graymatics', 12),
+      username: 'adminAis',
+      password: bcrypt.hashSync('AisGraymatics1!', 12),
       email: 'test@graymatics.com',
       role: 'ADMIN',
     })

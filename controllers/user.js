@@ -17,6 +17,7 @@ exports.login = Controller(async (req, res) => {
     return res.status(400).json({
       success: false,
       message: 'User not exists',
+      type: 'user'
     })
   }
 
@@ -25,11 +26,15 @@ exports.login = Controller(async (req, res) => {
     return res.status(400).send({
       success: false,
       message: 'Invalid password provided',
+      type: 'pass'
     })
   }
+
+  delete user.dataValues.password
 
   res.status(200).json({
     success: true,
     message: 'You are logged in successfully',
+    user: user
   })
 })
