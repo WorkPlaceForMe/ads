@@ -8,66 +8,79 @@ var stream = require('stream')
 
 exports.generateReport = Controller(async (req, res) => {
   const responseData = {}
+  const tableDataArray = []
   if (!req.query.init || !req.query.fin || !req.query.id || !req.query.option) {
     return res.status(400).json({
       success: false,
       message: 'Date range, id & option all is required',
     })
   }
+  if (!['webpages', 'images'].includes(req.query.option)) {
+    return res.status(400).json({
+      success: false,
+      message: 'Option must be webpages or images',
+    })
+  }
   try {
-    getStats(req)
-      .then((stats) => {
-        const statsLength = Object.keys(stats).length
-        if (statsLength == 0) {
-          return res.status(400).json({ success: false, message: 'Not Found' })
+    getAllStats(req)
+      .then(async (allStats) => {
+        if (req.query.id !== 'all') {
+          allStats = allStats.filter((item) => item.id == req.query.id)
         }
-        req.query.url = stats.url
-        responseData['stats'] = stats
-        getStatsUrl(req)
-          .then(async (statsUrl) => {
-            responseData['stats']['statsUrl'] = statsUrl
-            for (let i = 0; i < responseData.stats.statsUrl.table.length; i++) {
-              req.query.imgs = responseData.stats.statsUrl.table[i].url
-              await getStatsImg(req)
-                .then((images) => {
-                  responseData.stats.statsUrl.table[i].images = images
-                })
-                .catch((err) => res.status(500).json(err))
-            }
-
-            const webpageRes = [...responseData.stats.statsUrl.table]
-
-            const reportData = []
-            if (req.query.option === 'webpages') {
-              for (const webpage of webpageRes) {
-                delete webpage['images']
-                reportData.push(webpage)
+        if (allStats.length == 0) {
+          return res
+            .status(400)
+            .json({ success: false, message: 'No Data Found' })
+        }
+        for (const stats of allStats) {
+          req.query.url = stats.url
+          responseData['stats'] = stats
+          await getStatsUrl(req)
+            .then(async (statsUrl) => {
+              responseData['stats']['statsUrl'] = statsUrl
+              for (
+                let i = 0;
+                i < responseData.stats.statsUrl.table.length;
+                i++
+              ) {
+                req.query.imgs = responseData.stats.statsUrl.table[i].url
+                await getStatsImg(req)
+                  .then((images) => {
+                    responseData.stats.statsUrl.table[i].images = images
+                  })
+                  .catch((err) => res.status(500).json(err))
               }
-            } else if (req.query.option === 'images') {
-              for (const webpage of webpageRes) {
-                for (const image of webpage.images) {
-                  image['webPageBelongsTo'] = webpage.url
-                  reportData.push(image)
-                }
+
+              for (const tData of responseData.stats.statsUrl.table) {
+                tableDataArray.push(tData)
               }
-            } else {
-              return res.status(400).json({
-                success: false,
-                message: 'Option must be webpages or images',
-              })
-              // res.status(200).json(responseData)
+            })
+            .catch((err) => res.status(500).json(err))
+        }
+
+        const reportData = []
+        if (req.query.option === 'webpages') {
+          for (const webpage of tableDataArray) {
+            delete webpage['images']
+            reportData.push(webpage)
+          }
+        } else if (req.query.option === 'images') {
+          for (const webpage of tableDataArray) {
+            for (const image of webpage.images) {
+              image['webPageBelongsTo'] = webpage.url
+              reportData.push(image)
             }
+          }
+        }
 
-            const data = await createExelReport(reportData)
-            const filename = 'advanced_report_' + Date.now() + '.xlsx'
-            const readStream = new stream.PassThrough()
-            readStream.end(data)
-            res.set('Content-disposition', 'attachment; filename=' + filename)
-            res.set('Content-Type', 'text/plain')
+        const data = await createExelReport(reportData)
+        const filename = 'advanced_report_' + Date.now() + '.xlsx'
+        const readStream = new stream.PassThrough()
+        readStream.end(data)
+        res.set('Content-disposition', 'attachment; filename=' + filename)
+        res.set('Content-Type', 'text/plain')
 
-            readStream.pipe(res)
-          })
-          .catch((err) => res.status(500).json(err))
+        readStream.pipe(res)
       })
       .catch((err) => res.status(500).json(err))
   } catch (err) {
@@ -86,9 +99,8 @@ const createExelReport = (data) => {
   return buffer
 }
 
-const getStats = (req) => {
+const getAllStats = (req) => {
   return new Promise((resolve, reject) => {
-    let stats = {}
     let ads = {},
       clicks = {},
       views = {},
@@ -98,8 +110,7 @@ const getStats = (req) => {
       clicksGrouped = {},
       viewsGrouped = {},
       imgsGrouped = {}
-
-    getAdsPerPage(async function (err, rows) {
+    getAdsPerPage(function (err, rows) {
       if (err) {
         return reject(err)
       } else {
@@ -156,6 +167,7 @@ const getStats = (req) => {
                   adsGrouped[url] = (adsGrouped[url] || 0) + ads[ad]
                 }
 
+                let table = []
                 for (let i = 0; i < Object.keys(imgsGrouped).length; i++) {
                   if (!clicksGrouped[Object.keys(imgsGrouped)[i]]) {
                     clicksGrouped[Object.keys(imgsGrouped)[i]] = 0
@@ -226,64 +238,67 @@ const getStats = (req) => {
                   }
 
                   const ids = await getPublisherId(Object.keys(imgsGrouped)[i])
-
-                  if (ids[0].id === req.query.id) {
-                    const init = new Date(req.query.init).toISOString()
-                    const fin = new Date(req.query.fin).toISOString()
-                    let rewards = {}
-                    const cacheed = await cache.getAsync(
-                      `${init}_${fin}_${ids[0].publisherId}`,
-                    )
-
-                    if (cacheed) {
-                      rewards = cacheed
-                    } else {
-                      try {
-                        rewards = await reportAff.report(
-                          init,
-                          fin,
-                          ids[0].publisherId,
-                        )
-                        await cache.setAsync(
-                          `${init}_${fin}_${ids[0].publisherId}`,
-                          JSON.stringify(rewards),
-                        )
-                      } catch (err) {
-                        rewards['totalReward'] = 0
-                        rewards['totalConversionsCount'] = 0
-                        await cache.setAsync(
-                          `${init}_${fin}_${ids[0].publisherId}`,
-                          JSON.stringify(rewards),
-                        )
-                      }
-                    }
-
-                    if (ids[0].enabled == 'true') {
-                      ids[0].enabled = true
-                    } else if (ids[0].enabled == 'false') {
-                      ids[0].enabled = false
-                    }
-
-                    stats = {
-                      url: Object.keys(imgsGrouped)[i],
-                      clicksPerImg: clicksPerImg,
-                      viewsPerImg: viewsPerImg,
-                      clicksPerAd: clicksPerAd,
-                      viewsPerAd: viewsPerAd,
-                      ctr: ctr,
-                      images: imgsGrouped[Object.keys(imgsGrouped)[i]],
-                      ads: adsGrouped[Object.keys(imgsGrouped)[i]],
-                      clicks: clicksGrouped[Object.keys(imgsGrouped)[i]],
-                      views: viewsGrouped[Object.keys(imgsGrouped)[i]],
-                      enabled: ids[0].enabled,
-                      id: ids[0].id,
-                      rewards: rewards['totalReward'],
-                      conversions: rewards['totalConversionsCount'],
+                  if (ids.length == 0) {
+                    ids[0] = {
+                      enabled: false,
+                      id: 0,
                     }
                   }
-                }
 
-                resolve(stats)
+                  const init = new Date(req.query.init).toISOString()
+                  const fin = new Date(req.query.fin).toISOString()
+                  let rewards = {}
+                  const cacheed = await cache.getAsync(
+                    `${init}_${fin}_${ids[0].publisherId}`,
+                  )
+
+                  if (cacheed) {
+                    rewards = cacheed
+                  } else {
+                    try {
+                      rewards = await reportAff.report(
+                        init,
+                        fin,
+                        ids[0].publisherId,
+                      )
+                      await cache.setAsync(
+                        `${init}_${fin}_${ids[0].publisherId}`,
+                        JSON.stringify(rewards),
+                      )
+                    } catch (err) {
+                      rewards['totalReward'] = 0
+                      rewards['totalConversionsCount'] = 0
+                      await cache.setAsync(
+                        `${init}_${fin}_${ids[0].publisherId}`,
+                        JSON.stringify(rewards),
+                      )
+                    }
+                  }
+
+                  if (ids[0].enabled == 'true') {
+                    ids[0].enabled = true
+                  } else if (ids[0].enabled == 'false') {
+                    ids[0].enabled = false
+                  }
+
+                  table[i] = {
+                    url: Object.keys(imgsGrouped)[i],
+                    clicksPerImg: clicksPerImg,
+                    viewsPerImg: viewsPerImg,
+                    clicksPerAd: clicksPerAd,
+                    viewsPerAd: viewsPerAd,
+                    ctr: ctr,
+                    images: imgsGrouped[Object.keys(imgsGrouped)[i]],
+                    ads: adsGrouped[Object.keys(imgsGrouped)[i]],
+                    clicks: clicksGrouped[Object.keys(imgsGrouped)[i]],
+                    views: viewsGrouped[Object.keys(imgsGrouped)[i]],
+                    enabled: ids[0].enabled,
+                    id: ids[0].id,
+                    rewards: rewards['totalReward'],
+                    conversions: rewards['totalConversionsCount'],
+                  }
+                }
+                resolve(table)
               }
             })
           }
