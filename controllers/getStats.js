@@ -301,7 +301,7 @@ exports.getStatsUrl = Controller(async(req, res) => {
 
                                 let extension = Object.keys(imgsGrouped)[i].split(req.query.url)[1]
                                 const def = 2;
-                                let adsPerImage, imgPerPage
+                                let adsPerImage, imgPerPage, totImgs
                                 if(ids[0].pages != null){
                                     const pages = JSON.parse(ids[0].pages)
                                     if(pages[0][extension] != null){
@@ -314,9 +314,15 @@ exports.getStatsUrl = Controller(async(req, res) => {
                                     }else{
                                         imgPerPage = imgsGrouped[Object.keys(imgsGrouped)[i]]
                                     }
+                                    if(pages[2][extension] != null){
+                                        totImgs = pages[2][extension]
+                                    }else{
+                                        totImgs = imgsGrouped[Object.keys(imgsGrouped)[i]]
+                                    }
                                 }else{
                                     adsPerImage = def
                                     imgPerPage = imgsGrouped[Object.keys(imgsGrouped)[i]]
+                                    totImgs = imgsGrouped[Object.keys(imgsGrouped)[i]]
                                 }
 
                                 table[i] = {
@@ -331,7 +337,8 @@ exports.getStatsUrl = Controller(async(req, res) => {
                                     clicks: clicksGrouped[Object.keys(imgsGrouped)[i]],
                                     views: viewsGrouped[Object.keys(imgsGrouped)[i]],
                                     adsNum: adsPerImage,
-                                    imgNum: imgPerPage
+                                    imgNum: imgPerPage,
+                                    totImgs: totImgs
                                 }
                             }
                             // console.table(table)
