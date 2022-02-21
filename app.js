@@ -103,7 +103,7 @@ async function check(ids = {}) {
 }
 
 async function createAdminUser() {
-  const adminCreated = await User.findOne({ where: { username: 'admin' } })
+  const adminCreated = await User.findOne({ where: { username: 'adminAis' } })
   if (!adminCreated) {
     await User.create({
       username: 'adminAis',
