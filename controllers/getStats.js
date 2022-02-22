@@ -354,7 +354,7 @@ exports.getStatsUrl = Controller(async(req, res) => {
                                     totImgs: totImgs
                                 }
                             }
-                            // console.table(table)
+                            console.table(table)
                             let rewards = {};
                             const cacheed = await cache.getAsync(`${req.query.init}_${req.query.fin}_${ids[0].publisherId}`);
                             
