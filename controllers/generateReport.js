@@ -25,8 +25,6 @@ exports.generateReport = Controller(async (req, res) => {
         responseData['stats'] = stats
         getStatsUrl(req)
           .then(async (statsUrl) => {
-            console.log(statsUrl.table)
-            console.log(statsUrl.rewards)
             responseData['stats']['statsUrl'] = statsUrl
             for (let i = 0; i < responseData.stats.statsUrl.table.length; i++) {
               req.query.imgs = responseData.stats.statsUrl.table[i].url
@@ -229,7 +227,7 @@ const getStats = (req) => {
                   }
 
                   const ids = await getPublisherId(Object.keys(imgsGrouped)[i])
-
+                  console.log(ids)
                   if (ids[0].id === req.query.id) {
                     const init = new Date(req.query.init).toISOString()
                     const fin = new Date(req.query.fin).toISOString()
