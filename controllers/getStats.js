@@ -85,15 +85,18 @@ exports.getStats = Controller(async(req, res) => {
                                     viewsGrouped[pub.dataValues.name] = 0
                                 }
                             }
+                            console.log(publ)
                             for(let i = 0; i < Object.keys(imgsGrouped).length; i++){
-                                let count = 0;
-                                for(const pub of publ){
-                                    if(pub.dataValues.name != Object.keys(imgsGrouped)[i]){
-                                        count ++;
+                                if(publ.length != Object.keys(imgsGrouped).length){
+                                    let count = 0;
+                                    for(const pub of publ){
+                                        if(pub.dataValues.name != Object.keys(imgsGrouped)[i]){
+                                            count ++;
+                                        }
                                     }
-                                }
-                                if(count == Object.keys(imgsGrouped).length -1){
-                                    continue;
+                                    if(count == Object.keys(imgsGrouped).length -1){
+                                        continue;
+                                    }
                                 }
                                 if(!clicksGrouped[Object.keys(imgsGrouped)[i]]){
                                     clicksGrouped[Object.keys(imgsGrouped)[i]] = 0
@@ -181,6 +184,7 @@ exports.getStats = Controller(async(req, res) => {
                                     }
 
                             }
+                            console.table(table)
                             let filtered = table.filter(function (el) {
                                 return el != null;
                             });
