@@ -89,7 +89,7 @@ exports.getStats = Controller(async(req, res) => {
                             for(let i = 0; i < Object.keys(imgsGrouped).length; i++){
                                 let count = 0;
                                 for(const pub of publ){
-                                    console.log(pub, Object.keys(imgsGrouped)[i])
+                                    console.log(pub.dataValues.name, Object.keys(imgsGrouped)[i])
                                     if(pub.dataValues.name != Object.keys(imgsGrouped)[i]){
                                         count ++;
                                     }
