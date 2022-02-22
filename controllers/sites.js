@@ -7,14 +7,23 @@ const conf = require('../middleware/prop')
 exports.register = Controller(async(req, res) => {
     const locId = uuidv4();
     const data = req.body
-    await registerDb(locId, data.name, data.nickname)
-    res.status(200).json({success: true});
+    try{
+        await registerDb(locId, data.name, data.nickname)
+        res.status(200).json({success: true});
+    }catch(err){
+        res.status(500).json({success: false, mess: err})
+    }
+
 })
 
 exports.update = Controller(async(req, res) => {
     const data = req.body
-    updateDb(data)
-    res.status(200).json({success: true});
+    try{
+        await updateDb(data)
+        res.status(200).json({success: true});
+    }catch(err){
+        res.status(500).json({success: false, mess: err})
+    }
 })
 
 exports.get = Controller(async(req, res) => {
