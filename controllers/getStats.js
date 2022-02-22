@@ -94,6 +94,7 @@ exports.getStats = Controller(async(req, res) => {
                                         count ++;
                                     }
                                 }
+                                console.log(count, Object.keys(imgsGrouped).length)
                                 if(count == Object.keys(imgsGrouped).length){
                                     console.log('=========================================')
                                     continue;
