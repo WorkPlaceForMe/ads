@@ -15,7 +15,6 @@ async function update(body,id) {
     const publ = await publishers.findOne({
         where: { name: id },
     })
-    console.log(publ)
     if(publ.dataValues.pages == null){
         await publ.update({pages: body})
     }else{

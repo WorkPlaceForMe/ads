@@ -3,6 +3,9 @@ const db1 = require('../campaigns-db/database')
 const publishers = db1.publishers
 const { v4: uuidv4 } = require('uuid')
 const conf = require('../middleware/prop')
+const axios = require('axios')
+const aff = require('./affiliate')
+const jwt = require('jsonwebtoken')
 
 exports.register = Controller(async(req, res) => {
     const locId = uuidv4();
@@ -45,8 +48,37 @@ exports.getServer = Controller(async(req, res) => {
 
 exports.del = Controller(async(req, res) => {
     const data = req.params.id
-    delSite(data)
-    res.status(200).json({success: true});
+    const credentials = await aff.getAff()
+
+    const token = jwt.sign(
+        { sub: credentials.userUid},
+        credentials.secretKey,
+        {
+        algorithm: "HS256"
+        }
+    )
+    try{
+        const publ = await publishers.findOne({
+            where: { id: req.params.id },
+        })
+        const affiliateEndpointCampaings = `${conf.get('accesstrade_endpoint')}/v1/publishers/me/sites/${publ.dataValues.publisherId}`
+        try{
+            await axios.delete(affiliateEndpointCampaings
+                ,{
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'X-Accesstrade-User-Type': 'publisher'
+                    }
+            })
+            await delSite(data)
+            res.status(200).json({success: true});
+        }catch(err){
+            await delSite(data)
+            res.status(500).json({success: false, mess: err})
+        }
+    }catch(err){
+        res.status(500).json({success: false, mess: err})
+    }
 })
 
 const registerDb = async function(id,site, nickname){
