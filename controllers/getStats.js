@@ -85,18 +85,15 @@ exports.getStats = Controller(async(req, res) => {
                                     viewsGrouped[pub.dataValues.name] = 0
                                 }
                             }
-                            console.log(Object.keys(imgsGrouped))
                             for(let i = 0; i < Object.keys(imgsGrouped).length; i++){
                                 let count = 0;
                                 for(const pub of publ){
-                                    console.log(pub.dataValues.name, Object.keys(imgsGrouped)[i])
                                     if(pub.dataValues.name != Object.keys(imgsGrouped)[i]){
                                         count ++;
                                     }
                                 }
                                 console.log(count, Object.keys(imgsGrouped).length)
                                 if(count == Object.keys(imgsGrouped).length -1){
-                                    console.log('=========================================')
                                     continue;
                                 }
                                 if(!clicksGrouped[Object.keys(imgsGrouped)[i]]){
