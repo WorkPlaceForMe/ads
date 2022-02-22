@@ -5,6 +5,8 @@ const cache = require('../helper/cacheManager')
 const conf = require('../middleware/prop')
 const xlsx = require('node-xlsx').default
 var stream = require('stream')
+const db1 = require('../campaigns-db/database')
+const publishers = db1.publishers
 
 exports.generateReport = Controller(async (req, res) => {
   const responseData = {}
@@ -156,8 +158,18 @@ const getStats = (req) => {
                   }
                   adsGrouped[url] = (adsGrouped[url] || 0) + ads[ad]
                 }
+                const publ = await getPublsh()
                 console.log(Object.keys(imgsGrouped))
                 for (let i = 0; i < Object.keys(imgsGrouped).length; i++) {
+                  let count = 0;
+                  for(const pub of publ){
+                      if(pub.dataValues.name != Object.keys(imgsGrouped)[i]){
+                          count ++;
+                      }
+                  }
+                  if(count == Object.keys(imgsGrouped).length -1){
+                      continue;
+                  }
                   if (!clicksGrouped[Object.keys(imgsGrouped)[i]]) {
                     clicksGrouped[Object.keys(imgsGrouped)[i]] = 0
                   }
@@ -661,4 +673,9 @@ const getPublisherId = async function (site) {
       },
     )
   })
+}
+
+const getPublsh = async function(){
+    const publ = await publishers.findAll()
+    return publ
 }
