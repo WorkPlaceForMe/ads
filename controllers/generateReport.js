@@ -163,11 +163,12 @@ const getStats = (req) => {
                 for (let i = 0; i < Object.keys(imgsGrouped).length; i++) {
                   let count = 0;
                   for(const pub of publ){
-                    console.log(count, Object.keys(imgsGrouped).length)
+
                       if(pub.dataValues.name != Object.keys(imgsGrouped)[i]){
                           count ++;
                       }
                   }
+                  console.log(count, Object.keys(imgsGrouped).length)
                   if(count == Object.keys(imgsGrouped).length -1){
                       continue;
                   }
