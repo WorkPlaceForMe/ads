@@ -92,7 +92,6 @@ exports.getStats = Controller(async(req, res) => {
                                         count ++;
                                     }
                                 }
-                                console.log(count, Object.keys(imgsGrouped).length)
                                 if(count == Object.keys(imgsGrouped).length -1){
                                     continue;
                                 }
@@ -314,7 +313,6 @@ exports.getStatsUrl = Controller(async(req, res) => {
                                 let extension = Object.keys(imgsGrouped)[i].split(req.query.url)[1]
                                 const def = 2;
                                 let adsPerImage, imgPerPage, totImgs
-                                console.log(ids[0])
                                 if(ids[0].pages != null){
                                     const pages = JSON.parse(ids[0].pages)
                                     if(pages[0][extension] != null){
@@ -354,7 +352,9 @@ exports.getStatsUrl = Controller(async(req, res) => {
                                     totImgs: totImgs
                                 }
                             }
-                            console.table(table)
+                            if(table.length == 0){
+                                table.push({"url":"/","clicksPerImg":0,"viewsPerImg":0,"clicksPerAd":0,"viewsPerAd":0,"ctr":0,"images":0,"ads":0,"clicks":0,"views":0,"adsNum":0,"imgNum":0,"totImgs":0})
+                            }
                             let rewards = {};
                             const cacheed = await cache.getAsync(`${req.query.init}_${req.query.fin}_${ids[0].publisherId}`);
                             
