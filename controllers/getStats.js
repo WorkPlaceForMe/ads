@@ -77,7 +77,6 @@ exports.getStats = Controller(async(req, res) => {
 
                             let table = []
                             const publ = await getPublsh()
-                            console.log(Object.keys(imgsGrouped))
                             for(const pub of publ){
                                 if(imgsGrouped[pub.dataValues.name] ===  undefined){
                                     imgsGrouped[pub.dataValues.name] = 0
@@ -86,8 +85,18 @@ exports.getStats = Controller(async(req, res) => {
                                     viewsGrouped[pub.dataValues.name] = 0
                                 }
                             }
+                            console.log(Object.keys(imgsGrouped))
                             for(let i = 0; i < Object.keys(imgsGrouped).length; i++){
-
+                                let count = 0;
+                                for(const pub of publ){
+                                    if(pub.dataValues.name != Object.keys(imgsGrouped)[i]){
+                                        count ++;
+                                    }
+                                }
+                                if(count == Object.keys(imgsGrouped).length){
+                                    console.log('=========================================')
+                                    continue;
+                                }
                                 if(!clicksGrouped[Object.keys(imgsGrouped)[i]]){
                                     clicksGrouped[Object.keys(imgsGrouped)[i]] = 0
                                 }
