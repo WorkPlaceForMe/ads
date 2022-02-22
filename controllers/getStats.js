@@ -85,7 +85,6 @@ exports.getStats = Controller(async(req, res) => {
                                     viewsGrouped[pub.dataValues.name] = 0
                                 }
                             }
-                            console.log(publ)
                             for(let i = 0; i < Object.keys(imgsGrouped).length; i++){
                                 if(publ.length != Object.keys(imgsGrouped).length){
                                     let count = 0;
@@ -184,7 +183,6 @@ exports.getStats = Controller(async(req, res) => {
                                     }
 
                             }
-                            console.table(table)
                             let filtered = table.filter(function (el) {
                                 return el != null;
                             });

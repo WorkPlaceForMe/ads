@@ -236,7 +236,6 @@ const getStats = (req) => {
                   }
 
                   const ids = await getPublisherId(Object.keys(imgsGrouped)[i])
-                  console.log(ids, '====================')
                   if(ids.length == 0){
                     continue;
                   }
