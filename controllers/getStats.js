@@ -185,7 +185,10 @@ exports.getStats = Controller(async(req, res) => {
                                     }
 
                             }
-                            res.status(200).json({success: true, table: table});
+                            let filtered = table.filter(function (el) {
+                                return el != null;
+                            });
+                            res.status(200).json({success: true, table: filtered});
                         }
                     })
                 }
