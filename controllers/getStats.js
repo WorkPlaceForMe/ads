@@ -77,7 +77,7 @@ exports.getStats = Controller(async(req, res) => {
 
                             let table = []
                             const publ = await getPublsh()
-                            console.log(publ)
+                            console.log(Object.keys(imgsGrouped))
                             for(const pub of publ){
                                 if(imgsGrouped[pub.dataValues.name] ===  undefined){
                                     imgsGrouped[pub.dataValues.name] = 0
