@@ -156,7 +156,7 @@ const getStats = (req) => {
                   }
                   adsGrouped[url] = (adsGrouped[url] || 0) + ads[ad]
                 }
-
+                console.log(Object.keys(imgsGrouped))
                 for (let i = 0; i < Object.keys(imgsGrouped).length; i++) {
                   if (!clicksGrouped[Object.keys(imgsGrouped)[i]]) {
                     clicksGrouped[Object.keys(imgsGrouped)[i]] = 0
