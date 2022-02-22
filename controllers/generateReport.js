@@ -227,7 +227,7 @@ const getStats = (req) => {
                   }
 
                   const ids = await getPublisherId(Object.keys(imgsGrouped)[i])
-                  console.log(ids)
+                  console.log(ids, '====================')
                   if (ids[0].id === req.query.id) {
                     const init = new Date(req.query.init).toISOString()
                     const fin = new Date(req.query.fin).toISOString()
