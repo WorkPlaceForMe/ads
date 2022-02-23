@@ -40,6 +40,8 @@ import { DashboardComponent } from './dashboard/dashboard.component';
 import { SliderComponent } from './slider/slider.component';
 import { NumsComponent } from './nums/nums.component';
 import { AddComponent } from './add/add.component';
+import { ReportComponent } from './report/report.component';
+import { LoginComponent } from './login/login.component';
 
 @NgModule({
   imports: [
@@ -93,7 +95,9 @@ import { AddComponent } from './add/add.component';
     DashboardComponent,
     SliderComponent,
     NumsComponent,
-    AddComponent
+    AddComponent,
+    ReportComponent,
+    LoginComponent
   ],
   providers: [
     FacesService,

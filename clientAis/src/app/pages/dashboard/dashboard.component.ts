@@ -7,6 +7,7 @@ import { LocalDataSource, ViewCell } from 'ng2-smart-table';
 import { FacesService } from '../../services/faces.service';
 import { AddComponent } from '../add/add.component';
 import { NumsComponent } from '../nums/nums.component';
+import { ReportComponent } from '../report/report.component';
 import { SliderComponent } from '../slider/slider.component';
 
 @Component({
@@ -117,18 +118,12 @@ export class DashboardComponent implements OnInit {
   initDash(){
       this.face.getStats(this.range).subscribe(
         res => {
-          // let nickname = {title: 'Name',
-          //   type: 'string',
-          //   filter: false,
-          //   sort: true
-          // }
           this.settings['columns']['nickname'] = {
             title: 'Name',
             type: 'string',
             filter: false,
             sort: true
           }
-          // this.settings['columns'] = {nickname , ...this.settings['columns']};
           this.settings['columns']['rewards'] = {
             title: 'Rewards',
             type: 'string',
@@ -232,6 +227,11 @@ export class DashboardComponent implements OnInit {
     }
   }
 
+  goReport(){
+    this.windowService.open(ReportComponent, { title: `Report Generation`});
+    // this.router.navigateByUrl(`/pages/report`)
+  }
+
   setDate(event){
     this.selectedDate = event
     if (this.selectedDate){
@@ -302,15 +302,17 @@ export class DashboardComponent implements OnInit {
     const params = this.activatedRoute.snapshot.queryParams;
     let adsImg = {}
     let imgPage = {}
+    let totImg = {}
     let pages = []
     for(const row of this.source){
       const extension = row.url.split(params.url)[1]
       adsImg[extension] = row.adsNum
       imgPage[extension] = row.imgNum
+      totImg[extension] = row.images
     }
     pages.push(adsImg)
     pages.push(imgPage)
-
+    pages.push(totImg)
     this.face.updatePages(pages,params.url).subscribe(
       res => {
         this.updateState = false
@@ -345,10 +347,12 @@ export class DashboardComponent implements OnInit {
     if(confirm('Do you want to delete this website?')){
       this.face.delSite(event.data.id).subscribe(
         res => this.initDash(),
-        err => console.error(err)
+        err => {
+          this.initDash()
+          console.error(err)
+        }
       )
     }
-
   }
 
   settings = {

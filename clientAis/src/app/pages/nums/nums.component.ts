@@ -14,13 +14,14 @@ export class NumsComponent implements OnInit {
   @Input() value: string | number;
   @Input() rowData: any;
   @Output() save: EventEmitter<any> = new EventEmitter();
-  max:number;
+  maximg:number;
+  maxAds:number;
 
   ngOnInit() {
     if(this.value == 'adsNum'){
-      this.max = 5
+      this.maxAds = 5
     }else{
-      this.max = this.rowData.images
+      this.maximg = this.rowData.totImgs
     }
   }
 }

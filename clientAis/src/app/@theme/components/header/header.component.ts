@@ -42,6 +42,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   currentTheme = 'dark';
   pic: string;
   ver:string;
+  logged: boolean = false;
 
   userMenu = [ { title: 'Profile' }, { title: 'Log out' } ];
 
@@ -62,6 +63,13 @@ export class HeaderComponent implements OnInit, OnDestroy {
                   },
                   err => console.error(err)
                 )
+                if(JSON.parse(localStorage.getItem('usr')) != null){
+                  this.logged = true
+                }
+  }
+
+  singOff(){
+    this.service.signOff()
   }
 
   refresh(){
