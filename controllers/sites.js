@@ -4,7 +4,7 @@ const publishers = db1.publishers
 const { v4: uuidv4 } = require('uuid')
 const conf = require('../middleware/prop')
 const axios = require('axios')
-const aff = require('./affiliate')
+const aff = require('../helper/affiliate')
 const jwt = require('jsonwebtoken')
 
 exports.register = Controller(async(req, res) => {
