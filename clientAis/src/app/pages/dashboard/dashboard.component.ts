@@ -289,7 +289,7 @@ export class DashboardComponent implements OnInit {
       this.router.navigateByUrl(`/pages/dashboard`)
     }
     if(stage == 'image'){
-      this.router.navigateByUrl(`/pages/site?url=${this.activatedRoute.snapshot.queryParams.img.split('/')[2]}`)
+      this.router.navigateByUrl(`/pages/site?url=${this.activatedRoute.snapshot.queryParams.img.split('/')[0]}`)
     }
     if(stage == 'ad'){
       this.router.navigateByUrl(`/pages/site/image?img=${this.activatedRoute.snapshot.queryParams.site}`)

@@ -11,6 +11,7 @@ serv = `${serv[0]}//${serv[2]}`
 let top1 = 0;
 let left1 = 0;
 let images;
+let imgsTop
 
 $(document).ready(function () {
 	$.ajax({
@@ -129,10 +130,12 @@ $(document).on('click', '.closeBut', function () {
 					posX = 2 + 'vw';
 			}else{
 				if(c.mx<270){
-					c.mx = 270
+					c.mx = 400
 				}
 			}
-
+			if(g.size.w < 400){
+				c.mx = 150
+			}
 			if(c.my<55){
 				c.my = 55
 			}
@@ -377,7 +380,7 @@ $(document).on('click', '.closeBut', function () {
 					cur_width: this.cur_width,
 					cur_height: this.cur_height
 				}
-				if (!(200 > h.cur_width || 200 > h.cur_height)) {
+				if (!(200 > h.cur_width || 150 > h.cur_height)) {
 					'__gm__' + a.now()
 					var j = r(this.celement)
 					j || (j = '')
@@ -385,6 +388,8 @@ $(document).on('click', '.closeBut', function () {
 						l = this.imgsrc
 					if(l.split('/')[0] == 'http:' || l.split('/')[0] == 'https:'){
 						l = this.imgsrc
+					}else if(l.startsWith("//")){
+						l = `https://${this.imgsrc.split('//')[1]}`
 					}else{
 						let sitee = window.location.href
 						let a = sitee.split('/')
@@ -432,6 +437,8 @@ $(document).on('click', '.closeBut', function () {
 						},
 						error: function () {}
 					})
+				}else{
+					imgsTop++
 				}
 			}
 		})
@@ -493,14 +500,16 @@ $(document).on('click', '.closeBut', function () {
 		pe = window.location.href
 	window.onload = function () {
 		var b = []
-		let imgsTop
 		a('img').each(function () {
 				b.push(new a.GM.IMLayer(a(this).attr('src'), a(this)[0]))
 			})
 		if(images != -1){
 			imgsTop = images
+			if(b.length <= images){
+				imgsTop = b.length - 1
+			}
 		}else{
-			imgsTop = b.length
+			imgsTop = b.length - 1
 		}
 
 		for (i = 0;
