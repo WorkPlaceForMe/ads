@@ -61,7 +61,7 @@ app.all(function (req, res, next) {
   next()
 })
 const numCPUs = require('os').cpus().length;
-console.log(`${numCPUs} cores present.`)
+console.log(`${numCPUs} core present.`)
 
 async function check(ids = {}) {
   const time = 604800000 //604800 1 week in milliseconds
