@@ -40,7 +40,7 @@ app.use(cookieParser())
 //     origin: ['*', server, 'http://localhost:4200']
 //   }))
 app.use(cors())
-
+const cluster = require('cluster');
 require('./helper/cacheManager')
 
 function customHeaders(req, res, next) {
@@ -60,6 +60,7 @@ app.all(function (req, res, next) {
   )
   next()
 })
+const numCPUs = require('os').cpus().length;
 
 async function check(ids = {}) {
   const time = 604800000 //604800 1 week in milliseconds
@@ -192,10 +193,39 @@ app.get('*', function (req, res) {
   }
 })
 
-httpsServer.listen(portS || 3000, function () {
-  console.log(`App is up on port ${portS || '3000'} on HTTPS`)
-})
+if (cluster.isMaster) {
+  console.log(`Master ${process.pid} is running`);
+ 
+  // Fork workers.
+  for (let i = 0; i < numCPUs; i++) {
+    cluster.fork();
+  }
+  // This event is firs when worker died
+  cluster.on('exit', (worker, code, signal) => {
+    console.log(`worker ${worker.process.pid} died`);
+  });
+}
+// For Worker
+else{
+  // Workers can share any TCP connection
+  // In this case it is an HTTP server
+  httpsServer.listen(portS || 3000, function () {
+    console.log(`Worker ${process.pid} started`);
+    console.log(`App is up on port ${portS || '3000'} on HTTPS`)
+  })
 
-httpServer.listen(port || 3000, function () {
-	console.log(`App is up on port ${port || '3000'} on HTTP`)
-});
+  httpServer.listen(port || 3000, function () {
+    console.log(`Worker ${process.pid} started`);
+    console.log(`App is up on port ${port || '3000'} on HTTP`)
+  });
+}
+
+  // httpsServer.listen(portS || 3000, function () {
+  //   console.log(`App is up on port ${portS || '3000'} on HTTPS`)
+  // })
+
+  // httpServer.listen(port || 3000, function () {
+  //   console.log(`App is up on port ${port || '3000'} on HTTP`)
+  // });
+
+
