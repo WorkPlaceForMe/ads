@@ -27,6 +27,7 @@ exports.check = Controller(async(req, res) => {
     }
     checkSite(checker, async function(err,rows){
         if(err){
+            console.log(err)
             res.status(500).json(err);
             }
         else{
