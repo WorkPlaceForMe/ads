@@ -14,7 +14,7 @@ const imgsPage = db1.imgsPage
 
 exports.getAds = Controller(async (req, res) => {
   // Disable SSL certificate
-  // process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0
+  process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0
 
   // get property values
   const vista_url = conf.get('vista_api_url')
