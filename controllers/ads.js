@@ -37,7 +37,8 @@ exports.getAds = Controller(async (req, res) => {
             results: JSON.parse(cachedImg)
         })
 
-    await addImg(dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url, uid, site)
+    const img = await addImg(dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url, uid, site)
+    console.log(img.dataValues.id)
     const aut = await auth(checker, site.split('/')[0])
     if (aut['enabled'] == false) {
         console.log("Cancelling")

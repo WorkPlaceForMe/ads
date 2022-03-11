@@ -7,7 +7,8 @@ exports.convert = async (arr) => {
     }
     let arrResult = [];
     for(const obj of arr){
-        addAd(obj.add.id,obj.add.site, obj.add.date,obj.add.url,obj.add.uid)
+        const ad = await addAd(obj.add.id,obj.add.site, obj.add.date,obj.add.url,obj.add.uid)
+        console.log(ad.dataValues.id)
         if(obj.vista.boundingBox == undefined){
             obj.vista.boundingBox = {
                 left: 100,

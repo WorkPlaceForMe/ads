@@ -53,10 +53,11 @@ $(document).on('mousedown', 'a.but2', function (e) {
 	if(e.button == 0 || e.button == 1){
 		let idItem, img;
 		if(navigator.userAgent.indexOf("Firefox") != -1 ) {
+
 			idItem = e.srcElement.parentNode.parentNode.parentNode.parentNode.parentNode.childNodes[1].id;
 			img = e.srcElement.parentNode.parentNode.parentNode.parentNode.parentNode.childNodes[0].currentSrc;
 		}else{
-			idItem = parseInt(decodeURI(e.originalEvent.path[2].href).split('id=')[1]) || parseInt(decodeURI(e.originalEvent.path[1].href).split('id=')[1]);
+			idItem = e.currentTarget.parentNode.parentNode.previousSibling.id;
 			img = e.originalEvent.path[5].children[0].currentSrc || e.originalEvent.path[6].children[0].currentSrc;
 		}
 		const data = {
@@ -119,7 +120,7 @@ $(document).on('click', '.closeBut', function () {
 		if ('indoorroom' != g.object && 'person' != g.object && f.keywords != ' ') {
 
 			let width = 350;
-			let posX = c.mx - 120 + 'px';
+			let posX;
 			if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
 					if(window.screen.width <= 400){
 							width = 330
@@ -132,10 +133,12 @@ $(document).on('click', '.closeBut', function () {
 				if(c.mx<270){
 					c.mx = 400
 				}
+				posX = c.mx - 120 + 'px';
 			}
 			if(g.size.w < 400){
 				c.mx = 150
-			}
+				posX = c.mx - 120 + 'px';
+			}			
 			if(c.my<55){
 				c.my = 55
 			}
@@ -144,6 +147,7 @@ $(document).on('click', '.closeBut', function () {
 			}
 			if(c.mx > (g.size.w - 55)){
 				c.mx = g.size.w - 55
+				posX = c.mx - 120 + 'px';
 			}
 
 			const diffe = 40;
@@ -179,7 +183,8 @@ $(document).on('click', '.closeBut', function () {
 			var j =
 				`position:absolute;zIndex:50;clear:both;width:${width}px;padding:0.2em;background-color:#FFFFFF;display:none;border: 1px solid gray;-webkit-border-radius: 6px;-moz-border-radius: 6px;border-radius: 6px;-webkit-box-shadow: 0 2px 5px;-moz-box-shadow: 0 2px 5px;box-shadow: 0 2px 5px;`
 			i.style.cssText = j
-			var k = a(e).width()
+			// var k = a(e).width()
+			// console.log(k)
 			i.style.top = c.my - 60 + 'px';
 			//k / 2 > c.mx ? i.style.left = c.mx - 240 + "px" : i.style.right = k - c.mx - 17 + "px", a(e).append(i);
 			(i.style.left = posX ), a(e).append(i)
@@ -380,7 +385,7 @@ $(document).on('click', '.closeBut', function () {
 					cur_width: this.cur_width,
 					cur_height: this.cur_height
 				}
-				if (!(200 > h.cur_width || 150 > h.cur_height)) {
+				if (!(200 > h.cur_width || 120 > h.cur_height)) {
 					'__gm__' + a.now()
 					var j = r(this.celement)
 					j || (j = '')
@@ -390,6 +395,17 @@ $(document).on('click', '.closeBut', function () {
 						l = this.imgsrc
 					}else if(l.startsWith("//")){
 						l = `https://${this.imgsrc.split('//')[1]}`
+					}else if(l.startsWith("..")){
+						let sitee = window.location.href
+						let a = sitee.split('/')
+						a.pop()
+						a.pop()
+						l = `${a.join('/')}${this.imgsrc.split('..')[1]}`
+					}else if(l.startsWith(".")){
+						let sitee = window.location.href
+						let a = sitee.split('/')
+						a.pop()
+						l = `${a.join('/')}${this.imgsrc.split('.')[1]}.${this.imgsrc.split('.')[2]}`
 					}else{
 						let sitee = window.location.href
 						let a = sitee.split('/')

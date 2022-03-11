@@ -407,7 +407,8 @@ exports.getStatsImg = Controller(async(req, res) => {
                 else{
                     let ads = {}
                     for(let i = 0; i<rows.length; i++){
-                        ads[rows[i].imgName] = (ads[rows[i].imgName]  || 0) + 1
+                        let img = rows[i].imgName.split('//')[1]
+                        ads[img] = (ads[img]  || 0) + 1
                         if(rows[i + 1] == undefined){
                             break;
                         }
@@ -422,15 +423,16 @@ exports.getStatsImg = Controller(async(req, res) => {
                         else{
                             let imgs = []
                             for(let i = 0; i<rows.length; i++){
-                                let adsTotal = ads[rows[i].img]
+                                let img = rows[i].img.split('//')[1]
+                                let adsTotal = ads[img]
                                 if(adsTotal == undefined){
                                     adsTotal = 0
                                 }
-                                let click = clicks[rows[i].img]
+                                let click = clicks[img]
                                 if(click == undefined){
                                     click = 0
                                 }
-                                let view = views[rows[i].img]
+                                let view = views[img]
                                 if(view == undefined){
                                     view = 0
                                 }
@@ -524,7 +526,7 @@ function getImgsList(site,callback){
 }
 
 function getClicksAndViewsPerImg(site,callback){
-    return db.query(`SELECT img, COUNT( CASE WHEN type = '2' THEN 1 END ) AS clicks, COUNT( CASE WHEN type = '1' THEN 1 END ) AS views FROM ${conf.get('database')}.impressions where url = 'https://${site}' OR url = 'http://${site}' group by img ;`,callback)
+    return db.query(`SELECT img, COUNT( CASE WHEN type = '2' THEN 1 END ) AS clicks, COUNT( CASE WHEN type = '1' THEN 1 END ) AS views FROM ${conf.get('database')}.impressions where url = 'https://${site}' OR url = 'http://${site}' group by img;`,callback)
 }
 
 function getAdsListPerImg(site,callback){
