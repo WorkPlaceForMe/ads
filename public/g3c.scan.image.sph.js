@@ -53,9 +53,11 @@ $(document).on('mousedown', 'a.but2', function (e) {
 	if(e.button == 0 || e.button == 1){
 		let idItem, img;
 		if(navigator.userAgent.indexOf("Firefox") != -1 ) {
-
 			idItem = e.srcElement.parentNode.parentNode.parentNode.parentNode.parentNode.childNodes[1].id;
 			img = e.srcElement.parentNode.parentNode.parentNode.parentNode.parentNode.childNodes[0].currentSrc;
+		}else if(navigator.userAgent.indexOf("Safari") != -1) {
+			idItem = e.currentTarget.parentNode.parentNode.previousSibling.id;
+			img = e.currentTarget.parentElement.parentElement.parentElement.firstChild.currentSrc;
 		}else{
 			idItem = e.currentTarget.parentNode.parentNode.previousSibling.id;
 			img = e.originalEvent.path[5].children[0].currentSrc || e.originalEvent.path[6].children[0].currentSrc;

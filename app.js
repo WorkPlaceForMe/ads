@@ -115,7 +115,7 @@ async function createAdminUser() {
 }
 
 if (conf.get('install') == true) {
-  console.log('Installing DB')
+  console.log('Installing DB...')
   mysql
     .createConnection({
       user: conf.get('user'),
@@ -133,12 +133,12 @@ if (conf.get('install') == true) {
           sequelize.sequelize
             .sync({ force: false, alter: true })
             .then(() => {
-              console.log('sequelize is connected')
+              console.log('Sequelize is connected and updated.')
               createAdminUser()
               check()
             })
             .catch((err) => {
-              console.error('no se concecto', err)
+              console.error('Sequelize was not able to connect.', err)
             })
         })
     })
@@ -193,9 +193,9 @@ app.get('*', function (req, res) {
 })
 
 httpsServer.listen(portS || 3000, function () {
-  console.log(`App is up on port ${portS || '3000'} on HTTPS`)
+  console.log(`App is running on HTTPS mode using port: ${portS || '3001'}`)
 })
 
 httpServer.listen(port || 3000, function () {
-	console.log(`App is up on port ${port || '3000'} on HTTP`)
+	console.log(`App is running on HTTP mode using port: ${port || '3000'}`)
 });

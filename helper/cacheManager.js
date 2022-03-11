@@ -10,8 +10,8 @@ const redisClient = redis.createClient({
 const password = conf.get('redis_password') || null
 if (password && password != 'null') {
   redisClient.auth(password, (err, res) => {
-    console.log('res', res)
-    console.log('err', err)
+    if(res) console.log('Connection to Redis', res)
+    if(err) console.log('err', err)
   })
 }
 try {

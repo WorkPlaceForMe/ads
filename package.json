@@ -1,6 +1,6 @@
 {
   "name": "graymatics-adscope",
-  "version": "2.2.14",
+  "version": "2.2.15",
   "private": true,
   "scripts": {
     "start": "node -max-old-space-size=4096 app.js",
