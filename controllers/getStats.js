@@ -497,6 +497,9 @@ exports.getStatsAd = Controller(async(req, res) => {
                                 break;
                             }
                         }
+                        if(rows[i + 1] == undefined){
+                            break;
+                        }
                         if(rows[i].idGeneration != rows[i + 1].idGeneration){
                             break;
                         }

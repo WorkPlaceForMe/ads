@@ -28,12 +28,18 @@ $(document).ready(function () {
 
 $(document).on('mousedown', 'a.but1', function (e) {
 	if(e.button == 0 || e.button == 1){
+		let img;
+		if(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
+			img = e.srcElement.parentNode.parentElement.parentElement.firstChild.src
+		}else {
+			img = e.originalEvent.path[3].children[0].currentSrc
+		}
 		const data = {
 			time: new Date(),
 			url: window.location.href,
 			type: 1,
 			idItem: e.currentTarget.id,
-			img: e.originalEvent.path[3].children[0].currentSrc
+			img: img
 		}
 
 			$.ajax({
