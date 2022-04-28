@@ -1,16 +1,7 @@
-var script = document.createElement('script');
-script.src = 'https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js'
-document.getElementsByTagName('head')[0].appendChild(script);
-
-// const start = new Promise((resolve, reject) => {
-// 	var script = document.createElement('script');
-// 	script.src = 'https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js'
-// 	document.getElementsByTagName('head')[0].appendChild(script);
-// 	setTimeout(() => {
-// 		console.log("Added Jquery")
-// 		resolve(true)
-// 	}, 200);
-//   });
+var styleEl = document.createElement('style')
+styleEl.innerHTML =
+	'.ui-tooltip-graymatics{background-color: #000033 !important;background:url("");font-size: 14px;font-weight: bold;opacity:0.8; color:#ffffff}; '
+document.head.appendChild(styleEl)
 
 const uuid = new Date().getTime()
 
@@ -105,6 +96,7 @@ $(document).on('click', '.closeBut', function () {
 	$(wrap).css('display', 'none')
 
 });
+
 
 //jQuery plugin to analyse images on website and show context connect ads automatically.|Copyright (c) 2013 GRAYMATICS SG PTE LTD (www.graymatics.com). All rights reserved.|version 0.7
 ;(function (a, b) {
@@ -570,12 +562,3 @@ function iconAndSize(file, big){
 	const str = `${file}) no-repeat ${rep}% ${rep}%;background-size: ${size}px;`
 	return str
 }
-
-function loadJS(url){
-	const scriptTag = document.createElement("script");
-	scriptTag.src = url;
-	document.head.appendChild(scriptTag);
-}
-
-loadJS("https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js");
-loadJS("g3c.scan.image.sph.without.jquery.js");
