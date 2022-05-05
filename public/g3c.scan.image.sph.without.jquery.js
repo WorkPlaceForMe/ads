@@ -5,8 +5,8 @@ document.head.appendChild(styleEl)
 
 const uuid = new Date().getTime()
 
-let serv = document.currentScript.getAttribute('src').split('/')
-serv = `${serv[0]}//${serv[2]}`
+let sourceJS = new URL($(document.currentScript).prop('src'))
+let serv = sourceJS.origin
 
 let top1 = 0;
 let left1 = 0;
@@ -525,7 +525,7 @@ $(document).on('click', '.closeBut', function () {
 	window.onload = function () {
 		var b = []
 		a('img').each(function () {
-				b.push(new a.GM.IMLayer(a(this).attr('src'), a(this)[0]))
+				b.push(new a.GM.IMLayer(a(this).prop('src'), a(this)[0]))
 			})
 		if(images != -1){
 			imgsTop = images
@@ -540,7 +540,7 @@ $(document).on('click', '.closeBut', function () {
 			imgsTop > i;
 			i++
 		){
-			b[i].imageProcess()
+			b[i] && b[i].imageProcess()
 		}
 			// b[i].imageProcess()
 	}
