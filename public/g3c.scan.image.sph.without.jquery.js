@@ -5,8 +5,7 @@ document.head.appendChild(styleEl)
 
 const uuid = new Date().getTime()
 
-let serv = document.currentScript.getAttribute('src').split('/')
-serv = `${serv[0]}//${serv[2]}`
+serv = document.location.protocol + '//' + document.location.host
 
 let top1 = 0;
 let left1 = 0;
