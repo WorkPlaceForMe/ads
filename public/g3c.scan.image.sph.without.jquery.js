@@ -5,7 +5,7 @@ document.head.appendChild(styleEl)
 
 const uuid = new Date().getTime()
 
-let sourceJS = new URL($(document.currentScript).prop('src'))
+let sourceJS = new URL(document.currentScript.src)
 let serv = sourceJS.origin
 
 let top1 = 0;
