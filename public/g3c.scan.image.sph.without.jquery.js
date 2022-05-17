@@ -17,6 +17,7 @@ $(document).ready(function () {
 	$.ajax({
 		url: `${serv}/api/check`,
 		type: 'GET',
+		async: false,
 		data: `site=${window.location.href}`,
 		dataType: 'json',
 		success: function (a) {
