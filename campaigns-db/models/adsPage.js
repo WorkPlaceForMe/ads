@@ -25,6 +25,8 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.BIGINT(11),
             allowNull: true
         },
+    },{
+        freezeTableName: true
     });
   
     return adsPage;
