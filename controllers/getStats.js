@@ -513,11 +513,11 @@ exports.getStatsAd = Controller(async(req, res) => {
 })
 
 function getAdsPerPage(callback){
-    return db.query(`SELECT count(*) as count, idGeneration as uid, (select site from ${conf.get('database')}.adsPages where idGeneration = uid limit 1) as site FROM ${conf.get('database')}.adsPages group by idGeneration order by uid asc`,callback)
+    return db.query(`SELECT count(*) as count, idGeneration as uid, (select site from ${conf.get('database')}.adspages where idGeneration = uid limit 1) as site FROM ${conf.get('database')}.adspages group by idGeneration order by uid asc`,callback)
 }
 
 function getImgPerPage(callback){
-    return db.query(`SELECT idGeneration as uid, count(*) as count, (select site from ${conf.get('database')}.imgsPages where idGeneration = uid limit 1) as site from ${conf.get('database')}.imgsPages group by idGeneration order by idGeneration asc;`,callback)
+    return db.query(`SELECT idGeneration as uid, count(*) as count, (select site from ${conf.get('database')}.imgspages where idGeneration = uid limit 1) as site from ${conf.get('database')}.imgspages group by idGeneration order by idGeneration asc;`,callback)
 }
 
 function getClicksAndViews(callback){
@@ -525,7 +525,7 @@ function getClicksAndViews(callback){
 }
 
 function getImgsList(site,callback){
-    return db.query(`SELECT img, idGeneration FROM ${conf.get('database')}.imgsPages where site = 'https://${site}' OR site = 'http://${site}' order by idGeneration desc;`,callback)
+    return db.query(`SELECT img, idGeneration FROM ${conf.get('database')}.imgspages where site = 'https://${site}' OR site = 'http://${site}' order by idGeneration desc;`,callback)
 }
 
 function getClicksAndViewsPerImg(site,callback){
@@ -533,11 +533,11 @@ function getClicksAndViewsPerImg(site,callback){
 }
 
 function getAdsListPerImg(site,callback){
-    return db.query(`SELECT imgName, idGeneration FROM ${conf.get('database')}.adsPages where site = 'https://${site}' OR site= 'http://${site}' order by idGeneration desc;`,callback)
+    return db.query(`SELECT imgName, idGeneration FROM ${conf.get('database')}.adspages where site = 'https://${site}' OR site= 'http://${site}' order by idGeneration desc;`,callback)
 }
 
 function getAdsList(img,site,callback){
-    return db.query(`SELECT imgName, idGeneration,idItem FROM ${conf.get('database')}.adsPages where (site = 'https://${site}' OR site = 'http://${site}') and imgName='${img}' order by idGeneration desc;`,callback)
+    return db.query(`SELECT imgName, idGeneration,idItem FROM ${conf.get('database')}.adspages where (site = 'https://${site}' OR site = 'http://${site}') and imgName='${img}' order by idGeneration desc;`,callback)
 }
 
 function getAdsClicksAndViews(img,site,callback){

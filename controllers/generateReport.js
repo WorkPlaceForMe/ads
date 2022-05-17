@@ -606,9 +606,9 @@ function getAdsPerPage(callback) {
   return db.query(
     `SELECT count(*) as count, idGeneration as uid, (select site from ${conf.get(
       'database',
-    )}.adsPages where idGeneration = uid limit 1) as site FROM ${conf.get(
+    )}.adspages where idGeneration = uid limit 1) as site FROM ${conf.get(
       'database',
-    )}.adsPages group by idGeneration order by uid asc`,
+    )}.adspages group by idGeneration order by uid asc`,
     callback,
   )
 }
@@ -617,9 +617,9 @@ function getImgPerPage(callback) {
   return db.query(
     `SELECT idGeneration as uid, count(*) as count, (select site from ${conf.get(
       'database',
-    )}.imgsPages where idGeneration = uid limit 1) as site from ${conf.get(
+    )}.imgspages where idGeneration = uid limit 1) as site from ${conf.get(
       'database',
-    )}.imgsPages group by idGeneration order by idGeneration asc;`,
+    )}.imgspages group by idGeneration order by idGeneration asc;`,
     callback,
   )
 }
@@ -637,7 +637,7 @@ function getImgsList(site, callback) {
   return db.query(
     `SELECT img, idGeneration FROM ${conf.get(
       'database',
-    )}.imgsPages where site = '${site}' order by idGeneration desc;`,
+    )}.imgspages where site = '${site}' order by idGeneration desc;`,
     callback,
   )
 }
@@ -655,7 +655,7 @@ function getAdsListPerImg(site, callback) {
   return db.query(
     `SELECT imgName, idGeneration FROM ${conf.get(
       'database',
-    )}.adsPages where site = '${site}' order by idGeneration desc;`,
+    )}.adspages where site = '${site}' order by idGeneration desc;`,
     callback,
   )
 }
