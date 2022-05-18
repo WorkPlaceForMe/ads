@@ -21,6 +21,8 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.STRING(200),
             allowNull: true
         },
+    },{
+        freezeTableName: true
     });
   
     return imgsPage;

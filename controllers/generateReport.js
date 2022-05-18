@@ -667,6 +667,7 @@ const getPublisherId = async function (site) {
       (error, elements) => {
         if (error) {
           return reject(error)
+          console.log(error)
         }
         return resolve(elements)
       },
