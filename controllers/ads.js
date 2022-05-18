@@ -32,7 +32,7 @@ exports.getAds = Controller(async (req, res) => {
     }
     let extension = site.split(checker)
     let cachedImg = await cache.getAsync(`${extension[1]}_${mobile}_${img_width}_${img_height}_${url}`);
-    if (cachedImg)
+    if (cachedImg && cachedImg !== '{}')
         return res.status(200).send({
             results: JSON.parse(cachedImg)
         })
