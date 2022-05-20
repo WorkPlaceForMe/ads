@@ -1,6 +1,7 @@
 function loadJS(url){
 	const scriptTag = document.createElement("script");
 	scriptTag.src = url;
+	scriptTag.async = false;
 	document.head.appendChild(scriptTag);
 }
 
