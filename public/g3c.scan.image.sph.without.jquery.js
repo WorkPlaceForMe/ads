@@ -528,22 +528,9 @@ $(document).on('click', '.closeBut', function () {
 		a('img').each(function () {
 				b.push(new a.GM.IMLayer(a(this).prop('src'), a(this)[0]))
 			})
-		if(images != -1){
-			imgsTop = images
-			if(b.length <= images){
-				imgsTop = b.length - 1
-			}
-		}else{
-			imgsTop = b.length - 1
-		}
-
-		for (i = 0;
-			imgsTop > i;
-			i++
-		){
-			b[i] && b[i].imageProcess()
-		}
-			// b[i].imageProcess()
+		b.forEach(function (item) {
+			item.imageProcess()
+		})
 	}
 })(jQuery)
 
