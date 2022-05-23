@@ -256,14 +256,14 @@ const getStats = (req) => {
                           fin,
                           ids[0].publisherId,
                         )
-                        await cache.setAsync(
+                        cache.setAsync(
                           `${init}_${fin}_${ids[0].publisherId}`,
                           JSON.stringify(rewards),
                         )
                       } catch (err) {
                         rewards['totalReward'] = 0
                         rewards['totalConversionsCount'] = 0
-                        await cache.setAsync(
+                        cache.setAsync(
                           `${init}_${fin}_${ids[0].publisherId}`,
                           JSON.stringify(rewards),
                         )
@@ -503,14 +503,14 @@ const getStatsUrl = (req) => {
                     req.query.fin,
                     ids[0].publisherId,
                   )
-                  await cache.setAsync(
+                  cache.setAsync(
                     `${req.query.init}_${req.query.fin}_${ids[0].publisherId}`,
                     JSON.stringify(rewards),
                   )
                 } catch (err) {
                   rewards['totalReward'] = 0
                   rewards['totalConversionsCount'] = 0
-                  await cache.setAsync(
+                  cache.setAsync(
                     `${req.query.init}_${req.query.fin}_${ids[0].publisherId}`,
                     JSON.stringify(rewards),
                   )

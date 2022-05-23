@@ -146,7 +146,7 @@ exports.getStats = Controller(async(req, res) => {
                                     try{
                                         if(ids[0].publisherId != null){
                                             rewards = await reportAff.report(init,fin,ids[0].publisherId)
-                                            await cache.setAsync(`${init}_${fin}_${ids[0].publisherId}`, JSON.stringify(rewards));
+                                            cache.setAsync(`${init}_${fin}_${ids[0].publisherId}`, JSON.stringify(rewards));
                                         }else{
                                             rewards['totalReward'] = 0;
                                             rewards['totalConversionsCount'] = 0;
@@ -154,7 +154,7 @@ exports.getStats = Controller(async(req, res) => {
                                     }catch(err){
                                         rewards['totalReward'] = 0;
                                         rewards['totalConversionsCount'] = 0;
-                                        await cache.setAsync(`${init}_${fin}_${ids[0].publisherId}`, JSON.stringify(rewards));
+                                        cache.setAsync(`${init}_${fin}_${ids[0].publisherId}`, JSON.stringify(rewards));
                                     }
                                 }
 
@@ -367,11 +367,11 @@ exports.getStatsUrl = Controller(async(req, res) => {
                             }
                             try{
                                 rewards = await reportAff.report(req.query.init,req.query.fin,ids[0].publisherId)
-                                await cache.setAsync(`${req.query.init}_${req.query.fin}_${ids[0].publisherId}`, JSON.stringify(rewards));
+                                cache.setAsync(`${req.query.init}_${req.query.fin}_${ids[0].publisherId}`, JSON.stringify(rewards));
                             }catch(err){
                                 rewards['totalReward'] = 0;
                                 rewards['totalConversionsCount'] = 0;
-                                await cache.setAsync(`${req.query.init}_${req.query.fin}_${ids[0].publisherId}`, JSON.stringify(rewards));
+                                cache.setAsync(`${req.query.init}_${req.query.fin}_${ids[0].publisherId}`, JSON.stringify(rewards));
                             }
 
                             res.status(200).json({success: true, table: table, rewards: rewards});

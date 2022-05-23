@@ -80,7 +80,7 @@ exports.getAds = Controller(async (req, res) => {
                 flat.length = limit
             }
             const sendingResults = await convert(flat)
-            await cache.setAsync(`${extension[1]}_${mobile}_${img_width}_${img_height}_${url}`, JSON.stringify(sendingResults), 'EX', 604800);
+            cache.setAsync(`${extension[1]}_${mobile}_${img_width}_${img_height}_${url}`, JSON.stringify(sendingResults), 'EX', 604800);
             res.status(200).send({
                 results: sendingResults
             })
@@ -88,7 +88,7 @@ exports.getAds = Controller(async (req, res) => {
         catch (err) {
             if (err.response)
                 console.log(err.response.status, url)
-            await cache.setAsync(`${extension[1]}_${mobile}_${img_width}_${img_height}_${url}`, JSON.stringify({}), 'EX', 604800);
+            cache.setAsync(`${extension[1]}_${mobile}_${img_width}_${img_height}_${url}`, JSON.stringify({}), 'EX', 604800);
             console.trace(err)
             return res.status(500).json({ success: false, message: "Vista Image failled", error: err, img: url })
         }
@@ -277,7 +277,7 @@ const clothing_Filler = (
             mobile: mobile,
           })
         } else if (
-          obj.deep_fashion_neckline.neckline[0].label == 'shirtcollar'
+          typeof obj.deep_fashion_neckline.neckline !== 'undefined' && obj.deep_fashion_neckline.neckline[0].label == 'shirtcollar'
         ) {
           const result = objetos.filter(
             (obj2) => obj2.Gender == gender && obj2.Category_Name == 'Shirts',
@@ -302,7 +302,7 @@ const clothing_Filler = (
             mobile: mobile,
           })
         } else if (
-          obj.deep_fashion_neckline.neckline[0].label == 'poloshirtcollar'
+          typeof obj.deep_fashion_neckline.neckline !== 'undefined' && obj.deep_fashion_neckline.neckline[0].label == 'poloshirtcollar'
         ) {
           const result = objetos.filter(
             (obj2) =>
