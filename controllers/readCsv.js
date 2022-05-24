@@ -29,7 +29,7 @@ exports.readCsv = async function (idPbl) {
     return flat
   } else {
     if (cachedDown == 'false' || !cachedDown) {
-      cache.setAsync(`downloading-${idPbl}`, true)
+      await cache.setAsync(`downloading-${idPbl}`, true)
       const ids = {
         shopee: 677,
       }
@@ -135,7 +135,7 @@ async function readCsv(Readable, id) {
       var receiveDate = new Date().getTime()
       var responseTimeMs = receiveDate - sendDate
       console.log(responseTimeMs)
-      cache.setAsync(`downloading-${id}`, false)
+      await cache.setAsync(`downloading-${id}`, false)
       const dataValues = todo.map((objects) => objects.dataValues)
       return dataValues
     })
@@ -204,7 +204,7 @@ const flatten = (ary) => {
 }
 
 exports.download = async function (idPbl) {
-  cache.setAsync(`downloading-${idPbl}`, true)
+  await cache.setAsync(`downloading-${idPbl}`, true)
   try {
     const credentials = await aff.getAff()
     const token = jwt.sign(
