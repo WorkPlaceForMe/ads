@@ -11,7 +11,7 @@ const sequelize = new Sequelize(
     pool: {
       max: 100,
       min: 0,
-      idle: 30000,
+      idle: 600000,
       acquire: 1000000,
     },
     charset: 'utf8mb4',
