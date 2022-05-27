@@ -8,6 +8,9 @@ const { modify } = require('./modStatus')
 const { auth, check } = require('./auth')
 const { updateAds } = require('./updateAds')
 const { version } = require('./version')
+const { generateReport } = require('./generateReport')
+const { login } = require('./user')
+const { register, update, get, del, getServer, getAll } = require('./sites')
 
 module.exports = {
 	getAds,
@@ -23,5 +26,13 @@ module.exports = {
 	auth,
 	check,
 	updateAds,
-	version
+	version,
+	register,
+	update,
+	get,
+	del,
+	getServer,
+	generateReport,
+	login,
+	getAll
 }

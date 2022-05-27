@@ -1,5 +1,5 @@
 module.exports = (sequelize, Sequelize) => {
-    const imgsPage = sequelize.define("imgsPages", {
+    const imgsPage = sequelize.define("imgspages", {
             id: {
             type: Sequelize.INTEGER,
             autoIncrement: true,
@@ -21,6 +21,8 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.STRING(200),
             allowNull: true
         },
+    },{
+        freezeTableName: true
     });
   
     return imgsPage;

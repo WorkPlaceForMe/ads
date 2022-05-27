@@ -7,7 +7,8 @@ exports.convert = async (arr) => {
     }
     let arrResult = [];
     for(const obj of arr){
-        addAd(obj.add.id,obj.add.site, obj.add.date,obj.add.url,obj.add.uid)
+        const ad = await addAd(obj.add.id,obj.add.site, obj.add.date,obj.add.url,obj.add.uid)
+        console.log(ad.dataValues.id)
         if(obj.vista.boundingBox == undefined){
             obj.vista.boundingBox = {
                 left: 100,
@@ -18,8 +19,8 @@ exports.convert = async (arr) => {
         }
         let item = {
             name: obj.affiliate['Merchant_Product_Name'],
-            x: obj.vista.boundingBox.left + obj.vista.boundingBox.width/2,
-            y: obj.vista.boundingBox.top,
+            x: obj.vista.boundingBox.left,
+            y: obj.vista.boundingBox.top + obj.vista.boundingBox.height*3/5,
             image: obj.affiliate['Image_URL'],
             site: obj.affiliate['Image_URL'].split('.')[1],
             url: obj.affiliate['Product_URL_Web_encoded'],
