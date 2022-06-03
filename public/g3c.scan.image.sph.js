@@ -5,8 +5,18 @@ function loadJS(url){
 	document.head.appendChild(scriptTag);
 }
 
-loadJS("https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js");
+const url = document.currentScript.src.substring(0, document.currentScript.src.lastIndexOf('/'));
+const iframe = document.createElement('iframe');
+iframe.src = `${url}/iframe.html`;
+iframe.style="display:none";
+document.body.appendChild(iframe);
+let userId = '';
 
-let url = document.currentScript.src.substring(0, document.currentScript.src.lastIndexOf('/'))
-
-loadJS(`${url}/g3c.scan.image.sph.without.jquery.js`);
+window.addEventListener('message', function(e){
+	let data = e.data;
+	if(data.type && data.type === 'userId'){
+		userId = data.userId;
+		loadJS("https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js");
+		loadJS(`${url}/g3c.scan.image.sph.without.jquery.js`);
+	}
+});

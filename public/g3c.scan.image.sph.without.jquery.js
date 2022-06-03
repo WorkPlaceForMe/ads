@@ -13,12 +13,12 @@ let left1 = 0;
 let images;
 let imgsTop
 
-$(document).ready(function () {
+$(document).ready(function () {	
 	$.ajax({
 		url: `${serv}/api/check`,
 		type: 'GET',
 		async: false,
-		data: `site=${window.location.href}`,
+		data: `site=${window.location.href}&userId=${userId}`,
 		dataType: 'json',
 		success: function (a) {
 			images = a.imgs
