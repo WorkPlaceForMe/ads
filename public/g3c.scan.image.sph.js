@@ -13,9 +13,9 @@ let userId = "";
 if (document.body) {
   document.body.appendChild(iframe);
 } else {
-  window.onload = function () {
+  window.addEventListener("load", function () {
     document.body.appendChild(iframe);
-  };
+  });
 }
 
 window.addEventListener("message", function (e) {
