@@ -32,5 +32,67 @@ db.impressions = require('./models/impressions')(sequelize, Sequelize)
 db.products = require('./models/products')(sequelize, Sequelize)
 db.publishers = require('./models/publishers')(sequelize, Sequelize)
 db.users = require('./models/user')(sequelize, Sequelize)
+db.client = require('./models/client')(sequelize, Sequelize)
+db.clientImgPubl = require('./models/clientImgPubl')(sequelize, Sequelize)
+
+db.client.belongsToMany(db.publishers, {
+  through: {
+    model: 'clientimgpubl',
+    unique: false
+  },
+  foreignKey: 'clientId',
+  otherKey: 'publId',
+  constrains: false
+})
+
+db.publishers.belongsToMany(db.client, {
+  through: {
+    model: 'clientimgpubl',
+    unique: false
+  },
+  foreignKey: 'id',
+  otherKey: 'clientId',
+  constrains: false
+})
+
+db.client.belongsToMany(db.imgsPage, {
+  through: {
+    model: 'clientimgpubl',
+    unique: false
+  },
+  foreignKey: 'clientId',
+  otherKey: 'imgId',
+  constrains: false
+})
+
+db.imgsPage.belongsToMany(db.client, {
+  through: {
+    model: 'clientimgpubl',
+    unique: false
+  },
+  foreignKey: 'id',
+  otherKey: 'clientId',
+  constrains: false
+})
+
+db.publishers.belongsToMany(db.imgsPage, {
+  through: {
+    model: 'clientimgpubl',
+    unique: false
+  },
+  foreignKey: 'id',
+  otherKey: 'imgId',
+  constrains: false
+})
+
+db.imgsPage.belongsToMany(db.publishers, {
+  through: {
+    model: 'clientimgpubl',
+    unique: false
+  },
+  foreignKey: 'id',
+  otherKey: 'publId',
+  constrains: false
+})
 
 module.exports = db
