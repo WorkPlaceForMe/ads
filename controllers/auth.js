@@ -20,7 +20,17 @@ exports.auth = Controller(async(req, res) => {
     })
 })
 
-exports.check = Controller(async(req, res) => {
+exports.iframe = Controller(async(req, res) => {    
+    let userId = req.query.userId;
+    if (!userId || userId === 'null') {
+        userId = uuidv4();
+    }
+
+    return res.status(200).json({userId: userId})
+})
+
+exports.check = Controller(async(req, res) => {   
+    let userId = req.query.userId;
     let checker = req.query.site.split('/')[2];
     if(checker.includes('www.')){
         checker = checker.split('w.')[1]

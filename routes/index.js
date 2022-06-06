@@ -31,6 +31,8 @@ router.get('/api/log/:id', controllers.auth)
 
 router.get('/test', controllers.getUserDetails)
 
+router.get('/api/iframe', controllers.iframe)
+
 router.get('/api/check', controllers.check)
 
 router.post('/api/adsNum/:id', controllers.updateAds)

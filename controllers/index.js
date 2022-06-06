@@ -5,7 +5,7 @@ const { postData } = require('./postData')
 const { readCsv } = require('./readCsv')
 const { getStats, getStatsUrl, getStatsImg, getStatsAd } = require('./getStats')
 const { modify } = require('./modStatus')
-const { auth, check } = require('./auth')
+const { auth, iframe, check } = require('./auth')
 const { updateAds } = require('./updateAds')
 const { version } = require('./version')
 const { generateReport } = require('./generateReport')
@@ -24,6 +24,7 @@ module.exports = {
 	getStatsAd,
 	modify,
 	auth,
+	iframe,
 	check,
 	updateAds,
 	version,

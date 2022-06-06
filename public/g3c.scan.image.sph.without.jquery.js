@@ -13,12 +13,12 @@ let left1 = 0;
 let images;
 let imgsTop
 
-$(document).ready(function () {
+$(document).ready(function () {	
 	$.ajax({
 		url: `${serv}/api/check`,
 		type: 'GET',
 		async: false,
-		data: `site=${window.location.href}`,
+		data: `site=${window.location.href}&userId=${userId}`,
 		dataType: 'json',
 		success: function (a) {
 			images = a.imgs
@@ -523,7 +523,7 @@ $(document).on('click', '.closeBut', function () {
 		C = '240x95_as',
 		E = 0,
 		pe = window.location.href
-	window.onload = function () {
+		$(document).ready(function () {
 		var b = []
 		a('img').each(function () {
 				b.push(new a.GM.IMLayer(a(this).prop('src'), a(this)[0]))
@@ -531,7 +531,7 @@ $(document).on('click', '.closeBut', function () {
 		b.forEach(function (item) {
 			item.imageProcess()
 		})
-	}
+	})
 })(jQuery)
 
 function iconAndSize(file, big){
