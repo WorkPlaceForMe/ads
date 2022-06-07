@@ -4,7 +4,7 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.STRING(40),
         allowNull: false,
         primaryKey: true,
-      },
+      }
     })
   
     return Client
