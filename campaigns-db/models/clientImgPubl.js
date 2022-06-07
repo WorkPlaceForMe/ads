@@ -7,7 +7,7 @@ module.exports = (sequelize, Sequelize) => {
         primaryKey: true,
       },
       clientId: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.STRING(40),
         allowNull: false,
       },
       imgId: {
