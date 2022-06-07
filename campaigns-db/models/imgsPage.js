@@ -21,6 +21,14 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.STRING(200),
             allowNull: true
         },
+        keyword :{
+            type: Sequelize.STRING(40),
+            allowNull: true
+        },
+        category :{
+            type: Sequelize.STRING(40),
+            allowNull: true
+        },
     },{
         freezeTableName: true
     });
