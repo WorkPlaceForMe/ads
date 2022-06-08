@@ -34,6 +34,7 @@ db.publishers = require('./models/publishers')(sequelize, Sequelize)
 db.users = require('./models/user')(sequelize, Sequelize)
 db.client = require('./models/client')(sequelize, Sequelize)
 db.clientImgPubl = require('./models/clientImgPubl')(sequelize, Sequelize)
+db.clientSession = require('./models/clientSession')(sequelize, Sequelize)
 
 db.client.belongsToMany(db.publishers, {
   through: {

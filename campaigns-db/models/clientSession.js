@@ -1,5 +1,5 @@
 module.exports = (sequelize, Sequelize) => {
-    const Rel = sequelize.define('clientimgpubl', {
+    const Rel = sequelize.define('clientsession', {
       id: {
         type: Sequelize.INTEGER,
         allowNull: false,
@@ -10,17 +10,12 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.STRING(40),
         allowNull: false,
       },
-      imgId: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-      },
       publId: {
         type: Sequelize.STRING(40),
         allowNull: false,
       },
-      duration: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
+      createdAt: {
+        type: Sequelize.DATE
       }
     }, {
       freezeTableName: true

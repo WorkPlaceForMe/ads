@@ -445,7 +445,9 @@ $(document).on('click', '.closeBut', function () {
 							'&serv=' +
 							serv +
 							'&mobile=' +
-							mobile
+							mobile +
+							'&userId=' +
+							userId,
 					num = num + 1
 					a.ajax({
 						url: v,
@@ -524,13 +526,13 @@ $(document).on('click', '.closeBut', function () {
 		E = 0,
 		pe = window.location.href
 		$(document).ready(function () {
-		var b = []
-		a('img').each(function () {
-				b.push(new a.GM.IMLayer(a(this).prop('src'), a(this)[0]))
+			var b = []
+			a('img').each(function () {
+					b.push(new a.GM.IMLayer(a(this).prop('src'), a(this)[0]))
+				})
+			b.forEach(function (item) {
+				item.imageProcess()
 			})
-		b.forEach(function (item) {
-			item.imageProcess()
-		})
 	})
 })(jQuery)
 

@@ -42,7 +42,7 @@ exports.create = async function(id,site,term){
                     }
             })
 
-            await addPublisher(id,site,affiliateResponse.data.id)
+            const data = await addPublisher(id,site,affiliateResponse.data.id)
             try{
                 const campaingResponse = await axios.post(affiliateEndpointCampaings, 
                     {
@@ -60,7 +60,7 @@ exports.create = async function(id,site,term){
                         }
                 })
 
-                return(campaingResponse.data)
+                return data
             } catch(err) {
                 console.error(err)
                 return(err)

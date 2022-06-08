@@ -11,6 +11,8 @@ const util = require('util')
 const cache = require('../helper/cacheManager')
 const db1 = require('../campaigns-db/database')
 const imgsPage = db1.imgsPage
+const publishers = db1.publishers
+const clientImgPubl = db1.clientImgPubl
 
 exports.getAds = Controller(async (req, res) => {
   // Disable SSL certificate
@@ -22,22 +24,32 @@ exports.getAds = Controller(async (req, res) => {
   const password = conf.get('vista_api_password')
 
   const apiEndpoint = '/api/v1/sync'
+  let img = null;
+  let publisher = null;
 
   // getting query strings
 
-    const { ad_type, img_width, img_height, ad_format, media_type, url, site, uid, serv, mobile } = req.query
+    const { ad_type, img_width, img_height, ad_format, media_type, url, site, uid, serv, mobile, userId } = req.query
     let checker = site.split('/')[2];
     if (checker.includes('www.')) {
         checker = checker.split('w.')[1]
     }
     let extension = site.split(checker)
     let cachedImg = await cache.getAsync(`${extension[1]}_${mobile}_${img_width}_${img_height}_${url}`);
-    if (cachedImg && cachedImg !== '{}')
+    if (cachedImg && cachedImg !== '{}'){
+        img = await getImg(url);
+        publisher = await getPublisher(checker);
+
+        if(img && publisher){
+          await clientImgPublData(userId, img.id, publisher.id);
+        }
+
         return res.status(200).send({
             results: JSON.parse(cachedImg)
         })
+    }
 
-    const img = await addImg(dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url, uid, site)
+    img = await addImg(dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url, uid, site)
     console.log(img.dataValues.id)
     const aut = await auth(checker, site.split('/')[0])
     if (aut['enabled'] == false) {
@@ -81,6 +93,13 @@ exports.getAds = Controller(async (req, res) => {
             }
             const sendingResults = await convert(flat)
             cache.setAsync(`${extension[1]}_${mobile}_${img_width}_${img_height}_${url}`, JSON.stringify(sendingResults), 'EX', 604800);
+            
+            publisher = await getPublisher(checker);
+
+          if(img && publisher){
+            await clientImgPublData(userId, img.id, publisher.id);
+          }
+            
             res.status(200).send({
                 results: sendingResults
             })
@@ -103,6 +122,28 @@ const addImg = (time, imgName, idGeneration, site) => {
     site: site,
   })
 }
+
+const getImg = (url) => {
+  return imgsPage.findOne({
+    url: url
+  })
+}
+
+const getPublisher = (site) => {
+  return publishers.findOne({
+    name: site
+  })
+}
+
+function clientImgPublData(clientId, imageId, publisherId) {
+  return clientImgPubl.create({
+        clientId: clientId,
+        imgId: imageId,
+        publId: publisherId,
+        duration: 0
+  })
+}
+
 const filler = (
   resultsVista,
   serv,
