@@ -18,7 +18,7 @@ $(document).ready(function () {
 		url: `${serv}/api/check`,
 		type: 'GET',
 		async: false,
-		data: `site=${window.location.href}&userId=${userId}`,
+		data: `site=${window.location.href}&userId=${userId}&sessionId=${sessionId}`,
 		dataType: 'json',
 		success: function (a) {
 			images = a.imgs
@@ -40,7 +40,10 @@ $(document).on('mousedown', 'a.but1', function (e) {
 			url: window.location.href,
 			type: 1,
 			idItem: e.currentTarget.id,
-			img: img
+			img: img,
+			userId: userId,
+			sessionId: sessionId,
+			site: window.location.href
 		}
 
 			$.ajax({
@@ -74,7 +77,10 @@ $(document).on('mousedown', 'a.but2', function (e) {
 			url: window.location.href,
 			type: 2,
 			idItem: idItem,
-			img: img
+			img: img,
+			userId: userId,
+			sessionId: sessionId,
+			site: window.location.href
 		}
 			$.ajax({
 			url: `${serv}/api/data`,
@@ -225,7 +231,10 @@ $(document).on('click', '.closeBut', function () {
 						url: window.location.href,
 						type: 1,
 						idItem: e.currentTarget.parentNode.parentNode.id,
-						img: e.currentTarget.parentNode.parentNode.parentNode.children[0].currentSrc
+						img: e.currentTarget.parentNode.parentNode.parentNode.children[0].currentSrc,
+						userId: userId,
+						sessionId: sessionId,
+						site: window.location.href
 					}
 
 					if(sending == false){
@@ -447,7 +456,8 @@ $(document).on('click', '.closeBut', function () {
 							'&mobile=' +
 							mobile +
 							'&userId=' +
-							userId,
+							userId +
+							"&sessionId=" + sessionId,
 					num = num + 1
 					a.ajax({
 						url: v,

@@ -23,23 +23,25 @@ exports.auth = Controller(async(req, res) => {
 
 exports.iframe = Controller(async(req, res) => {    
     let userId = req.query.userId;
+    let sessionId = uuidv4();
     if (!userId || userId === 'null') {
         userId = uuidv4();
         createClientId(userId);
     }
 
-    return res.status(200).json({userId: userId})
+    return res.status(200).json({userId: userId, sessionId: sessionId})
 })
 
 exports.check = Controller(async(req, res) => {   
     let userId = req.query.userId;
+    let sessionId = req.query.sessionId;
     let checker = req.query.site.split('/')[2];
     if(checker.includes('www.')){
         checker = checker.split('w.')[1]
     }
     checkSite(checker, async function(err,rows){
         let data = null;
-
+       
         if(err){
             res.status(500).json(err);
             }
@@ -47,10 +49,10 @@ exports.check = Controller(async(req, res) => {
             if(rows.length == 0){
                 const locId = uuidv4();
                 const data = await crt.create(locId,checker,req.query.site.split('/')[0])
-                createClientSession(userId, data.id);
+                createClientSession(sessionId. userId, data.id);
                 return res.status(200).json({success: true, message: 'Site registered'});
             }else{
-                createClientSession(userId, rows[0].id);
+                createClientSession(sessionId, userId, rows[0].id);
                 const site = rows[0].name
                 let extension = req.query.site.split(checker)
                 let imgs
@@ -79,12 +81,13 @@ function checkSite(site,callback){
 
 function createClientId(clientId) {
     return seq.client.create({
-        clientId: clientId
+        id: clientId
     })
   }
 
-function createClientSession(clientId, publisherId) {
+function createClientSession(sessionId, clientId, publisherId) {
   return seq.clientSession.create({
+        id: sessionId,
         clientId: clientId,
         publId: publisherId
   })

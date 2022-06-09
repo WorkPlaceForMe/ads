@@ -1,11 +1,13 @@
 module.exports = (sequelize, Sequelize) => {
     const Client = sequelize.define('client', {
-      clientId: {
+      id: {
         type: Sequelize.STRING(40),
         allowNull: false,
-        primaryKey: true,
+        primaryKey: true
       }
-    })
+    }, {
+      freezeTableName: true
+  });
   
     return Client
   }

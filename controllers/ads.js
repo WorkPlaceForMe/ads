@@ -29,7 +29,7 @@ exports.getAds = Controller(async (req, res) => {
 
   // getting query strings
 
-    const { ad_type, img_width, img_height, ad_format, media_type, url, site, uid, serv, mobile, userId } = req.query
+    const { ad_type, img_width, img_height, ad_format, media_type, url, site, uid, serv, mobile, userId, sessionId } = req.query
     let checker = site.split('/')[2];
     if (checker.includes('www.')) {
         checker = checker.split('w.')[1]
@@ -41,7 +41,7 @@ exports.getAds = Controller(async (req, res) => {
         publisher = await getPublisher(checker);
 
         if(img && publisher){
-          await clientImgPublData(userId, img.id, publisher.id);
+          await createClientImgPublData(userId, sessionId, img.id, publisher.id);
         }
 
         return res.status(200).send({
@@ -97,7 +97,7 @@ exports.getAds = Controller(async (req, res) => {
             publisher = await getPublisher(checker);
 
           if(img && publisher){
-            await clientImgPublData(userId, img.id, publisher.id);
+            await createClientImgPublData(userId, sessionId, img.id, publisher.id);
           }
             
             res.status(200).send({
@@ -125,22 +125,22 @@ const addImg = (time, imgName, idGeneration, site) => {
 
 const getImg = (url) => {
   return imgsPage.findOne({
-    url: url
+    where: { img: url }
   })
 }
 
 const getPublisher = (site) => {
   return publishers.findOne({
-    name: site
+    where: { name: site }
   })
 }
 
-function clientImgPublData(clientId, imageId, publisherId) {
+function createClientImgPublData(clientId, sessionId, imageId, publisherId) {
   return clientImgPubl.create({
         clientId: clientId,
+        sessionId: sessionId,
         imgId: imageId,
-        publId: publisherId,
-        duration: 0
+        publId: publisherId
   })
 }
 
