@@ -30,6 +30,10 @@ module.exports = (sequelize, Sequelize) => {
           key: 'id'
        }
       },
+      imgUrl: {
+        type: Sequelize.STRING(200),
+        allowNull: false
+      },
       publId: {
         type: Sequelize.STRING(40),
         allowNull: false,

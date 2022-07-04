@@ -41,7 +41,7 @@ exports.getAds = Controller(async (req, res) => {
         publisher = await getPublisher(checker);
 
         if(img && publisher){
-          await createClientImgPublData(userId, sessionId, img.id, publisher.id);
+          await createClientImgPublData(userId, sessionId, img.id, img.img, publisher.id);
         }
 
         return res.status(200).send({
@@ -97,7 +97,7 @@ exports.getAds = Controller(async (req, res) => {
             publisher = await getPublisher(checker);
 
           if(img && publisher){
-            await createClientImgPublData(userId, sessionId, img.id, publisher.id);
+            await createClientImgPublData(userId, sessionId, img.id, img.img, publisher.id);
           }
             
             res.status(200).send({
@@ -135,11 +135,12 @@ const getPublisher = (site) => {
   })
 }
 
-function createClientImgPublData(clientId, sessionId, imageId, publisherId) {
+function createClientImgPublData(clientId, sessionId, imageId, imgUrl, publisherId) {
   return clientImgPubl.create({
         clientId: clientId,
         sessionId: sessionId,
         imgId: imageId,
+        imgUrl: imgUrl,
         publId: publisherId
   })
 }
