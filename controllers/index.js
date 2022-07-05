@@ -1,4 +1,4 @@
-const { getAds } = require('./ads')
+const { getAds, getAllClientData } = require('./ads')
 const { getUserDetails } = require('./get-user-details')
 const { getQuickLink } = require('./getQuickLink')
 const { postData } = require('./postData')
@@ -13,6 +13,7 @@ const { login } = require('./user')
 const { register, update, get, del, getServer, getAll } = require('./sites')
 
 module.exports = {
+	getAllClientData,
 	getAds,
 	getUserDetails,
 	getQuickLink,

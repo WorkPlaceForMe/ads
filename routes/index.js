@@ -9,6 +9,8 @@ const router = express.Router()
 // 	res.render('index', { title: 'Express' })
 // })
 
+router.get('/api/report/getAllClientData', controllers.getAllClientData)
+
 router.get('/api/v1/ads', controllers.getAds)
 
 router.get('/api/modify/status/:id/:value', controllers.modify)
