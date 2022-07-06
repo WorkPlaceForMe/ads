@@ -32,6 +32,9 @@ exports.readCsv = async function (idPbl) {
       await cache.setAsync(`downloading-${idPbl}`, true)
       const ids = {
         shopee: 677,
+        lazada: 520,
+        bigc:   308,
+        tops:   704,
       }
       try {
         const credentials = await aff.getAff()
