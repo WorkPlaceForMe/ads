@@ -47,7 +47,7 @@ exports.readCsv = async function (idPbl) {
         )
         let affiliateEndpoint = `${conf.get(
           'accesstrade_endpoint',
-        )}/v1/publishers/me/sites/${idPbl}/campaigns/677/productfeed/url`
+        )}/v1/publishers/me/sites/${idPbl}/campaigns/520/productfeed/url`
         const affiliateResponse = await axios.get(affiliateEndpoint, {
           headers: {
             Authorization: `Bearer ${token}`,
