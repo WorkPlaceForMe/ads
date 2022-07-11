@@ -35,6 +35,8 @@ exports.readCsv = async function (idPbl) {
         lazada: 520,
         bigc:   308,
         tops:   704,
+        jdc:    722,
+        newc:   730
       }
       try {
         const credentials = await aff.getAff()
