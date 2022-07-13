@@ -50,7 +50,7 @@ exports.readCsv = async function (idPbl) {
         )        
 
         for (const providerId of Object.keys(providerIds)){
-          let affiliateEndpoint = '';
+          let affiliateEndpoint = ''
 
           try {
             affiliateEndpoint = `${conf.get(
