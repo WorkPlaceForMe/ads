@@ -28,13 +28,16 @@ exports.readCsv = async function (idPbl) {
     const flat = flatten(dataValues)
     return flat
   } else {
-    if (cachedDown == 'false' || !cachedDown) {
+    if (!cachedDown) {
       await cache.setAsync(`downloading-${idPbl}`, true)
-      const ids = {
-        shopee: 677,
-        lazada: 520,
+      const results = []
+      const providerIds = {
         bigc:   308,
+        lazada: 520,
+        trueshopping: 594,
         tops:   704,
+        jdcentral: 722,
+        central: 730
       }
       try {
         const credentials = await aff.getAff()
@@ -44,18 +47,38 @@ exports.readCsv = async function (idPbl) {
           {
             algorithm: 'HS256',
           },
-        )
-        let affiliateEndpoint = `${conf.get(
-          'accesstrade_endpoint',
-        )}/v1/publishers/me/sites/${idPbl}/campaigns/520/productfeed/url`
-        const affiliateResponse = await axios.get(affiliateEndpoint, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'X-Accesstrade-User-Type': 'publisher',
-          },
-        })
-        const rs = await download(affiliateResponse.data.baseUrl, idPbl)
-        const results = await readCsv(rs, idPbl)
+        )        
+
+        for (const providerId of Object.keys(providerIds)){
+          let affiliateEndpoint = '';
+
+          try {
+            affiliateEndpoint = `${conf.get(
+              'accesstrade_endpoint',
+            )}/v1/publishers/me/sites/${idPbl}/campaigns/${providerIds[providerId]}/productfeed/url`
+
+            console.log(`Downloading data for site ${idPbl} for provider ${providerId} affiliateEndpoint ${affiliateEndpoint} `)
+            
+            const affiliateResponse = await axios.get(affiliateEndpoint, {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                'X-Accesstrade-User-Type': 'publisher',
+              },
+            })
+            
+            const rs = await download(affiliateResponse.data.baseUrl, idPbl, providerId)
+            const affiliateResult = await readCsv(rs, idPbl, providerId)
+
+            if(affiliateResult){
+              results.concat(affiliateResult)
+            }
+          } catch (err) {
+            console.log(`Downloading data for site ${idPbl} for provider ${providerId} affiliateEndpoint ${affiliateEndpoint} failed`)
+            console.log(err)
+          }
+        }
+
+        await cache.setAsync(`downloading-${idPbl}`, false)
         return results
       } catch (err) {
         console.log(err)
@@ -79,26 +102,26 @@ exports.readCsv = async function (idPbl) {
   }
 }
 
-async function readCsv(Readable, id) {
+async function readCsv(Readable, id, providerName) {
   const promises = []
   console.log('piping')
   var sendDate = new Date().getTime()
   Readable.pipe(parseCsv({ delimiter: ',', from_line: 2, headers: true }))
     .on('data', function (csvrow) {
       for (const element of objetos['Products']) {
-        if (
+        if (csvrow[15] && 
           csvrow[15].toLowerCase().includes(' ' + element) ||
           csvrow[15].toLowerCase() == element
         ) {
           const product = create_products(csvrow, element, id)
           promises.push(product)
-        } else if (
+        } else if (csvrow[17] &&
           csvrow[17].toLowerCase().includes(' ' + element) ||
           csvrow[17].toLowerCase() == element
         ) {
           const product = create_products(csvrow, element, id)
           promises.push(product)
-        } else if (
+        } else if (csvrow[13] &&
           csvrow[13].toLowerCase().includes(' ' + element) ||
           csvrow[13].toLowerCase() == element
         ) {
@@ -106,47 +129,46 @@ async function readCsv(Readable, id) {
           promises.push(product)
         }
       }
-      if (csvrow[13] == 'Women Clothes') {
+      if (csvrow[13] && csvrow[13] == 'Women Clothes') {
         const gender = 'Female'
         const garment = create_clothing(csvrow, id, gender)
         promises.push(garment)
       }
-      if (csvrow[13] == 'Men Clothes') {
+      if (csvrow[13] && csvrow[13] == 'Men Clothes') {
         const gender = 'Male'
         const garment = create_clothing(csvrow, id, gender)
         promises.push(garment)
       }
       if (
-        csvrow[13] == 'Sports & Outdoors' &&
-        !csvrow[15].includes('Sportswear')
+        csvrow[13] && csvrow[13].toLowerCase().includes('sport') &&
+        !csvrow[15].toLowerCase().includes('sportswear')
       ) {
         const product = create_products(csvrow, 'sport', id)
         promises.push(product)
       }
-      if (csvrow[13] == 'Beauty & Personal Care') {
+      if (csvrow[13] && csvrow[13].toLowerCase().includes('beauty')){
         const product = create_products(csvrow, 'makeup', id)
         promises.push(product)
       }
-      if (csvrow[15] == 'Mobile') {
+      if (csvrow[15] && csvrow[15] == 'Mobile') {
         const product = create_products(csvrow, 'cell_phone', id)
         promises.push(product)
       }
     })
     .on('end', async () => {
       const todo = await Promise.all(promises)
-      console.log('done with shopee')
+      console.log(`done with provider ${providerName}`)
       var receiveDate = new Date().getTime()
       var responseTimeMs = receiveDate - sendDate
-      console.log(responseTimeMs)
-      await cache.setAsync(`downloading-${id}`, false)
+      console.log(responseTimeMs)      
       const dataValues = todo.map((objects) => objects.dataValues)
       return dataValues
     })
 }
 
-const download = async (url, idPbl) => {
+const download = async (url, idPbl, providerName) => {
   var sendDate = new Date().getTime()
-  console.log(`Downloading ${idPbl}`)
+  console.log(`Downloading ${idPbl} provider ${providerName}`)
   const resp = await axios.get(url)
   const Csv = Readable.from(resp.data)
   var receiveDate = new Date().getTime()

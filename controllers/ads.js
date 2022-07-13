@@ -77,11 +77,11 @@ exports.getAds = Controller(async (req, res) => {
     let extension = site.split(checker)
     let cachedImg = await cache.getAsync(`${extension[1]}_${mobile}_${img_width}_${img_height}_${url}`);
     if (cachedImg && cachedImg !== '{}'){
-        img = await getImg(url);
-        publisher = await getPublisher(checker);
+        img = await getImg(url)
+        publisher = await getPublisher(checker)
 
         if(img && publisher){
-          await createClientImgPublData(userId, sessionId, img.id, img.img, publisher.id);
+          await createClientImgPublData(userId, sessionId, img.id, img.img, publisher.id)
         }
 
         return res.status(200).send({
@@ -89,14 +89,17 @@ exports.getAds = Controller(async (req, res) => {
         })
     }
 
-    img = await addImg(dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url, uid, site)
+    img = await getImg(url)    
+    if(!img){
+      img = await addImg(dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url, uid, site)
+    }
     console.log(img.dataValues.id)
     const aut = await auth(checker, site.split('/')[0])
     if (aut['enabled'] == false) {
         console.log("Cancelling")
         return res.status(400).json({ success: false, message: "Unauthorized" })
     }
-    else {
+    else if(!cachedImg) {
         let formData = new FormData()
         formData.append('upload', request(url))
         formData.append('subscriptions', 'face,fashion,Object,tags2,sport')
