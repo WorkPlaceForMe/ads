@@ -41,41 +41,34 @@ exports.readCsv = async function (idPbl) {
       }
       
       try {
-        const credentials = await aff.getAff()
-        const token = jwt.sign(
-          { sub: credentials.userUid },
-          credentials.secretKey,
-          {
-            algorithm: 'HS256',
-          },
-        )        
-
         for (const providerId of Object.keys(providerIds)){
-          let affiliateEndpoint = ''
+          const credentials = await aff.getAff()
+          const token = jwt.sign(
+            { sub: credentials.userUid },
+            credentials.secretKey,
+            {
+              algorithm: 'HS256',
+            },
+          )   
 
-          try {
-            affiliateEndpoint = `${conf.get(
+          let affiliateEndpoint = `${conf.get(
               'accesstrade_endpoint',
             )}/v1/publishers/me/sites/${idPbl}/campaigns/${providerIds[providerId]}/productfeed/url`
 
-            console.log(`Downloading data for site ${idPbl} for provider ${providerId} affiliateEndpoint ${affiliateEndpoint} `)
-            
-            const affiliateResponse = await axios.get(affiliateEndpoint, {
-              headers: {
-                Authorization: `Bearer ${token}`,
-                'X-Accesstrade-User-Type': 'publisher',
-              },
-            })
-            
-            const rs = await download(affiliateResponse.data.baseUrl, idPbl, providerId)
-            const affiliateResult = await readCsv(rs, idPbl, providerId, results)
+          console.log(`Downloading data for site ${idPbl} for provider ${providerId} affiliateEndpoint ${affiliateEndpoint} `)
+          
+          const affiliateResponse = await axios.get(affiliateEndpoint, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'X-Accesstrade-User-Type': 'publisher',
+            },
+          })
+          
+          const rs = await download(affiliateResponse.data.baseUrl, idPbl, providerId)
+          const affiliateResult = await readCsv(rs, idPbl, providerId, results)
 
-            if(affiliateResult){
-              results.push(...affiliateResult)
-            }
-          } catch (err) {
-            console.log(`Downloading data for site ${idPbl} for provider ${providerId} affiliateEndpoint ${affiliateEndpoint} failed`)
-            console.log(err)
+          if(affiliateResult){
+            results.push(...affiliateResult)
           }
         }
 
