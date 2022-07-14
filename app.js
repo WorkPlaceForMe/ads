@@ -36,9 +36,6 @@ server = server.join('/')
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
 app.use(cookieParser())
-// app.use(cors({
-//     origin: ['*', server, 'http://localhost:4200']
-//   }))
 app.use(cors())
 
 require('./helper/cacheManager')
