@@ -79,6 +79,8 @@ exports.readCsv = async function (idPbl) {
           }
         }
 
+        await cache.setAsync(`downloading-${idPbl}`, false)
+
         return results
       } catch (err) {
         console.log(err)
@@ -107,42 +109,40 @@ async function readCsv(Readable, id, providerName) {
   console.log('piping')
   var sendDate = new Date().getTime()
   
-  await cache.setAsync(`downloading-${id}`, true)
-  
   Readable.pipe(parseCsv({ delimiter: ',', from_line: 2, headers: true }))
     .on('data', function (csvrow) {
       try { 
         for (const element of objetos['Products']) {
           if (csvrow[15] && 
-            csvrow[15].toLowerCase().includes(' ' + element) ||
-            csvrow[15].toLowerCase() == element
+            csvrow[15].toLowerCase().toLowerCase().includes(element)
           ) {
             const product = create_products(csvrow, element, id)
             promises.push(product)
           } else if (csvrow[17] &&
-            csvrow[17].toLowerCase().includes(' ' + element) ||
-            csvrow[17].toLowerCase() == element
+            csvrow[17].toLowerCase().includes(element)
           ) {
             const product = create_products(csvrow, element, id)
             promises.push(product)
           } else if (csvrow[13] &&
-            csvrow[13].toLowerCase().includes(' ' + element) ||
-            csvrow[13].toLowerCase() == element
+            csvrow[13].toLowerCase().toLowerCase().includes(element)
           ) {
             const product = create_products(csvrow, element, id)
             promises.push(product)
           }
         }
+        
         if (csvrow[13] && csvrow[13] == 'Women Clothes') {
           const gender = 'Female'
           const garment = create_clothing(csvrow, id, gender)
           promises.push(garment)
         }
+        
         if (csvrow[13] && csvrow[13] == 'Men Clothes') {
           const gender = 'Male'
           const garment = create_clothing(csvrow, id, gender)
           promises.push(garment)
         }
+        
         if (
           csvrow[13] && csvrow[13].toLowerCase().includes('sport') &&
           !csvrow[15].toLowerCase().includes('sportswear')
@@ -150,11 +150,13 @@ async function readCsv(Readable, id, providerName) {
           const product = create_products(csvrow, 'sport', id)
           promises.push(product)
         }
+        
         if (csvrow[13] && csvrow[13].toLowerCase().includes('beauty')){
           const product = create_products(csvrow, 'makeup', id)
           promises.push(product)
         }
-        if (csvrow[15] && csvrow[15] == 'Mobile') {
+        
+        if (csvrow[15] && csvrow[15].toLowerCase().includes('mobile')) {
           const product = create_products(csvrow, 'cell_phone', id)
           promises.push(product)
         }
@@ -170,8 +172,6 @@ async function readCsv(Readable, id, providerName) {
       var responseTimeMs = receiveDate - sendDate
       console.log(responseTimeMs)      
       const dataValues = todo.map((objects) => objects.dataValues)
-      
-      await cache.setAsync(`downloading-${id}`, false)
 
       return dataValues
     })
