@@ -8,12 +8,20 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.STRING(45),
             allowNull: true,
         },
+        nickname: {
+            type: Sequelize.STRING(45),
+            allowNull: true,
+        },
         enabled: {
             type: Sequelize.STRING(45),
             allowNull: true,
         },
         publisherId: {
             type: Sequelize.STRING(45),
+            allowNull: true,
+        },
+        pages: {
+            type: Sequelize.JSON,
             allowNull: true,
         }
     });

@@ -1,8 +1,9 @@
-app.properties
 public/**
 !public/g3c.scan.image.sph.js
+!public/index.html
 !public/pictures/iconBorder.gif
 !public/pictures/vector2x.png
+!public/pictures/graymaticsLogo.png
 adscopeManual.docx
 .eslintrc.js
 .prettierrc
@@ -15,3 +16,5 @@ csv/**
 index.html
 startDocker.sh
 .gitignore
+oldDist
+test.js

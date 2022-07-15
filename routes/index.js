@@ -1,5 +1,6 @@
 const express = require('express')
 const controllers = require('../controllers')
+const verify = require('../middleware/verifyPubl')
 
 const router = express.Router()
 
@@ -7,6 +8,8 @@ const router = express.Router()
 // router.get('/', function (req, res) {
 // 	res.render('index', { title: 'Express' })
 // })
+
+router.get('/api/report/getAllClientData', controllers.getAllClientData)
 
 router.get('/api/v1/ads', controllers.getAds)
 
@@ -20,6 +23,8 @@ router.get('/api/stats/url', controllers.getStatsUrl)
 
 router.get('/api/stats/url/img', controllers.getStatsImg)
 
+router.get('/api/report', controllers.generateReport)
+
 router.get('/api/stats/url/img/ad', controllers.getStatsAd)
 
 router.get('/api/log/:id', controllers.auth)
@@ -28,6 +33,26 @@ router.get('/api/log/:id', controllers.auth)
 
 router.get('/test', controllers.getUserDetails)
 
+router.get('/api/iframe', controllers.iframe)
+
 router.get('/api/check', controllers.check)
+
+router.post('/api/adsNum/:id', controllers.updateAds)
+
+router.get('/api/version', controllers.version)
+
+router.post('/api/login', controllers.login)
+
+router.post('/api/register', [verify.checkDuplicatePubl], controllers.register)
+
+router.get('/api/site/:id', controllers.get)
+
+router.put('/api/update', [verify.checkDuplicatePublEdit], controllers.update)
+
+router.delete('/api/del/:id', controllers.del)
+
+router.get('/api/sites', controllers.getAll)
+
+router.get('/api/server', controllers.getServer)
 
 module.exports = router

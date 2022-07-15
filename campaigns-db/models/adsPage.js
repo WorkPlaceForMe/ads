@@ -1,5 +1,5 @@
 module.exports = (sequelize, Sequelize) => {
-    const adsPage = sequelize.define("adsPage", {
+    const adsPage = sequelize.define("adspages", {
         id: {
             type: Sequelize.INTEGER,
             primaryKey: true,
@@ -25,6 +25,8 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.BIGINT(11),
             allowNull: true
         },
+    },{
+        freezeTableName: true
     });
   
     return adsPage;

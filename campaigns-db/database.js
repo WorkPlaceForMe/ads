@@ -1,18 +1,24 @@
-const Sequelize  = require('sequelize');
+const Sequelize = require('sequelize')
 const conf = require('../middleware/prop')
 
-const sequelize = new Sequelize(conf.get('database'),conf.get('user'),conf.get('password'),{
+const sequelize = new Sequelize(
+  conf.get('database'),
+  conf.get('user'),
+  conf.get('password'),
+  {
     dialect: 'mysql',
     host: conf.get('host'),
     pool: {
-      max : 100,
-      min : 0,
-      idle: 30000,
-      acquire: 1000000 
+      max: 100,
+      min: 0,
+      idle: 600000,
+      acquire: 1000000,
     },
     charset: 'utf8mb4',
-    collate: 'utf8mb4_general_ci', 
-  });
+    collate: 'utf8mb4_general_ci',
+    logging: false,
+  },
+)
 
 const db = {}
 
@@ -25,5 +31,9 @@ db.imgsPage = require('./models/imgsPage')(sequelize, Sequelize)
 db.impressions = require('./models/impressions')(sequelize, Sequelize)
 db.products = require('./models/products')(sequelize, Sequelize)
 db.publishers = require('./models/publishers')(sequelize, Sequelize)
+db.users = require('./models/user')(sequelize, Sequelize)
+db.client = require('./models/client')(sequelize, Sequelize)
+db.clientImgPubl = require('./models/clientImgPubl')(sequelize, Sequelize)
+db.clientSession = require('./models/clientSession')(sequelize, Sequelize)
 
-module.exports = db;
+module.exports = db

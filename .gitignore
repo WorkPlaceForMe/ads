@@ -8,9 +8,11 @@ adscopeManual.docx
 .prettierrc
 access.log
 node_modules/**
-clientClient
-clientAis
+clientAis/node_modules/**
+clientClient/node_modules/**
 csv/**
 !csv/objetos2.json
 index.html
 startDocker.sh
+oldDist
+test.js

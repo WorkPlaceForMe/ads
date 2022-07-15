@@ -3,6 +3,10 @@ const db = require('../helper/dbconnection')
 const readCsv = require('./readCsv')
 const reportAff = require('../helper/reportAff')
 const auth = require('../helper/auth')
+const cache = require('../helper/cacheManager')
+const conf = require('../middleware/prop')
+const db1 = require('../campaigns-db/database')
+const publishers = db1.publishers
 
 exports.getStats = Controller(async(req, res) => {
     let ads = {},
@@ -22,7 +26,6 @@ exports.getStats = Controller(async(req, res) => {
             for(const stat of rows){
                 ads[stat.site] = stat.count
             }
-            // console.table(ads)
             getImgPerPage(function(err,rows){
                 if(err){
                     res.status(500).json(err);
@@ -31,7 +34,6 @@ exports.getStats = Controller(async(req, res) => {
                     for(const stat of rows){
                         imgs[stat.site] = stat.count
                     }
-                    // console.table(imgs)
                     getClicksAndViews(async function(err,rows){
                         if(err){
                             res.status(500).json(err);
@@ -41,8 +43,6 @@ exports.getStats = Controller(async(req, res) => {
                                 clicks[stat.url] = stat.clicks
                                 views[stat.url] = stat.views
                             }
-                            // console.table(clicks)
-                            // console.table(views)
                             for(const click in clicks){
                                 let url = click.split('/')[2]
                                 if(url == ''){
@@ -76,8 +76,27 @@ exports.getStats = Controller(async(req, res) => {
                             }
 
                             let table = []
+                            const publ = await getPublsh()
+                            for(const pub of publ){
+                                if(imgsGrouped[pub.dataValues.name] ===  undefined){
+                                    imgsGrouped[pub.dataValues.name] = 0
+                                    clicksGrouped[pub.dataValues.name] = 0
+                                    adsGrouped[pub.dataValues.name] = 0
+                                    viewsGrouped[pub.dataValues.name] = 0
+                                }
+                            }
                             for(let i = 0; i < Object.keys(imgsGrouped).length; i++){
-
+                                if(publ.length != Object.keys(imgsGrouped).length){
+                                    let count = 0;
+                                    for(const pub of publ){
+                                        if(pub.dataValues.name != Object.keys(imgsGrouped)[i]){
+                                            count ++;
+                                        }
+                                    }
+                                    if(count == Object.keys(imgsGrouped).length -1){
+                                        continue;
+                                    }
+                                }
                                 if(!clicksGrouped[Object.keys(imgsGrouped)[i]]){
                                     clicksGrouped[Object.keys(imgsGrouped)[i]] = 0
                                 }
@@ -118,18 +137,33 @@ exports.getStats = Controller(async(req, res) => {
 
                                 const init = new Date(req.query.init).toISOString()
                                 const fin = new Date(req.query.fin).toISOString()
-                                let rewards;
+                                let rewards = {};
+                                const cacheed = await cache.getAsync(`${init}_${fin}_${ids[0].publisherId}`);
+                                
+                                if (cacheed){
+                                    rewards = cacheed
+                                }else{
+                                    try{
+                                        if(ids[0].publisherId != null){
+                                            rewards = await reportAff.report(init,fin,ids[0].publisherId)
+                                            cache.setAsync(`${init}_${fin}_${ids[0].publisherId}`, JSON.stringify(rewards));
+                                        }else{
+                                            rewards['totalReward'] = 0;
+                                            rewards['totalConversionsCount'] = 0;
+                                        }
+                                    }catch(err){
+                                        rewards['totalReward'] = 0;
+                                        rewards['totalConversionsCount'] = 0;
+                                        cache.setAsync(`${init}_${fin}_${ids[0].publisherId}`, JSON.stringify(rewards));
+                                    }
+                                }
+
                                 if(ids[0].enabled == 'true'){
                                         ids[0].enabled  = true
                                     }else if(ids[0].enabled == 'false'){
                                         ids[0].enabled  = false
                                     }
-                                try{
-                                    rewards = await reportAff.report(init,fin,ids[0].publisherId)
-                                }catch(err){
-                                    rewards['totalReward'] = 0;
-                                    rewards['totalConversionsCount'] = 0;
-                                }
+
                                     table[i] = {
                                         url : Object.keys(imgsGrouped)[i],
                                         clicksPerImg: clicksPerImg,
@@ -144,12 +178,15 @@ exports.getStats = Controller(async(req, res) => {
                                         enabled: ids[0].enabled,
                                         id: ids[0].id,
                                         rewards: rewards['totalReward'],
-                                        conversions: rewards['totalConversionsCount']
+                                        conversions: rewards['totalConversionsCount'],
+                                        nickname: ids[0].nickname
                                     }
 
                             }
-                            // console.table(table)
-                            res.status(200).json({success: true, table: table});
+                            let filtered = table.filter(function (el) {
+                                return el != null;
+                            });
+                            res.status(200).json({success: true, table: filtered});
                         }
                     })
                 }
@@ -176,7 +213,8 @@ exports.getStatsUrl = Controller(async(req, res) => {
             }
         else{
             for(const stat of rows){
-                ads[stat.site] = stat.count
+                let name = stat.site.split('//')[1]
+                ads[name] = stat.count
             }
             // console.table(ads)
             getImgPerPage(async function(err,rows){
@@ -185,22 +223,24 @@ exports.getStatsUrl = Controller(async(req, res) => {
                     }
                 else{
                     for(const stat of rows){
-                        imgs[stat.site] = stat.count
+                        let name = stat.site.split('//')[1]
+                        imgs[name] = stat.count
                     }
-                    // console.table(imgs)
+                    //console.table(imgs)
                     getClicksAndViews(async function(err,rows){
                         if(err){
                             res.status(500).json(err);
                             }
                         else{
                             for(const stat of rows){
-                                clicks[stat.url] = stat.clicks
-                                views[stat.url] = stat.views
+                                let name = stat.url.split('//')[1]
+                                clicks[name] = stat.clicks
+                                views[name] = stat.views
                             }
                             // console.table(clicks)
                             // console.table(views)
                             for(const click in clicks){
-                                let url = click.split('/')[2]
+                                let url = click.split('/')[0]
                                 if(url == ''){
                                     url = 'Static File'
                                 }
@@ -209,7 +249,7 @@ exports.getStatsUrl = Controller(async(req, res) => {
                                 }
                             }
                             for(const view in views){
-                                let url = view.split('/')[2]
+                                let url = view.split('/')[0]
                                 if(url == ''){
                                     url = 'Static File'
                                 }
@@ -218,20 +258,20 @@ exports.getStatsUrl = Controller(async(req, res) => {
                                 }
                             }
                             for(const img in imgs){
-                                let url = img.split('/')[2]
+                                let url = img.split('/')[0]
                                 if(url == ''){
                                     url = 'Static File'
                                 }
-                                if(url == urlQuery){
+                                if(url == urlQuery){         
                                     imgsGrouped[img] = (imgsGrouped[img]  || 0) + imgs[img]
                                 }
                             }
                             for(const ad in ads){
-                                let url = ad.split('/')[2]
+                                let url = ad.split('/')[0]
                                 if(url == ''){
                                     url = 'Static File'
                                 }
-                                if(url == urlQuery){
+                                if(url == urlQuery){         
                                     adsGrouped[ad] = (adsGrouped[ad]  || 0) + ads[ad]
                                 }
                             }
@@ -240,6 +280,7 @@ exports.getStatsUrl = Controller(async(req, res) => {
                             // console.table(viewsGrouped)
                             // console.table(adsGrouped)
                             let table = []
+                            const ids = await getPublisherId(req.query.url)
                             for(let i = 0; i < Object.keys(imgsGrouped).length; i++){
                                 // const url = Object.keys(imgsGrouped)[i].split('/')[2]
                                 // console.log(url)
@@ -272,6 +313,33 @@ exports.getStatsUrl = Controller(async(req, res) => {
                                 if(Number.isNaN(viewsPerAd)){
                                     viewsPerAd = 0;
                                 }
+
+                                let extension = Object.keys(imgsGrouped)[i].split(req.query.url)[1]
+                                const def = 2;
+                                let adsPerImage, imgPerPage, totImgs
+                                if(ids[0].pages != null){
+                                    const pages = JSON.parse(ids[0].pages)
+                                    if(pages[0][extension] != null){
+                                        adsPerImage = pages[0][extension]
+                                    }else{
+                                        adsPerImage = def
+                                    }
+                                    if(pages[1][extension] != null){
+                                        imgPerPage = pages[1][extension]
+                                    }else{
+                                        imgPerPage = imgsGrouped[Object.keys(imgsGrouped)[i]]
+                                    }
+                                    if(pages[2][extension] != null){
+                                        totImgs = pages[2][extension]
+                                    }else{
+                                        totImgs = imgsGrouped[Object.keys(imgsGrouped)[i]]
+                                    }
+                                }else{
+                                    adsPerImage = def
+                                    imgPerPage = imgsGrouped[Object.keys(imgsGrouped)[i]]
+                                    totImgs = imgsGrouped[Object.keys(imgsGrouped)[i]]
+                                }
+
                                 table[i] = {
                                     url : Object.keys(imgsGrouped)[i],
                                     clicksPerImg: clicksPerImg,
@@ -282,17 +350,28 @@ exports.getStatsUrl = Controller(async(req, res) => {
                                     images: imgsGrouped[Object.keys(imgsGrouped)[i]],
                                     ads: adsGrouped[Object.keys(imgsGrouped)[i]],
                                     clicks: clicksGrouped[Object.keys(imgsGrouped)[i]],
-                                    views: viewsGrouped[Object.keys(imgsGrouped)[i]] 
+                                    views: viewsGrouped[Object.keys(imgsGrouped)[i]],
+                                    adsNum: adsPerImage,
+                                    imgNum: imgPerPage,
+                                    totImgs: totImgs
                                 }
                             }
-                            // console.table(table)
-                            const ids = await getPublisherId(req.query.url)
-                            let rewards;
+                            if(table.length == 0){
+                                table.push({"url":"/","clicksPerImg":0,"viewsPerImg":0,"clicksPerAd":0,"viewsPerAd":0,"ctr":0,"images":0,"ads":0,"clicks":0,"views":0,"adsNum":0,"imgNum":0,"totImgs":0})
+                            }
+                            let rewards = {};
+                            const cacheed = await cache.getAsync(`${req.query.init}_${req.query.fin}_${ids[0].publisherId}`);
+                            
+                            if (cacheed){
+                                return res.status(200).json({success: true, table: table, rewards: JSON.parse(cacheed)});
+                            }
                             try{
                                 rewards = await reportAff.report(req.query.init,req.query.fin,ids[0].publisherId)
+                                cache.setAsync(`${req.query.init}_${req.query.fin}_${ids[0].publisherId}`, JSON.stringify(rewards));
                             }catch(err){
                                 rewards['totalReward'] = 0;
                                 rewards['totalConversionsCount'] = 0;
+                                cache.setAsync(`${req.query.init}_${req.query.fin}_${ids[0].publisherId}`, JSON.stringify(rewards));
                             }
 
                             res.status(200).json({success: true, table: table, rewards: rewards});
@@ -314,8 +393,12 @@ exports.getStatsImg = Controller(async(req, res) => {
             }
         else{
             for(const stat of rows){
-                clicks[stat.img] = stat.clicks
-                views[stat.img] = stat.views
+                if(stat.img == null){
+                    continue;
+                }
+                let name = stat.img.split('//')[1]
+                clicks[name] = stat.clicks
+                views[name] = stat.views
             }
             getAdsListPerImg(urlQuery,function(err,rows){
                 if(err){
@@ -324,7 +407,11 @@ exports.getStatsImg = Controller(async(req, res) => {
                 else{
                     let ads = {}
                     for(let i = 0; i<rows.length; i++){
-                        ads[rows[i].imgName] = (ads[rows[i].imgName]  || 0) + 1
+                        let img = rows[i].imgName.split('//')[1]
+                        ads[img] = (ads[img]  || 0) + 1
+                        if(rows[i + 1] == undefined){
+                            break;
+                        }
                         if(rows[i].idGeneration != rows[i + 1].idGeneration){
                             break;
                         }
@@ -336,15 +423,16 @@ exports.getStatsImg = Controller(async(req, res) => {
                         else{
                             let imgs = []
                             for(let i = 0; i<rows.length; i++){
-                                let adsTotal = ads[rows[i].img]
+                                let img = rows[i].img.split('//')[1]
+                                let adsTotal = ads[img]
                                 if(adsTotal == undefined){
                                     adsTotal = 0
                                 }
-                                let click = clicks[rows[i].img]
+                                let click = clicks[img]
                                 if(click == undefined){
                                     click = 0
                                 }
-                                let view = views[rows[i].img]
+                                let view = views[img]
                                 if(view == undefined){
                                     view = 0
                                 }
@@ -353,6 +441,9 @@ exports.getStatsImg = Controller(async(req, res) => {
                                     ctr = 0
                                 }
                                 imgs.push({img: rows[i].img, title: rows[i].img.split('/')[rows[i].img.split('/').length - 1],clicks : click, views: view, ctr: ctr, ads: adsTotal})
+                                if(rows[i + 1] == undefined){
+                                    break;
+                                }
                                 if(rows[i].idGeneration != rows[i + 1].idGeneration){
                                     break;
                                 }
@@ -371,7 +462,7 @@ exports.getStatsAd = Controller(async(req, res) => {
     let clicks = {},
     views = {},
     ads = []
-    const aut = await auth(urlQuery.url.split('/')[2],urlQuery.url.split('/')[0])
+    const aut = await auth(urlQuery.url.split('/')[0],urlQuery.url.split('/')[0])
     getAdsClicksAndViews(urlQuery.ad,urlQuery.url,async function(err,rows){
         if(err){
             res.status(500).json(err);
@@ -402,9 +493,12 @@ exports.getStatsAd = Controller(async(req, res) => {
                                 if(Number.isNaN(ctr)){
                                     ctr = 0
                                 }
-                                ads.push({img: resCsv['Image URL'], title: resCsv['Merchant Product Name'], affiliate: resCsv['Product URL Web (encoded)'], views: view, clicks: click, ctr: ctr})
+                                ads.push({img: resCsv['Image_URL'], title: resCsv['Merchant_Product_Name'], affiliate: resCsv['Product_URL_Web_encoded'], views: view, clicks: click, ctr: ctr})
                                 break;
                             }
+                        }
+                        if(rows[i + 1] == undefined){
+                            break;
                         }
                         if(rows[i].idGeneration != rows[i + 1].idGeneration){
                             break;
@@ -419,35 +513,35 @@ exports.getStatsAd = Controller(async(req, res) => {
 })
 
 function getAdsPerPage(callback){
-    return db.query(`SELECT count(*) as count, idGeneration as uid, (select site from ads.adsPage where idGeneration = uid limit 1) as site FROM ads.adsPage group by idGeneration order by uid asc`,callback)
+    return db.query(`SELECT count(*) as count, idGeneration as uid, (select site from ${conf.get('database')}.adspages where idGeneration = uid limit 1) as site FROM ${conf.get('database')}.adspages group by idGeneration order by uid asc`,callback)
 }
 
 function getImgPerPage(callback){
-    return db.query(`SELECT idGeneration as uid, count(*) as count, (select site from ads.imgsPage where idGeneration = uid limit 1) as site from ads.imgsPage group by idGeneration order by idGeneration asc;`,callback)
+    return db.query(`SELECT idGeneration as uid, count(*) as count, (select site from ${conf.get('database')}.imgspages where idGeneration = uid limit 1) as site from ${conf.get('database')}.imgspages group by idGeneration order by idGeneration asc;`,callback)
 }
 
 function getClicksAndViews(callback){
-    return db.query(`SELECT url, COUNT( CASE WHEN type = '2' THEN 1 END ) AS clicks, COUNT( CASE WHEN type = '1' THEN 1 END ) AS views FROM ads.impressions group by url;`,callback)
+    return db.query(`SELECT url, COUNT( CASE WHEN type = '2' THEN 1 END ) AS clicks, COUNT( CASE WHEN type = '1' THEN 1 END ) AS views FROM ${conf.get('database')}.impressions group by url;`,callback)
 }
 
 function getImgsList(site,callback){
-    return db.query(`SELECT img, idGeneration FROM ads.imgsPage where site = '${site}' order by idGeneration desc;`,callback)
+    return db.query(`SELECT img, idGeneration FROM ${conf.get('database')}.imgspages where site = 'https://${site}' OR site = 'http://${site}' order by idGeneration desc;`,callback)
 }
 
 function getClicksAndViewsPerImg(site,callback){
-    return db.query(`SELECT img, COUNT( CASE WHEN type = '2' THEN 1 END ) AS clicks, COUNT( CASE WHEN type = '1' THEN 1 END ) AS views FROM ads.impressions where url = '${site}' group by img ;`,callback)
+    return db.query(`SELECT img, COUNT( CASE WHEN type = '2' THEN 1 END ) AS clicks, COUNT( CASE WHEN type = '1' THEN 1 END ) AS views FROM ${conf.get('database')}.impressions where url = 'https://${site}' OR url = 'http://${site}' group by img;`,callback)
 }
 
 function getAdsListPerImg(site,callback){
-    return db.query(`SELECT imgName, idGeneration FROM ads.adsPage where site = '${site}' order by idGeneration desc;`,callback)
+    return db.query(`SELECT imgName, idGeneration FROM ${conf.get('database')}.adspages where site = 'https://${site}' OR site= 'http://${site}' order by idGeneration desc;`,callback)
 }
 
 function getAdsList(img,site,callback){
-    return db.query(`SELECT imgName, idGeneration,idItem FROM ads.adsPage where site = '${site}' and imgName='${img}' order by idGeneration desc;`,callback)
+    return db.query(`SELECT imgName, idGeneration,idItem FROM ${conf.get('database')}.adspages where (site = 'https://${site}' OR site = 'http://${site}') and imgName='${img}' order by idGeneration desc;`,callback)
 }
 
 function getAdsClicksAndViews(img,site,callback){
-    return db.query(`SELECT idItem,img, COUNT( CASE WHEN type = '2' THEN 1 END ) AS clicks, COUNT( CASE WHEN type = '1' THEN 1 END ) AS views FROM ads.impressions where url = '${site}' and img= '${img}' group by idItem;`,callback)
+    return db.query(`SELECT idItem,img, COUNT( CASE WHEN type = '2' THEN 1 END ) AS clicks, COUNT( CASE WHEN type = '1' THEN 1 END ) AS views FROM ${conf.get('database')}.impressions where ( url = 'https://${site}' OR url = 'http://${site}' ) and img= '${img}' group by idItem;`,callback)
 }
 
 const getPublisherId = async function(site){
@@ -459,4 +553,9 @@ const getPublisherId = async function(site){
                 return resolve(elements);
             });
     });
+}
+
+const getPublsh = async function(){
+    const publ = await publishers.findAll()
+    return publ
 }
