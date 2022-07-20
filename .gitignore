@@ -3,6 +3,7 @@ public/**
 !public/g3c.scan.image.sph.js
 !public/pictures/iconBorder.gif
 !public/pictures/vector2x.png
+!public/iframe.html
 adscopeManual.docx
 .eslintrc.js
 .prettierrc

@@ -3,6 +3,9 @@ const aff = require('../helper/affiliate')
 const jwt = require('jsonwebtoken')
 const conf = require('../middleware/prop')
 const cache = require('../helper/cacheManager')
+const fs = require('fs');
+const request = require('request');
+var progress = require('request-progress');
 const { Readable } = require('stream')
 const  bigcCsvReader  = require('./provider/bigcCsvReader')
 const  lazadaCsvReader  = require('./provider/lazadaCsvReader')
@@ -14,56 +17,58 @@ const db = require('../campaigns-db/database')
 const products = db.products
 const clothing = db.clothing
 
-exports.readCsv = async function (idPbl) {
-  let cachedDown = await cache.getAsync(`downloading-${idPbl}`)
-  const val1 = products.findOne({ where: { Page_ID: idPbl } })
-  const val2 = clothing.findOne({ where: { Page_ID: idPbl } })
+exports.readCsv = async (siteId) => {  
+  let cachedDown = await cache.getAsync(`downloading-${siteId}`)
+  const val1 = products.findOne({ where: { Page_ID: siteId } })
+  const val2 = clothing.findOne({ where: { Page_ID: siteId } })
   const enter = await Promise.all([val1, val2])
+  
   if (enter[0] && enter[1]) {
     const Clothing = clothing.findAll({
       raw: true,
-      where: { Page_ID: idPbl },
+      where: { Page_ID: siteId }
     })
     const Products = products.findAll({
       raw: true,
-      where: { Page_ID: idPbl },
+      where: { Page_ID: siteId }
     })
     const dataValues = await Promise.all([Clothing, Products])
-    const flat = flatten(dataValues)
-    return flat
-  } else {
-    if (!cachedDown) {
-      await cache.setAsync(`downloading-${idPbl}`, true)
-      const results = []
-      const providers = [
+    
+    return flatten(dataValues)
+  } else if (!cachedDown)  {
+
+    return new Promise(async (resolve, reject) => {   
+      const downloadPromises = []
+      await cache.setAsync(`downloading-${siteId}`, true)
+      const providers = [       
         {
           id: 308,
-          label: "bigc",
+          label: 'Bigc',
           csvReader: bigcCsvReader
         },
         { 
           id: 520, 
-          label: "lazada", 
+          label: 'Lazada', 
           csvReader: lazadaCsvReader
         },
         { 
           id: 594, 
-          label: "trueshopping", 
+          label: 'True Shopping', 
           csvReader: trueShoppingCsvReader
         },
         { 
           id: 704, 
-          label: "tops", 
+          label: 'Tops', 
           csvReader: topsCsvReader
         },
         { 
           id: 722, 
-          label: "jdcentral", 
+          label: 'JD Central', 
           csvReader: jdCentralCsvReader
         },
         { 
           id: 730, 
-          label: "central",
+          label: 'Central',
           csvReader: centralCsvReader
         }
       ]
@@ -81,67 +86,84 @@ exports.readCsv = async function (idPbl) {
 
           let affiliateEndpoint = `${conf.get(
               'accesstrade_endpoint',
-            )}/v1/publishers/me/sites/${idPbl}/campaigns/${provider.id}/productfeed/url`
+            )}/v1/publishers/me/sites/${siteId}/campaigns/${provider.id}/productfeed/url`
 
-          console.log(`Downloading data for site ${idPbl} for provider ${provider.label} affiliateEndpoint ${affiliateEndpoint} `)
+          console.log(`Downloading data for site ${siteId} for provider ${provider.label} affiliateEndpoint ${affiliateEndpoint}`)
           
           const affiliateResponse = await axios.get(affiliateEndpoint, {
             headers: {
               Authorization: `Bearer ${token}`,
               'X-Accesstrade-User-Type': 'publisher',
             },
-          })
-          
-          const rs = await download(affiliateResponse.data.baseUrl, idPbl, provider.label)
-          const affiliateResult = await provider.csvReader.readCsv(rs, idPbl)
+          })          
 
-          if(affiliateResult){
-            results.push(...affiliateResult)
-          }
+          downloadPromises.push(download(affiliateResponse.data.baseUrl, siteId, provider))            
         }
 
-        await cache.setAsync(`downloading-${idPbl}`, false)
+        const dataValues = await Promise.all(downloadPromises)
+        await cache.setAsync(`downloading-${siteId}`, false)
 
-        return results
+        const data = flatten(dataValues)
+
+        console.log(`Setup completed for site ${siteId} for all providers`)
+        
+        resolve(data)
       } catch (err) {
         console.log(err)
+        reject(err)
       }
-    } else {
-      cachedDown = await cache.getAsync(`downloading-${idPbl}`)
-      while (cachedDown == 'true') {
-        cachedDown = await cache.getAsync(`downloading-${idPbl}`)
-        continue
-      }
-      const Clothing = clothing.findAll({
-        raw: true,
-      })
-      const Products = products.findAll({
-        raw: true,
-      })
-      const dataValues = await Promise.all([Clothing, Products])
-      const flat = flatten(dataValues)
-      return flat
+    })
+  } else {
+    cachedDown = await cache.getAsync(`downloading-${siteId}`)
+    
+    while (cachedDown == 'true') {
+      cachedDown = await cache.getAsync(`downloading-${siteId}`)
+      continue
     }
+    const Clothing = clothing.findAll({
+      raw: true,
+    })
+    const Products = products.findAll({
+      raw: true,
+    })
+    
+    const dataValues = await Promise.all([Clothing, Products])
+    
+    return flatten(dataValues)
   }
 }
 
-const download = async (url, idPbl, providerName) => {
-  let Csv = ''
+const download = (url, siteId, provider) => {
+  let csv = ''
 
-  try {
-    var sendDate = new Date().getTime()
-    console.log(`Downloading ${idPbl} provider ${providerName}`)
-    const resp = await axios.get(url)
-    Csv = Readable.from(resp.data)
-    var receiveDate = new Date().getTime()
-    var responseTimeMs = receiveDate - sendDate
-    console.log(`Downloading ${idPbl} provider ${providerName} completed in ${responseTimeMs}ms` )
-  } catch(e) {
-    console.log(`Downloading ${idPbl} provider ${providerName} failed`)
-    console.log(e)
-  }
-
-  return Csv
+  return new Promise((resolve, reject) => {  
+    try {
+      var sendDate = new Date().getTime()
+      console.log(`Downloading csv data for site ${siteId} for provider ${provider.label}`)
+      const csvFileName = `${provider.label}.csv`
+      
+      progress(request(url))
+        .on('error', error => reject(error))
+        .on('end', async () => {
+          console.log(`Response received for csv data for site ${siteId} for provider ${provider.label}`)      
+          var readStream = fs.createReadStream(csvFileName)     
+          const data = Readable.from(readStream)
+          var receiveDate = new Date().getTime()
+          var responseTimeMs = receiveDate - sendDate
+          console.log(`Downloading csv data for site ${siteId} for provider ${provider.label} completed in ${responseTimeMs}ms` )
+          csv = await provider.csvReader.readCsv(data, siteId)
+          fs.unlinkSync(csvFileName)
+          resolve(csv)
+        })
+        .pipe(fs.createWriteStream(csvFileName))
+        
+      } catch(err) {
+        console.log(`Downloading csv data for site ${siteId} for provider ${provider.label} failed`)
+        console.log(err)
+        fs.unlinkSync(csvFileName)
+        reject(err)
+      }
+  })
 }
 
 const flatten = (ary) => {
