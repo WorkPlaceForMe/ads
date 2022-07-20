@@ -24,7 +24,7 @@ exports.readCsv = async (siteId) => {
   const enter = await Promise.all([val1, val2])
   
   if (enter[0] && enter[1]) {
-    return getProductClothData()
+    return getProductClothData(siteId)
   } else if (!cachedDown)  {
 
     return new Promise(async (resolve, reject) => {   
@@ -95,7 +95,7 @@ exports.readCsv = async (siteId) => {
 
         console.log(`Setup completed for site ${siteId} for all providers`)
         
-        resolve(getProductClothData())
+        resolve(getProductClothData(siteId))
       } catch (err) {
         console.log(err)
         reject(err)
@@ -109,7 +109,7 @@ exports.readCsv = async (siteId) => {
       continue
     }
     
-    return getProductClothData()
+    return getProductClothData(siteId)
   }
 }
 
@@ -155,7 +155,7 @@ const flatten = (ary) => {
   }, [])
 }
 
-const getProductClothData = async () => {
+const getProductClothData = async (siteId) => {
   const Clothing = clothing.findAll({
     raw: true,
     where: { Page_ID: siteId },
