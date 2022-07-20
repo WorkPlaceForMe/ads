@@ -11,16 +11,13 @@ const sequelize = new Sequelize(
     pool: {
       max: 100,
       min: 0,
-      idle: 600000000,
+      idle: 600000,
       acquire: 1000000,
     },
     charset: 'utf8mb4',
     collate: 'utf8mb4_general_ci',
     logging: false,
-    dialectOptions: {
-      connectTimeout: 600000000
-    }
-  }
+  },
 )
 
 const db = {}

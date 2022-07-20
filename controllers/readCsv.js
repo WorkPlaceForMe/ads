@@ -24,17 +24,7 @@ exports.readCsv = async (siteId) => {
   const enter = await Promise.all([val1, val2])
   
   if (enter[0] && enter[1]) {
-    const Clothing = clothing.findAll({
-      raw: true,
-      where: { Page_ID: siteId }
-    })
-    const Products = products.findAll({
-      raw: true,
-      where: { Page_ID: siteId }
-    })
-    const dataValues = await Promise.all([Clothing, Products])
-    
-    return flatten(dataValues)
+    return getProductClothData()
   } else if (!cachedDown)  {
 
     return new Promise(async (resolve, reject) => {   
@@ -100,14 +90,12 @@ exports.readCsv = async (siteId) => {
           downloadPromises.push(download(affiliateResponse.data.baseUrl, siteId, provider))            
         }
 
-        const dataValues = await Promise.all(downloadPromises)
+        await Promise.all(downloadPromises)
         await cache.setAsync(`downloading-${siteId}`, false)
-
-        const data = flatten(dataValues)
 
         console.log(`Setup completed for site ${siteId} for all providers`)
         
-        resolve(data)
+        resolve(getProductClothData())
       } catch (err) {
         console.log(err)
         reject(err)
@@ -120,16 +108,8 @@ exports.readCsv = async (siteId) => {
       cachedDown = await cache.getAsync(`downloading-${siteId}`)
       continue
     }
-    const Clothing = clothing.findAll({
-      raw: true,
-    })
-    const Products = products.findAll({
-      raw: true,
-    })
     
-    const dataValues = await Promise.all([Clothing, Products])
-    
-    return flatten(dataValues)
+    return getProductClothData()
   }
 }
 
@@ -173,4 +153,24 @@ const flatten = (ary) => {
     }
     return a.concat(b)
   }, [])
+}
+
+const getProductClothData = async () => {
+  const Clothing = clothing.findAll({
+    raw: true,
+    where: { Page_ID: siteId },
+    limit: 5000,
+    order: db.sequelize.random()
+  })
+  
+  const Products = products.findAll({
+    raw: true,
+    where: { Page_ID: siteId },
+    limit: 5000,
+    order: db.sequelize.random()
+  })
+  
+  const dataValues = await Promise.all([Clothing, Products])
+  
+  return flatten(dataValues)
 }

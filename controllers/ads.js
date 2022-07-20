@@ -97,10 +97,12 @@ exports.getAds = Controller(async (req, res) => {
   
   const aut = await auth(checker, site.split('/')[0])
   
-  if (aut['enabled'] == false) {
+  if(aut['enabled'] == false) {
     console.log("Cancelling")
     return res.status(400).json({ success: false, message: "Unauthorized" })
-  } else if(!cachedImg) {
+  } 
+  
+  if(!cachedImg || cachedImg == '{}') {
     let formData = new FormData()
     formData.append('upload', request(url))
     formData.append('subscriptions', 'face,fashion,Object,tags2,sport')
@@ -116,8 +118,7 @@ exports.getAds = Controller(async (req, res) => {
         },
         data: formData
     }
-    console.log("Sending request to Vista Server")
-    
+       
     let limit = 2
     
     if(aut['pages'] != null && JSON.parse(aut['pages'])[0] != null){
@@ -125,35 +126,33 @@ exports.getAds = Controller(async (req, res) => {
     }
     
     try {
-        console.log('=====================> VISTA RESPONSE <========================')
-        const response = await axios(request_config)
-        const objetos = await readCsv.readCsv(aut['idP'])
-        let resultsVista
-        if (response.data) {
-            resultsVista = response.data.results
-        }
-        const resultsAffiliate = await filler(resultsVista, serv, img_width, img_height, site, url, uid, objetos, mobile)
-        const flat = flatten(resultsAffiliate)
-        if (flat.length > limit) {
-            flat.length = limit
-        }
-        const sendingResults = await convert(flat)
-        cache.setAsync(`${extension[1]}_${mobile}_${img_width}_${img_height}_${url}`, JSON.stringify(sendingResults), 'EX', 604800);
-        
-        publisher = await getPublisher(checker);
-
-        if(img && publisher){
-          await createClientImgPublData(userId, sessionId, img.id, img.img, publisher.id);
-        }
-          
-        res.status(200).send({
-          results: sendingResults
-        })
-    }
-    catch (err) {
-      if (err.response){
-        console.log(err.response.status, url)
+      console.log("Sending request to Vista Server")
+      const response = await axios(request_config)
+      const objetos = await readCsv.readCsv(aut['idP'])
+      let resultsVista
+      if (response.data) {
+          resultsVista = response.data.results
       }
+      const resultsAffiliate = await filler(resultsVista, serv, img_width, img_height, site, url, uid, objetos, mobile)
+      const flat = flatten(resultsAffiliate)
+      if (flat.length > limit) {
+          flat.length = limit
+      }
+      const sendingResults = await convert(flat)
+      cache.setAsync(`${extension[1]}_${mobile}_${img_width}_${img_height}_${url}`, JSON.stringify(sendingResults), 'EX', 604800);
+      
+      publisher = await getPublisher(checker);
+
+      if(img && publisher){
+        await createClientImgPublData(userId, sessionId, img.id, img.img, publisher.id);
+      }
+        
+      res.status(200).send({
+        results: sendingResults
+      })
+    } catch (err) {
+      console.log('Error in processing')
+      console.log(err)
       cache.setAsync(`${extension[1]}_${mobile}_${img_width}_${img_height}_${url}`, JSON.stringify({}), 'EX', 604800);
       return res.status(500).json({ success: false, message: "Vista Image failled", error: err, img: url })
     }
