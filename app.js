@@ -84,11 +84,11 @@ async function check() {
           truncate: true
         }))
         
-        Promise.all(productClothPromises).then(async () => {
+        Promise.all(productClothPromises).then(() => {
           console.log(`All products and cloths deleted for publisher: ${publisher.dataValues.publisherId}`)
 
-          scanAndDeleteRedisData(publisher.dataValues.name, publisher.dataValues.publisherId).then(() => {
-            console.log(`All redis cache data delete for Publisher ${publisher.dataValues.publisherId}`)
+          deleteRedisData(publisher.dataValues.name, publisher.dataValues.publisherId).then(() => {
+            console.log(`All redis cache data deleted for Publisher ${publisher.dataValues.publisherId}`)
             
             readCsv.readCsv(publisher.dataValues.publisherId).then(() => {
               
@@ -215,10 +215,9 @@ httpServer.listen(port || 3000, function () {
 	console.log(`App is running on HTTP mode using port: ${port || '3000'}`)
 })
 
-scanAndDeleteRedisData = async (pattern, publisherId) => {
+deleteRedisData = async (pattern, publisherId) => {
 
-  return new Promise(async (resolve, reject) => { 
-
+  return new Promise(async (resolve, reject) => {
     try {
       cache.keys('*', (err, keys) => {
         for (const key of keys) {
