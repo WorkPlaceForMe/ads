@@ -48,9 +48,12 @@ exports.create = async function(id,site,term){
                     {
                         "siteId": affiliateResponse.data.id,
                         "campaignIds": [
+                            308,
                             520,
                             594,
-                            677
+                            704,
+                            722,
+                            730
                         ]
                     }
                     ,{

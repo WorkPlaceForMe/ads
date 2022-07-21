@@ -72,8 +72,6 @@ exports.getAds = Controller(async (req, res) => {
   if (checker.includes('www.')) {
       checker = checker.split('w.')[1]
   }
-
-  //await scanAndDeleteRedisData(checker)
   
   let extension = site.split(checker)
   let cachedImg = await cache.getAsync(`${extension[1]}_${mobile}_${img_width}_${img_height}_${url}`);
@@ -820,14 +818,4 @@ const flatten = (ary) => {
     }
     return a.concat(b)
   }, [])
-}
-
-scanAndDeleteRedisData = async (pattern) => {
-  let cursor = '0'
-  const reply = await cache.scan(cursor, "MATCH", pattern, "COUNT", "100000");
-  
-  for (key of reply.keys) {
-    cursor = reply.cursor
-    await cache.del(key);
-  }
 }

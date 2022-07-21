@@ -10,6 +10,7 @@ const mysql = require('mysql2/promise')
 const app = express()
 const port = conf.get('port')
 const portS = conf.get('portS')
+const refreshTimeInterval = conf.get('refresh_time_interval') || 604800000
 const https = require('https')
 const http = require('http')
 const fs = require('fs')
@@ -58,45 +59,62 @@ app.all(function (req, res, next) {
   next()
 })
 
-async function check(ids = {}) {
-  const time = 604800000 //604800 1 week in milliseconds
-  const idsCheck = await publishers.findAll({
-    attributes: ['publisherId'],
+async function check() {
+  const currentTime = new Date().getTime()
+  const publisherList = await publishers.findAll({
+    attributes: ['publisherId', 'name', 'updatedAt']
   })
-  if (
-    Object.keys(ids).length === 0 ||
-    Object.keys(ids).length != idsCheck.length
-  ) {
-    for (const id of idsCheck) {
-      const update = await products.findOne({
-        where: { Page_ID: id.dataValues.publisherId },
-        order: [['createdAt', 'DESC']],
-      })
-      if (update == null) {
-        await readCsv.readCsv(id.dataValues.publisherId)
-        ids[id.dataValues.publisherId] = new Date().getTime() / 1000
-      } else {
-        ids[id.dataValues.publisherId] =
-          update.dataValues.createdAt.getTime() / 1000
+  
+  if (publisherList) {
+    for (const publisher of publisherList) {
+      const sampleProductClothList = await Promise.all([products.findOne({ where: { Page_ID: publisher.dataValues.publisherId } }), 
+        clothing.findOne({ where: { Page_ID: publisher.dataValues.publisherId } })])
+      const updatedAtTime = publisher.dataValues.updatedAt.getTime()
+      
+      if((currentTime - updatedAtTime >= refreshTimeInterval) || (!sampleProductClothList[0] && !sampleProductClothList[1])) {
+        const productClothPromises = [];
+
+        productClothPromises.push(clothing.destroy({
+          where: { Page_ID: publisher.dataValues.publisherId },
+          truncate: true
+        }))
+        
+        productClothPromises.push(products.destroy({
+          where: { Page_ID: publisher.dataValues.publisherId },
+          truncate: true
+        }))
+        
+        Promise.all(productClothPromises).then(async () => {
+          console.log(`All products and cloths deleted for publisher: ${publisher.dataValues.publisherId}`)
+
+          scanAndDeleteRedisData(publisher.dataValues.name, publisher.dataValues.publisherId).then(() => {
+            console.log(`All redis cache data delete for Publisher ${publisher.dataValues.publisherId}`)
+            
+            readCsv.readCsv(publisher.dataValues.publisherId).then(() => {
+              
+              //Need to update updatedAt time
+              publishers.update(
+                {
+                  publisherId: publisher.dataValues.publisherId
+                },
+                {
+                  where: {
+                    publisherId: publisher.dataValues.publisherId
+                  }
+                }).then(() => {
+                  console.log(`Publisher ${publisher.dataValues.publisherId} updated with latest products and cloths`) 
+              })                  
+            })
+          })       
+        })       
       }
     }
   }
-  let now = new Date().getTime() / 1000
-  for (const id in ids) {
-    if (ids[id] + time <= now) {
-      await clothing.destroy({
-        where: { Page_ID: id.dataValues.publisherId },
-        truncate: true,
-      })
-      await products.destroy({
-        where: { Page_ID: id.dataValues.publisherId },
-        truncate: true,
-      })
-      await readCsv.readCsv(id)
-    }
-  }
-  await delay(86400000) //1 day 86400000 in milliseonds
-  return check(ids)
+  
+  //Wait and run the same method after 1 day
+  await delay(86400000)
+  
+  return check()
 }
 
 async function createAdminUser() {
@@ -195,4 +213,26 @@ httpsServer.listen(portS || 3000, function () {
 
 httpServer.listen(port || 3000, function () {
 	console.log(`App is running on HTTP mode using port: ${port || '3000'}`)
-});
+})
+
+scanAndDeleteRedisData = async (pattern, publisherId) => {
+
+  return new Promise(async (resolve, reject) => { 
+
+    try {
+      cache.keys('*', (err, keys) => {
+        for (const key of keys) {
+          if(key.includes(pattern)){
+            cache.del(key)
+          }
+        }
+
+        cache.del(`downloading-${publisherId}`)
+        resolve()
+      })      
+    } catch (err) {
+      console.log(err)
+      reject(err)
+    }
+  })
+}

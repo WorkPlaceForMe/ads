@@ -17,23 +17,22 @@ const db = require('../campaigns-db/database')
 const products = db.products
 const clothing = db.clothing
 
-exports.readCsv = async (siteId) => {  
-  let cachedDown = await cache.getAsync(`downloading-${siteId}`)
-  const val1 = products.findOne({ where: { Page_ID: siteId } })
-  const val2 = clothing.findOne({ where: { Page_ID: siteId } })
-  const enter = await Promise.all([val1, val2])
+exports.readCsv = async (publisherId) => {  
+  let cachedDown = await cache.getAsync(`downloading-${publisherId}`)
+  const sampleProductClothList = await Promise.all([products.findOne({ where: { Page_ID: publisherId } }), 
+    clothing.findOne({ where: { Page_ID: publisherId } })])
   
-  if (enter[0] && enter[1]) {
-    return getProductClothData(siteId)
+  if (sampleProductClothList[0] && sampleProductClothList[1] ) {
+    return getProductClothData(publisherId)
   } else if (!cachedDown)  {
 
     return new Promise(async (resolve, reject) => {   
       const downloadPromises = []
-      await cache.setAsync(`downloading-${siteId}`, true)
+      await cache.setAsync(`downloading-${publisherId}`, true)
       const providers = [       
         {
           id: 308,
-          label: 'Bigc',
+          label: 'Big C',
           csvReader: bigcCsvReader
         },
         { 
@@ -48,7 +47,7 @@ exports.readCsv = async (siteId) => {
         },
         { 
           id: 704, 
-          label: 'Tops', 
+          label: 'Tops Online', 
           csvReader: topsCsvReader
         },
         { 
@@ -58,7 +57,7 @@ exports.readCsv = async (siteId) => {
         },
         { 
           id: 730, 
-          label: 'Central',
+          label: 'Central Online',
           csvReader: centralCsvReader
         }
       ]
@@ -76,9 +75,9 @@ exports.readCsv = async (siteId) => {
 
           let affiliateEndpoint = `${conf.get(
               'accesstrade_endpoint',
-            )}/v1/publishers/me/sites/${siteId}/campaigns/${provider.id}/productfeed/url`
+            )}/v1/publishers/me/sites/${publisherId}/campaigns/${provider.id}/productfeed/url`
 
-          console.log(`Downloading data for site ${siteId} for provider ${provider.label} affiliateEndpoint ${affiliateEndpoint}`)
+          console.log(`Downloading data for site ${publisherId} for provider ${provider.label} affiliateEndpoint ${affiliateEndpoint}`)
           
           const affiliateResponse = await axios.get(affiliateEndpoint, {
             headers: {
@@ -87,58 +86,58 @@ exports.readCsv = async (siteId) => {
             },
           })          
 
-          downloadPromises.push(download(affiliateResponse.data.baseUrl, siteId, provider))            
+          downloadPromises.push(download(affiliateResponse.data.baseUrl, publisherId, provider))            
         }
 
         await Promise.all(downloadPromises)
-        await cache.setAsync(`downloading-${siteId}`, false)
+        await cache.setAsync(`downloading-${publisherId}`, false)
 
-        console.log(`Setup completed for site ${siteId} for all providers`)
+        console.log(`Setup completed for site ${publisherId} for all providers`)
         
-        resolve(getProductClothData(siteId))
+        resolve(getProductClothData(publisherId))
       } catch (err) {
         console.log(err)
         reject(err)
       }
     })
   } else {
-    cachedDown = await cache.getAsync(`downloading-${siteId}`)
+    cachedDown = await cache.getAsync(`downloading-${publisherId}`)
     
     while (cachedDown == 'true') {
-      cachedDown = await cache.getAsync(`downloading-${siteId}`)
+      cachedDown = await cache.getAsync(`downloading-${publisherId}`)
       continue
     }
     
-    return getProductClothData(siteId)
+    return getProductClothData(publisherId)
   }
 }
 
-const download = (url, siteId, provider) => {
+const download = (url, publisherId, provider) => {
   let csv = ''
 
   return new Promise((resolve, reject) => {  
     try {
       var sendDate = new Date().getTime()
-      console.log(`Downloading csv data for site ${siteId} for provider ${provider.label}`)
-      const csvFileName = `${provider.label}-${siteId}.csv`
+      console.log(`Downloading csv data for site ${publisherId} for provider ${provider.label}`)
+      const csvFileName = `${provider.id}-${publisherId}.csv`
       
       progress(request(url))
         .on('error', error => reject(error))
         .on('end', async () => {
-          console.log(`Response received for csv data for site ${siteId} for provider ${provider.label}`)      
+          console.log(`Response received for csv data for site ${publisherId} for provider ${provider.label}`)      
           var readStream = fs.createReadStream(csvFileName)     
           const data = Readable.from(readStream)
           var receiveDate = new Date().getTime()
           var responseTimeMs = receiveDate - sendDate
-          console.log(`Downloading csv data for site ${siteId} for provider ${provider.label} completed in ${responseTimeMs}ms` )
-          csv = await provider.csvReader.readCsv(data, siteId)
+          console.log(`Downloading csv data for site ${publisherId} for provider ${provider.label} completed in ${responseTimeMs}ms` )
+          csv = await provider.csvReader.readCsv(data, publisherId)
           fs.unlinkSync(csvFileName)
           resolve(csv)
         })
         .pipe(fs.createWriteStream(csvFileName))
         
       } catch(err) {
-        console.log(`Downloading csv data for site ${siteId} for provider ${provider.label} failed`)
+        console.log(`Downloading csv data for site ${publisherId} for provider ${provider.label} failed`)
         console.log(err)
         fs.unlinkSync(csvFileName)
         reject(err)
@@ -155,17 +154,17 @@ const flatten = (ary) => {
   }, [])
 }
 
-const getProductClothData = async (siteId) => {
+const getProductClothData = async (publisherId) => {
   const Clothing = clothing.findAll({
     raw: true,
-    where: { Page_ID: siteId },
+    where: { Page_ID: publisherId },
     limit: 5000,
     order: db.sequelize.random()
   })
   
   const Products = products.findAll({
     raw: true,
-    where: { Page_ID: siteId },
+    where: { Page_ID: publisherId },
     limit: 5000,
     order: db.sequelize.random()
   })
