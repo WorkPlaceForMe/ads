@@ -87,26 +87,27 @@ async function check() {
         Promise.all(productClothPromises).then(() => {
           console.log(`All products and cloths deleted for publisher: ${publisher.dataValues.publisherId}`)
 
-          deleteRedisData(publisher.dataValues.name, publisher.dataValues.publisherId).then(() => {
-            console.log(`All redis cache data deleted for Publisher ${publisher.dataValues.publisherId}`)
+          cache.del(`downloading-${publisher.dataValues.publisherId}`)  
+          readCsv.readCsv(publisher.dataValues.publisherId).then(() => {
             
-            readCsv.readCsv(publisher.dataValues.publisherId).then(() => {
-              
-              //Need to update updatedAt time
-              publishers.update(
-                {
+            //Need to update updatedAt time
+            publishers.update(
+              {
+                publisherId: publisher.dataValues.publisherId
+              },
+              {
+                where: {
                   publisherId: publisher.dataValues.publisherId
-                },
-                {
-                  where: {
-                    publisherId: publisher.dataValues.publisherId
-                  }
-                }).then(() => {
-                  console.log(`Publisher ${publisher.dataValues.publisherId} updated with latest products and cloths`) 
-              })                  
-            })
-          })       
-        })       
+                }
+              }).then(() => {
+                console.log(`Publisher ${publisher.dataValues.publisherId} updated with latest products and cloths`) 
+
+                deleteRedisData(publisher.dataValues.name).then(() => {
+                  console.log(`All redis cache data deleted for Publisher ${publisher.dataValues.publisherId}`)
+                })
+            })                  
+          })
+        })     
       }
     }
   }
@@ -215,7 +216,7 @@ httpServer.listen(port || 3000, function () {
 	console.log(`App is running on HTTP mode using port: ${port || '3000'}`)
 })
 
-deleteRedisData = async (pattern, publisherId) => {
+deleteRedisData = async (pattern) => {
 
   return new Promise(async (resolve, reject) => {
     try {
@@ -226,7 +227,6 @@ deleteRedisData = async (pattern, publisherId) => {
           }
         }
 
-        cache.del(`downloading-${publisherId}`)
         resolve()
       })      
     } catch (err) {
