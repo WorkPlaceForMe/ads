@@ -120,6 +120,7 @@ exports.getAds = Controller(async (req, res) => {
     try {
       console.log("Sending request to Vista Server")
       const response = await axios(request_config)
+      console.log("Response received from Vista Server")
       const objetos = await readCsv.readCsv(aut['idP'])
       let resultsVista
       if (response.data) {
@@ -344,7 +345,7 @@ const clothing_Filler = (
         ) {
           const result = objetos.filter(
             (obj2) =>
-              obj2.Gender == gender && obj2.Category_Name == 'Outerwear',
+              obj2.Gender == gender && obj2.Sub_Category_Name.toLowerCase().includes('jackets')
           )
           const count = result.length - 1
           if (count == -1) {
@@ -369,7 +370,7 @@ const clothing_Filler = (
           typeof obj.deep_fashion_neckline.neckline !== 'undefined' && obj.deep_fashion_neckline.neckline[0].label == 'shirtcollar'
         ) {
           const result = objetos.filter(
-            (obj2) => obj2.Gender == gender && obj2.Category_Name == 'Shirts',
+            (obj2) => obj2.Gender == gender && obj2.Sub_Category_Name.toLowerCase().includes('shirts')
           )
           const count = result.length - 1
           if (count == -1) {
@@ -395,7 +396,7 @@ const clothing_Filler = (
         ) {
           const result = objetos.filter(
             (obj2) =>
-              obj2.Gender == gender && obj2.Category_Name == 'Polo Shirts',
+              obj2.Gender == gender && obj2.Sub_Category_Name.toLowerCase().includes('polos')
           )
           const count = result.length - 1
           if (count == -1) {
@@ -418,7 +419,8 @@ const clothing_Filler = (
           })
         } else {
           const result = objetos.filter(
-            (obj2) => obj2.Gender == gender && obj2.Category_Name == 'T-Shirts',
+            (obj2) => obj2.Gender == gender && obj2.Sub_Category_Name.toLowerCase().includes('t-shirts') 
+            || obj2.Sub_Category_Name.toLowerCase().includes('tshirts')
           )
           const count = result.length - 1
           if (count == -1) {
@@ -445,67 +447,13 @@ const clothing_Filler = (
         if (
           obj.deep_fashion_tf.pant_length[0].label == 'FullLength' ||
           obj.deep_fashion_tf.pant_length[0].label == 'CroppedPant' ||
-          (obj.deep_fashion_tf.pant_length[0].label == '3/4Length' &&
-            obj.deep_fashion_color.color[0].label == 'blue')
-        ) {
-          const result_temp = objetos.filter(
-            (obj2) => obj2.Gender == gender && obj2.Category_Name == 'Jeans',
-          )
-          const result = result_temp.filter(
-            (obj3) => obj3.Sub_Category_Name != 'Short Jeans',
-          )
-          const count = result.length - 1
-          if (count == -1) {
-            return []
-          }
-          let int = Math.floor(Math.random() * count)
-          resultsAffiliate_Temp.push({
-            vista: obj,
-            affiliate: result[int],
-            add: {
-              id: parseInt(result[int]['Merchant_Product_ID']),
-              site: site,
-              date: dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss'),
-              url: url,
-              uid: uid,
-            },
-            serv: serv,
-            size: { w: img_width, h: img_height },
-            mobile: mobile,
-          })
-        }
-        if (
-          obj.deep_fashion_tf.pant_length[0].label == 'FullLength' ||
-          obj.deep_fashion_tf.pant_length[0].label == 'CroppedPant' ||
           obj.deep_fashion_tf.pant_length[0].label == '3/4Length'
         ) {
           const result = objetos.filter(
-            (obj2) =>
-              obj2.Gender == gender && obj2.Category_Name == 'Long Pants',
+            (obj2) => obj2.Gender == gender && (obj2.Sub_Category_Name.toLowerCase().includes('pants') 
+            || obj2.Sub_Category_Name.toLowerCase().includes('bottoms')) 
           )
-          const count = result.length - 1
-          if (count == -1) {
-            return []
-          }
-          let int = Math.floor(Math.random() * count)
-          resultsAffiliate_Temp.push({
-            vista: obj,
-            affiliate: result[int],
-            add: {
-              id: parseInt(result[int]['Merchant_Product_ID']),
-              site: site,
-              date: dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss'),
-              url: url,
-              uid: uid,
-            },
-            serv: serv,
-            size: { w: img_width, h: img_height },
-            mobile: mobile,
-          })
-        } else {
-          const result = objetos.filter(
-            (obj2) => obj2.Gender == gender && obj2.Category_Name == 'Shorts',
-          )
+          
           const count = result.length - 1
           if (count == -1) {
             return []
@@ -535,7 +483,7 @@ const clothing_Filler = (
           obj.deep_fashion_tf.sleeve_length[0].label == 'LongSleeves'
         ) {
           const prendras = objetos.filter((obj2) => {
-            if (obj2.Gender == gender && obj2.Category_Name == 'Outerwear')
+            if (obj2.Gender == gender && obj2.Sub_Category_Name.toLowerCase().includes('jackets'))
               return true
           })
           const count = prendras.length - 1
@@ -559,7 +507,7 @@ const clothing_Filler = (
           })
         } else {
           const prendras = objetos.filter((obj2) => {
-            if (obj2.Gender == gender && obj2.Category_Name == 'Tops')
+            if (obj2.Gender == gender && obj2.Sub_Category_Name.toLowerCase().includes('tops'))
               return true
           })
           const count = prendras.length - 1
@@ -591,7 +539,8 @@ const clothing_Filler = (
         ) {
           const result = objetos.filter(
             (obj2) =>
-              obj2.Gender == gender && obj2.Sub_Category_Name == 'Shorts',
+              obj2.Gender == gender && obj2.Sub_Category_Name.toLowerCase().includes('pants') 
+              || obj2.Sub_Category_Name.toLowerCase().includes('bottoms')
           )
           const count = result.length - 1
           if (count == -1) {
@@ -613,12 +562,10 @@ const clothing_Filler = (
             mobile: mobile,
           })
         } else {
-          const result_temp = objetos.filter(
+          const result = objetos.filter(
             (obj2) =>
-              obj2.Gender == gender && obj2.Category_Name == 'Pants & Leggings',
-          )
-          const result = result_temp.filter(
-            (obj3) => obj3.Sub_Category_Name != 'Shorts',
+              obj2.Gender == gender && (obj2.Sub_Category_Name.toLowerCase().includes('pants')
+              || obj2.Sub_Category_Name.toLowerCase().includes('leggings'))
           )
           const count = result.length - 1
           if (count == -1) {
