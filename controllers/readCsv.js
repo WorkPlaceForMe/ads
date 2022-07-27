@@ -116,10 +116,10 @@ const download = (url, publisherId, provider) => {
   let csv = ''
 
   return new Promise((resolve, reject) => {  
+    const csvFileName = `./csv/${provider.id}-${publisherId}.csv`
     try {
       var sendDate = new Date().getTime()
       console.log(`Downloading csv data for site ${publisherId} for provider ${provider.label}`)
-      const csvFileName = `${provider.id}-${publisherId}.csv`
       
       progress(request(url))
         .on('error', error => reject(error))
