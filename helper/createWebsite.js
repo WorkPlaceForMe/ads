@@ -50,7 +50,6 @@ exports.create = async function(id,site,term){
                         "campaignIds": [
                             308,
                             520,
-                            594,
                             704,
                             722,
                             730

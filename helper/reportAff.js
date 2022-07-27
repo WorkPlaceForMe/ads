@@ -19,9 +19,11 @@ exports.report = async function(init,fin,siteId,){
             const periodBase = `CONFIRMATION_DATE`
             const conversion = `APPROVED`
             const ids = {
+                bigc : 308,
                 lazada : 520,
-                trueShopping : 594,
-                shopee : 677,
+                topsOnline : 704,
+                jdCentral : 722,
+                centralOnline : 730
             }
             let rewards = {};
             for(const id in ids){

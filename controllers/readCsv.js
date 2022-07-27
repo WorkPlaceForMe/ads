@@ -41,11 +41,6 @@ exports.readCsv = async (publisherId) => {
           csvReader: lazadaCsvReader
         },
         { 
-          id: 594, 
-          label: 'True Shopping', 
-          csvReader: trueShoppingCsvReader
-        },
-        { 
           id: 704, 
           label: 'Tops Online', 
           csvReader: topsCsvReader
