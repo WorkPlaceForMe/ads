@@ -9,7 +9,6 @@ var progress = require('request-progress');
 const { Readable } = require('stream')
 const  bigcCsvReader  = require('./provider/bigcCsvReader')
 const  lazadaCsvReader  = require('./provider/lazadaCsvReader')
-const  trueShoppingCsvReader  = require('./provider/trueShoppingCsvReader')
 const  topsCsvReader  = require('./provider/topsCsvReader')
 const  jdCentralCsvReader  = require('./provider/jdCentralCsvReader')
 const  centralCsvReader  = require('./provider/centralCsvReader')
