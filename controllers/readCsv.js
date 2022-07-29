@@ -30,27 +30,27 @@ exports.readCsv = async (publisherId) => {
       await cache.setAsync(`downloading-${publisherId}`, true)
       const providers = [       
         {
-          id: 308,
+          id: conf.get('bigc.campaign_id'),
           label: 'Big C',
           csvReader: bigcCsvReader
         },
         { 
-          id: 520, 
+          id: conf.get('lazada.campaign_id'), 
           label: 'Lazada', 
           csvReader: lazadaCsvReader
         },
         { 
-          id: 704, 
+          id: conf.get('topsOnline.campaign_id'), 
           label: 'Tops Online', 
           csvReader: topsCsvReader
         },
         { 
-          id: 722, 
+          id: conf.get('jdCentral.campaign_id'), 
           label: 'JD Central', 
           csvReader: jdCentralCsvReader
         },
         { 
-          id: 730, 
+          id: conf.get('centralOnline.campaign_id'), 
           label: 'Central Online',
           csvReader: centralCsvReader
         }
@@ -111,6 +111,7 @@ const download = (url, publisherId, provider) => {
 
   return new Promise((resolve, reject) => {  
     const csvFileName = `./csv/${provider.id}-${publisherId}.csv`
+    
     try {
       var sendDate = new Date().getTime()
       console.log(`Downloading csv data for site ${publisherId} for provider ${provider.label}`)

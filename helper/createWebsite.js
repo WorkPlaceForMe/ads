@@ -48,11 +48,11 @@ exports.create = async function(id,site,term){
                     {
                         "siteId": affiliateResponse.data.id,
                         "campaignIds": [
-                            308,
-                            520,
-                            704,
-                            722,
-                            730
+                            conf.get('bigc.campaign_id'),
+                            conf.get('lazada.campaign_id'),
+                            conf.get('topsOnline.campaign_id'),
+                            conf.get('jdCentral.campaign_id'),
+                            conf.get('centralOnline.campaign_id')
                         ]
                     }
                     ,{
