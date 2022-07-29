@@ -19,11 +19,11 @@ exports.report = async function(init,fin,siteId,){
             const periodBase = `CONFIRMATION_DATE`
             const conversion = `APPROVED`
             const ids = {
-                bigc : 308,
-                lazada : 520,
-                topsOnline : 704,
-                jdCentral : 722,
-                centralOnline : 730
+                bigc : conf.get('bigc.campaign_id'),
+                lazada : conf.get('lazada.campaign_id'),
+                topsOnline : conf.get('topsOnline.campaign_id'),
+                jdCentral : conf.get('jdCentral.campaign_id'),
+                centralOnline : conf.get('centralOnline.campaign_id')
             }
             let rewards = {};
             for(const id in ids){
