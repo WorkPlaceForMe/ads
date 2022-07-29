@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "start": "node -max-old-space-size=4096 app.js",
-    "dev": "nodemon app.js"
+    "dev": "nodemon app.js",
+    "test": "node benchmark.js"
   },
   "authors": {
     "author": "Alex Kaiser",
@@ -12,6 +13,7 @@
   },
   "dependencies": {
     "ansi-regex": "^5.0.1",
+    "autocannon": "^7.9.0",
     "axios": "^0.21.2",
     "bcrypt": "^5.0.1",
     "bluebird": "^3.7.2",
@@ -45,7 +47,7 @@
     "sequelize": "^6.9.0",
     "sequelize-cli": "^6.3.0",
     "shelljs": "^0.8.5",
-    "stream": "0.0.2",
+    "stream": "^0.0.2",
     "util": "^0.12.3",
     "uuid": "^3.4.0"
   },
