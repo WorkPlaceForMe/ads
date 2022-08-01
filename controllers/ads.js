@@ -298,8 +298,17 @@ const filler = (
           }
       }
     }
+
+    const uniqueProductIdList = []
     
-    resolve(resultsAffiliate)
+    const uniqueItems =  resultsAffiliate.filter(item => {
+        let valueDoesNotExits = uniqueProductIdList.indexOf(item[0].affiliate.Merchant_Product_ID) == -1
+        uniqueProductIdList.push(item[0].affiliate.Merchant_Product_ID)
+
+        return valueDoesNotExits
+    })
+    
+    resolve(uniqueItems)
   })
 }
 
