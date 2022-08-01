@@ -111,7 +111,7 @@ exports.getAds = Controller(async (req, res) => {
         data: formData
     }
        
-    let limit = 2
+    let limit = 4
     
     if(aut['pages'] != null && JSON.parse(aut['pages'])[0] != null){
         limit = JSON.parse(aut['pages'])[0][extension[1]]
@@ -276,7 +276,11 @@ const filler = (
       }
     }
     for (const obj of resultsVista['Object']) {
-      if (obj.class != 'person') {
+      if (obj.class != 'person') {          
+          if(obj.class === 'cell_phone'){
+            obj.class = 'mobile'
+          }
+
           const result = object_Filler(
             obj,
             objetos,
@@ -314,7 +318,7 @@ const clothing_Filler = (
   const resultsAffiliate_Temp = []
   
   if (gender == 'Male') {
-    if ((obj.class == 'upper' || obj.class == 'person') && obj.confidence > 0.6) {
+    if (obj.class == 'upper' && obj.confidence > 0.6) {
       if (obj.deep_fashion_tf.sleeve_length[0].label == 'ExtraLongSleeves' ||
         obj.deep_fashion_tf.sleeve_length[0].label == 'LongSleeves') {
         const result = objetos.filter(
@@ -456,7 +460,7 @@ const clothing_Filler = (
     }
   }
   if (gender == 'Female') {
-    if ((obj.class == 'upper' || obj.class == 'person') && obj.confidence > 0.6) {
+    if (obj.class == 'upper' && obj.confidence > 0.6) {
       if (obj.deep_fashion_tf.sleeve_length[0].label == 'ExtraLongSleeves' ||
         obj.deep_fashion_tf.sleeve_length[0].label == 'LongSleeves'
       ) {
@@ -585,10 +589,11 @@ const object_Filler = (
   const resultsAffiliate_Temp = []  
   const result = objetos.filter(
     (obj2) =>
-      obj.class.toLowerCase().includes(
-      obj2.Sub_Category_Name) &&
+      obj2.Sub_Category_Name &&
+      obj2.Sub_Category_Name.toLowerCase().includes(
+      obj.class) &&
       obj2.Type == 'products' &&
-      obj.confidence >= 0.6,
+      obj.confidence >= 0.6
   )
   const count = result.length - 1
   if (count == -1) {
@@ -630,7 +635,7 @@ const sport_makeup_Filler = (
   if (bool) {
     if (obj.class.toLowerCase().includes('beauty')) {
       const result = objetos.filter(
-        (obj2) => (obj2.Main_Category_Name.toLowerCase('beauty') || obj2.Main_Category_Name.toLowerCase('makeup') || obj2.Main_Category_Name.toLowerCase('make-up'))
+        (obj2) => (obj2.Main_Category_Name.toLowerCase().includes('beauty') || obj2.Main_Category_Name.toLowerCase().includes('makeup') || obj2.Main_Category_Name.toLowerCase().includes('make-up'))
          && obj2.Type == 'products'
       )
       const count = result.length - 1
@@ -686,7 +691,7 @@ const sport_makeup_Filler = (
     if (obj.label.toLowerCase().includes('lipstick') || obj.label.toLowerCase().includes('hair') || obj.label.toLowerCase().includes('face')
        ||  obj.label.toLowerCase().includes('perfume') || obj.label.toLowerCase().includes('paintbrush')) {
       const result = objetos.filter(
-        (obj2) => (obj2.Main_Category_Name.toLowerCase('beauty') || obj2.Main_Category_Name.toLowerCase('makeup') || obj2.Main_Category_Name.toLowerCase('make-up'))
+        (obj2) => (obj2.Main_Category_Name.toLowerCase().includes('beauty') || obj2.Main_Category_Name.toLowerCase().includes('makeup') || obj2.Main_Category_Name.toLowerCase().includes('make-up'))
          && obj2.Type == 'products'
       )
       const count = result.length - 1
@@ -711,9 +716,9 @@ const sport_makeup_Filler = (
     }
     if (obj.IAB.includes('IAB17')) {
       const result = objetos.filter(
-        (obj2) =>  (obj2) => obj2.Category_Name
-        && obj2.Category_Name.toLowerCase().includes('sport')
-        && !obj2.Category_Name.toLowerCase().includes('sportswear')
+        (obj2) => obj2.Main_Category_Name
+        && obj2.Main_Category_Name.toLowerCase().includes('sport')
+        && !obj2.Main_Category_Name.toLowerCase().includes('sportswear')
         && obj2.label
         && obj2.label.toLowerCase().includes('sport')        
         && obj2.Type == 'products'
