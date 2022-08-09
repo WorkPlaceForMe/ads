@@ -127,9 +127,9 @@ exports.getAds = Controller(async (req, res) => {
           resultsVista = response.data.results
       }
       const resultsAffiliate = await filler(resultsVista, serv, img_width, img_height, site, url, uid, objetos, mobile)
-      const flat = flatten(resultsAffiliate)
+      let flat = flatten(resultsAffiliate)
       if (flat.length > limit) {
-          flat.length = limit
+        flat = getDiversifiedResults(flat, limit)
       }
       const sendingResults = await convert(flat)
       cache.setAsync(`${extension[1]}_${mobile}_${img_width}_${img_height}_${url}`, JSON.stringify(sendingResults))
@@ -327,13 +327,12 @@ const clothing_Filler = (
   const resultsAffiliate_Temp = []
   
   if (gender == 'Male') {
-    if (obj.class == 'upper' && obj.confidence > 0.6) {
+    if ((obj.class == 'person' || obj.class == 'upper') && obj.confidence > 0.6) {
       if (obj.deep_fashion_tf.sleeve_length[0].label == 'ExtraLongSleeves' ||
         obj.deep_fashion_tf.sleeve_length[0].label == 'LongSleeves') {
         const result = objetos.filter(
           (obj2) =>
             obj2.Gender == gender && obj2.Sub_Category_Name.toLowerCase().includes('jackets')
-            && !obj2.Main_Category_Name.toLowerCase().includes('women')
         )
         const count = result.length - 1
         if (count == -1) {
@@ -469,13 +468,11 @@ const clothing_Filler = (
     }
   }
   if (gender == 'Female') {
-    if (obj.class == 'upper' && obj.confidence > 0.6) {
+    if ((obj.class == 'person' || obj.class == 'upper') && obj.confidence > 0.6) {
       if (obj.deep_fashion_tf.sleeve_length[0].label == 'ExtraLongSleeves' ||
         obj.deep_fashion_tf.sleeve_length[0].label == 'LongSleeves'
       ) {
-        const prendras = objetos.filter((obj2) => obj2.Gender == gender 
-        && obj2.Sub_Category_Name.toLowerCase().includes('jackets'))
-        
+        const prendras = objetos.filter((obj2) => obj2.Sub_Category_Name.toLowerCase().includes('jackets'))        
         const count = prendras.length - 1
         if (count == -1) {
           return []
@@ -755,6 +752,37 @@ const sport_makeup_Filler = (
   }
 
   return resultsAffiliate_Temp
+}
+
+const getDiversifiedResults = (data, limit) => {
+  const newData = []
+  const rejectedData = []
+  const subCategories = []
+
+  for (const item of data) {
+    if(newData.length >= limit){
+      break
+    }
+    
+    const subCategory = item.affiliate.Sub_Category_Name
+    
+    if(!subCategory || !subCategories.includes(subCategory)){
+      newData.push(item)
+      subCategories.push(subCategory)
+    } else {
+      rejectedData.push(item)
+    }
+  }
+
+  if(newData.length < limit){
+    for (const item of rejectedData) {
+      if(newData.length < limit){
+        newData.push(item)
+      }
+    }
+  }
+
+  return newData
 }
 
 const flatten = (ary) => {

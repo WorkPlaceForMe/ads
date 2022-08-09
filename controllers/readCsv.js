@@ -150,21 +150,28 @@ const flatten = (ary) => {
 }
 
 const getProductClothData = async (publisherId) => {
-  const Clothing = clothing.findAll({
+  const maleClothing = clothing.findAll({
     raw: true,
-    where: { Page_ID: publisherId },
+    where: { Page_ID: publisherId, Gender: 'Male' },
+    limit: 5000,
+    order: db.sequelize.random()
+  })
+
+  const femaleClothing = clothing.findAll({
+    raw: true,
+    where: { Page_ID: publisherId, Gender: 'Female' },
     limit: 5000,
     order: db.sequelize.random()
   })
   
-  const Products = products.findAll({
+  const items = products.findAll({
     raw: true,
     where: { Page_ID: publisherId },
-    limit: 5000,
+    limit: 10000,
     order: db.sequelize.random()
   })
   
-  const dataValues = await Promise.all([Clothing, Products])
+  const dataValues = await Promise.all([maleClothing, femaleClothing, items])
   
   return flatten(dataValues)
 }

@@ -208,12 +208,12 @@ app.get('*', function (req, res) {
   }
 })
 
-httpsServer.listen(portS || 3000, function () {
-  console.log(`App is running on HTTPS mode using port: ${portS || '3001'}`)
+httpsServer.listen(portS || 3311, function () {
+  console.log(`App is running on HTTPS mode using port: ${portS || '3311'}`)
 })
 
-httpServer.listen(port || 3000, function () {
-	console.log(`App is running on HTTP mode using port: ${port || '3000'}`)
+httpServer.listen(port || 3310, function () {
+	console.log(`App is running on HTTP mode using port: ${port || '3310'}`)
 })
 
 deleteRedisData = async (pattern) => {
