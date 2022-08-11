@@ -108,6 +108,10 @@ async function check() {
                   console.log(`All redis cache data deleted for Publisher ${publisher.dataValues.publisherId}`)
                 })
             })                  
+          }).catch(error => {
+            console.log(`Error downloading and setting up csv data for publisher id ${publisher.dataValues.publisherId}`)
+            console.log(error)
+            cache.setAsync(`downloading-${publisher.dataValues.publisherId}`, false)
           })
         })     
       }

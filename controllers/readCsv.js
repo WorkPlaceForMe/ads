@@ -90,7 +90,9 @@ exports.readCsv = async (publisherId) => {
         
         resolve(getProductClothData(publisherId))
       } catch (err) {
+        console.log(`Error downloading and setting up csv data for publisher id ${publisherId}`)
         console.log(err)
+        cache.setAsync(`downloading-${publisherId}`, false)
         reject(err)
       }
     })
