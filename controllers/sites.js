@@ -63,6 +63,7 @@ exports.del = Controller(async(req, res) => {
         })
         const affiliateEndpointCampaings = `${conf.get('accesstrade_endpoint')}/v1/publishers/me/sites/${publ.dataValues.publisherId}`
         try{
+            console.log(`Calling url: ${affiliateEndpointCampaings}`)
             await axios.delete(affiliateEndpointCampaings
                 ,{
                     headers: {

@@ -117,7 +117,12 @@ const download = (url, publisherId, provider) => {
       console.log(`Downloading csv data for site ${publisherId} for provider ${provider.label}`)
       
       progress(request(url))
-        .on('error', error => reject(error))
+        .on('error', error => {
+          console.log(`Downloading csv data for site ${publisherId} for provider ${provider.label} failed`)
+          console.log(err)
+          fs.unlinkSync(csvFileName)
+          reject(error)          
+        })
         .on('end', async () => {
           console.log(`Response received for csv data for site ${publisherId} for provider ${provider.label}`)      
           var readStream = fs.createReadStream(csvFileName)     

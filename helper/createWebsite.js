@@ -18,6 +18,7 @@ exports.create = async function(id,site,term){
             }
         )
             try{
+            console.log(`Calling url: ${affiliateEndpoint}`)
             const affiliateResponse = await axios.put(affiliateEndpoint, 
                 {
                     "name": site,

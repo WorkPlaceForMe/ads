@@ -30,6 +30,7 @@ exports.report = async function(init,fin,siteId,){
                 const endpoint = `${conf.get('accesstrade_endpoint')}/v1/publishers/me/reports/conversion?fromDate=${encodeURIComponent(dateInit)}&toDate=${encodeURIComponent(dateFin)}&siteId=${siteId}&campaignId=${ids[id]}&periodBase=${periodBase}&conversionStatuses=${conversion}`
 
                 try{
+                    console.log(`Calling url: ${endpoint}`)
                     const affiliateResponse = await axios.get(endpoint, {
                         headers: {
                             'Authorization': `Bearer ${token}`,

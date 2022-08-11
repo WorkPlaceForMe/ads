@@ -29,6 +29,8 @@ const User = db1.users
 const readCsv = require('./controllers/readCsv')
 const { delay } = require('bluebird')
 const bcrypt = require('bcrypt')
+const axios = require('axios');
+const axiosRetry = require('axios-retry');
 
 let server = conf.get('server').split('/')
 server[2] = `www.${server[2]}`
@@ -235,3 +237,14 @@ deleteRedisData = async (pattern) => {
     }
   })
 }
+
+axiosRetry(axios, {
+  retries: 3,
+  retryDelay: (retryCount) => {
+    console.log(`retry attempt: ${retryCount}`)
+    return retryCount * 2000
+  },
+  retryCondition: (error) => {
+    return (error == null || error.reponse == null || error.response.status !== 200 || error.response.status !== 201)
+  }
+})
