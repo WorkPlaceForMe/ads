@@ -35,7 +35,7 @@ exports.readCsv = function(data, id) {
         })
         .on('error', error => {
           console.log('Error in reading csv file')
-          console.log(err)
+          console.log(error)
           reject(error)
         })
         .on('end', async () => {

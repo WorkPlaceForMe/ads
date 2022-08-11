@@ -119,7 +119,7 @@ const download = (url, publisherId, provider) => {
       progress(request(url))
         .on('error', error => {
           console.log(`Downloading csv data for site ${publisherId} for provider ${provider.label} failed`)
-          console.log(err)
+          console.log(error)
           fs.unlinkSync(csvFileName)
           reject(error)          
         })
