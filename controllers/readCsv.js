@@ -24,10 +24,10 @@ exports.readCsv = async (publisherId) => {
   if (sampleProductClothList[0] && sampleProductClothList[1] ) {
     return getProductClothData(publisherId)
   } else if (!cachedDown)  {
+    await cache.setAsync(`downloading-${publisherId}`, true)
 
     return new Promise(async (resolve, reject) => {   
-      const downloadPromises = []
-      await cache.setAsync(`downloading-${publisherId}`, true)
+      const downloadPromises = []      
       const providers = [       
         {
           id: conf.get('bigc.campaign_id'),
