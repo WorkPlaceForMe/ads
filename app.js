@@ -171,6 +171,7 @@ if (conf.get('install') == true) {
         })
     })
 } else {
+  console.log('Sequelize is connected.')
   check()
 }
 
