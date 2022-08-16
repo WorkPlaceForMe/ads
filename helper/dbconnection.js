@@ -5,6 +5,7 @@ const conf = require('../middleware/prop')
    host     : conf.get('host'),
    user     : conf.get('user'),
    password : conf.get('password'),
-   database : conf.get('database')
+   database : conf.get('database'),
+   port: conf.get('dbport')
 });
  module.exports=connection;

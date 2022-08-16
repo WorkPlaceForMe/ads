@@ -149,6 +149,7 @@ if (conf.get('install') == true) {
       user: conf.get('user'),
       password: conf.get('password'),
       host: conf.get('host'),
+      port: conf.get('dbport')
     })
     .then((connection) => {
       connection
