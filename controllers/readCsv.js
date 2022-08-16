@@ -112,7 +112,7 @@ const download = (url, publisherId, provider) => {
   let csv = ''
 
   return new Promise((resolve, reject) => {  
-    const csvFileName = `./csv/${provider.id}-${publisherId}.csv`
+    const csvFileName = `csv/${provider.id}-${publisherId}.csv`
     
     try {
       var sendDate = new Date().getTime()
