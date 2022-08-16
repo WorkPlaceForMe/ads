@@ -74,6 +74,12 @@ async function check() {
       const updatedAtTime = publisher.dataValues.updatedAt.getTime()
       
       if((currentTime - updatedAtTime >= refreshTimeInterval) || (!sampleProductClothList[0] && !sampleProductClothList[1])) {
+        const publisherUpdateInProgress = await cache.getAsync(`downloading-${publisher.dataValues.publisherId}`)
+    
+        if (publisherUpdateInProgress == 'true') {
+          continue
+        }
+
         const productClothPromises = [];
 
         productClothPromises.push(clothing.destroy({
