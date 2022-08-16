@@ -73,7 +73,7 @@ async function check() {
         clothing.findOne({ where: { Page_ID: publisher.dataValues.publisherId } })])
       const updatedAtTime = publisher.dataValues.updatedAt.getTime()
       
-      if((currentTime - updatedAtTime >= refreshTimeInterval) || (!sampleProductClothList[0] && !sampleProductClothList[1])) {
+      if((currentTime - updatedAtTime) >= refreshTimeInterval || (!sampleProductClothList[0] && !sampleProductClothList[1])) {
         const publisherUpdateInProgress = await cache.getAsync(`downloading-${publisher.dataValues.publisherId}`)
     
         if (publisherUpdateInProgress == 'true') {
