@@ -74,7 +74,6 @@ exports.getAds = Controller(async (req, res) => {
   }
   
   let extension = site.split(checker)
-  let cachedImg = await cache.getAsync(`${extension[1]}_${mobile}_${img_width}_${img_height}_${url}`)
 
   const aut = await auth(checker, site.split('/')[0])
   
@@ -82,6 +81,15 @@ exports.getAds = Controller(async (req, res) => {
     console.log("Cancelling")
     return res.status(400).json({ success: false, message: "Unauthorized" })
   }
+
+  let isImageBeingProcessed = await cache.getAsync(`downloading-${extension[1]}_${mobile}_${img_width}_${img_height}_${url}`)
+    
+  while (isImageBeingProcessed == 'true') {
+    isImageBeingProcessed = await cache.getAsync(`downloading-${extension[1]}_${mobile}_${img_width}_${img_height}_${url}`)
+    continue
+  }
+
+  let cachedImg = await cache.getAsync(`${extension[1]}_${mobile}_${img_width}_${img_height}_${url}`)  
   
   if (cachedImg && cachedImg !== '{}' && cachedImg !== '[]'){
     img = await getImg(url)
@@ -94,7 +102,9 @@ exports.getAds = Controller(async (req, res) => {
     return res.status(200).send({
         results: JSON.parse(cachedImg)
     })
-  } else{
+  } else{  
+    await cache.setAsync(`downloading-${extension[1]}_${mobile}_${img_width}_${img_height}_${url}`, true)
+
     let formData = new FormData()
     formData.append('upload', request(url))
     formData.append('subscriptions', 'face,fashion,Object,tags2,sport')
@@ -145,6 +155,8 @@ exports.getAds = Controller(async (req, res) => {
       if(img && publisher){
         await createClientImgPublData(userId, sessionId, img.id, img.img, publisher.id);
       }
+
+      await cache.setAsync(`downloading-${extension[1]}_${mobile}_${img_width}_${img_height}_${url}`, false)
         
       res.status(200).send({
         results: sendingResults
@@ -152,7 +164,8 @@ exports.getAds = Controller(async (req, res) => {
     } catch (err) {
       console.log('Error in processing')
       console.log(err)
-      cache.setAsync(`${extension[1]}_${mobile}_${img_width}_${img_height}_${url}`, JSON.stringify({}));
+      await cache.setAsync(`downloading-${extension[1]}_${mobile}_${img_width}_${img_height}_${url}`, false)
+      await cache.setAsync(`${extension[1]}_${mobile}_${img_width}_${img_height}_${url}`, JSON.stringify({}));
       return res.status(500).json({ success: false, message: "Vista Image failled", error: err, img: url })
     }
   }
