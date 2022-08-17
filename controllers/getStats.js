@@ -360,18 +360,20 @@ exports.getStatsUrl = Controller(async(req, res) => {
                                 table.push({"url":"/","clicksPerImg":0,"viewsPerImg":0,"clicksPerAd":0,"viewsPerAd":0,"ctr":0,"images":0,"ads":0,"clicks":0,"views":0,"adsNum":0,"imgNum":0,"totImgs":0})
                             }
                             let rewards = {};
-                            const cacheed = await cache.getAsync(`${req.query.init}_${req.query.fin}_${ids[0].publisherId}`);
+                            const init = new Date(req.query.init).toISOString();
+                            const fin = new Date(req.query.fin).toISOString();
+                            const cacheed = await cache.getAsync(`${init}_${fin}_${ids[0].publisherId}`);
                             
                             if (cacheed){
                                 return res.status(200).json({success: true, table: table, rewards: JSON.parse(cacheed)});
                             }
-                            try{
-                                rewards = await reportAff.report(req.query.init,req.query.fin,ids[0].publisherId)
-                                cache.setAsync(`${req.query.init}_${req.query.fin}_${ids[0].publisherId}`, JSON.stringify(rewards));
+                            try{                              
+                                rewards = await reportAff.report(init, fin,ids[0].publisherId)
+                                cache.setAsync(`${init}_${fin}_${ids[0].publisherId}`, JSON.stringify(rewards));
                             }catch(err){
                                 rewards['totalReward'] = 0;
                                 rewards['totalConversionsCount'] = 0;
-                                cache.setAsync(`${req.query.init}_${req.query.fin}_${ids[0].publisherId}`, JSON.stringify(rewards));
+                                cache.setAsync(`${init}_${fin}_${ids[0].publisherId}`, JSON.stringify(rewards));
                             }
 
                             res.status(200).json({success: true, table: table, rewards: rewards});

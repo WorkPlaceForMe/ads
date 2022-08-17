@@ -3,7 +3,7 @@ const aff = require('../helper/affiliate')
 const jwt = require('jsonwebtoken')
 const conf = require('../middleware/prop')
 
-exports.report = async function(init,fin,siteId,){
+exports.report = async function(init,fin,siteId){
     try{
         const credentials = await aff.getAff()
             const token = jwt.sign(
@@ -47,7 +47,7 @@ exports.report = async function(init,fin,siteId,){
                 }
             }
 
-            return(rewards)
+            return rewards
     }catch(err){
         console.error(err)
     }

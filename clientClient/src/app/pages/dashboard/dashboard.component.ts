@@ -331,12 +331,12 @@ export class DashboardComponent implements OnInit {
         filter: false,
       },
       clicks: {
-        title: 'Image Icon Impressions',
+        title: 'Image Icon Clicks',
         type: 'string',
         filter: false,
       },
       views: {
-        title: 'Image Ad Clicks',
+        title: 'Image Ad Views',
         type: 'string',
         filter: false,
       },
