@@ -303,6 +303,7 @@ export class DashboardComponent implements OnInit {
     this.face.getStatsUrl(params.url,this.range).subscribe(
       res => {       
         this.source = res['table'];
+        this.rewards = res['rewards'];
       },
       err => {
         console.error(err);
