@@ -456,7 +456,7 @@ export class DashboardComponent implements OnInit {
         filter: false,
       },
       views: {
-        title: 'Image Ad Views',
+        title: 'Image Icon Impressions',
         type: 'string',
         filter: false,
       },
