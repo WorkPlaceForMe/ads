@@ -297,50 +297,18 @@ export class DashboardComponent implements OnInit {
   }
 
   updateState:boolean = false
+  
   update(){
-    this.updateState = true
     const params = this.activatedRoute.snapshot.queryParams;
-    let adsImg = {}
-    let imgPage = {}
-    let totImg = {}
-    let pages = []
-    for(const row of this.source){
-      const extension = row.url.split(params.url)[1]
-      adsImg[extension] = row.adsNum
-      imgPage[extension] = row.imgNum
-      totImg[extension] = row.images
-    }
-    pages.push(adsImg)
-    pages.push(imgPage)
-    pages.push(totImg)
-    this.face.updatePages(pages,params.url).subscribe(
-      res => {
-        this.updateState = false
+    this.face.getStatsUrl(params.url,this.range).subscribe(
+      res => {       
+        this.source = res['table'];
       },
       err => {
         console.error(err);
-        this.updateState = false
+        this.source = undefined;
       },
     );
-  }
-
-  create() {
-    this.windowService.open(AddComponent, { title: `Add new site`, context: { 
-        onChange: changes => {
-          this.initDash()
-        }
-      }
-    });
-  }
-
-  edit(event) {
-    this.windowService.open(AddComponent, { title: `Edit site` , context: { 
-        onChange: changes => {
-          this.initDash()
-        },
-         id: event.data.id
-      }
-    });
   }
 
   delete(event){
@@ -449,14 +417,14 @@ export class DashboardComponent implements OnInit {
         title: 'Image Title',
         type: 'string',
         filter: false,
-      },
-      clicks: {
-        title: 'Image Icon Clicks',
+      },     
+      views: {
+        title: 'Image Icon Impressions',
         type: 'string',
         filter: false,
       },
-      views: {
-        title: 'Image Icon Impressions',
+      clicks: {
+        title: 'Image Icon Clicks',
         type: 'string',
         filter: false,
       },

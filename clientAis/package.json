@@ -34,7 +34,7 @@
     "@angular/animations": "^9.0.4",
     "@angular/cdk": "^9.1.2",
     "@angular/common": "^9.0.4",
-    "@angular/compiler": "^9.0.4",
+    "@angular/compiler": "^9.0yar.4",
     "@angular/core": "^9.0.4",
     "@angular/forms": "^9.0.4",
     "@angular/google-maps": "^9.1.0",

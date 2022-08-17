@@ -121,7 +121,7 @@ exports.getAds = Controller(async (req, res) => {
         data: formData
     }
        
-    let limit = 4
+    let limit = conf.get('max_ads_per_image') || 4
     
     if(aut['pages'] != null && JSON.parse(aut['pages'])[0] != null){
         limit = JSON.parse(aut['pages'])[0][extension[1]]

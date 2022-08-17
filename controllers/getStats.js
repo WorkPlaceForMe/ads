@@ -24,7 +24,7 @@ exports.getStats = Controller(async(req, res) => {
             }
         else{
             for(const stat of rows){
-                ads[stat.site] = stat.count
+                ads[stat.site] = (!ads[stat.site] ? 0 : ads[stat.site]) + stat.count
             }
             getImgPerPage(function(err,rows){
                 if(err){
@@ -32,7 +32,7 @@ exports.getStats = Controller(async(req, res) => {
                     }
                 else{
                     for(const stat of rows){
-                        imgs[stat.site] = stat.count
+                        imgs[stat.site] = (!imgs[stat.site] ? 0 : imgs[stat.site]) + stat.count
                     }
                     getClicksAndViews(async function(err,rows){
                         if(err){
@@ -138,24 +138,17 @@ exports.getStats = Controller(async(req, res) => {
                                 const init = new Date(req.query.init).toISOString()
                                 const fin = new Date(req.query.fin).toISOString()
                                 let rewards = {};
-                                const cacheed = await cache.getAsync(`${init}_${fin}_${ids[0].publisherId}`);
-                                
-                                if (cacheed){
-                                    rewards = cacheed
-                                }else{
-                                    try{
-                                        if(ids[0].publisherId != null){
-                                            rewards = await reportAff.report(init,fin,ids[0].publisherId)
-                                            cache.setAsync(`${init}_${fin}_${ids[0].publisherId}`, JSON.stringify(rewards));
+                            
+                                try{
+                                    if(ids[0].publisherId != null){
+                                        rewards = await reportAff.report(init,fin,ids[0].publisherId)
                                         }else{
-                                            rewards['totalReward'] = 0;
-                                            rewards['totalConversionsCount'] = 0;
-                                        }
-                                    }catch(err){
                                         rewards['totalReward'] = 0;
                                         rewards['totalConversionsCount'] = 0;
-                                        cache.setAsync(`${init}_${fin}_${ids[0].publisherId}`, JSON.stringify(rewards));
                                     }
+                                }catch(err){
+                                    rewards['totalReward'] = 0;
+                                    rewards['totalConversionsCount'] = 0;
                                 }
 
                                 if(ids[0].enabled == 'true'){
@@ -214,7 +207,7 @@ exports.getStatsUrl = Controller(async(req, res) => {
         else{
             for(const stat of rows){
                 let name = stat.site.split('//')[1]
-                ads[name] = stat.count
+                ads[name] = (!ads[name] ? 0 : ads[name]) + stat.count
             }
             // console.table(ads)
             getImgPerPage(async function(err,rows){
@@ -224,7 +217,7 @@ exports.getStatsUrl = Controller(async(req, res) => {
                 else{
                     for(const stat of rows){
                         let name = stat.site.split('//')[1]
-                        imgs[name] = stat.count
+                        imgs[name] = (!imgs[name] ? 0 : imgs[name]) + stat.count
                     }
                     //console.table(imgs)
                     getClicksAndViews(async function(err,rows){
@@ -315,7 +308,7 @@ exports.getStatsUrl = Controller(async(req, res) => {
                                 }
 
                                 let extension = Object.keys(imgsGrouped)[i].split(req.query.url)[1]
-                                const def = 2;
+                                const def = conf.get('max_ads_per_image') || 4;
                                 let adsPerImage, imgPerPage, totImgs
                                 if(ids[0].pages != null){
                                     const pages = JSON.parse(ids[0].pages)
@@ -362,18 +355,11 @@ exports.getStatsUrl = Controller(async(req, res) => {
                             let rewards = {};
                             const init = new Date(req.query.init).toISOString();
                             const fin = new Date(req.query.fin).toISOString();
-                            const cacheed = await cache.getAsync(`${init}_${fin}_${ids[0].publisherId}`);
-                            
-                            if (cacheed){
-                                return res.status(200).json({success: true, table: table, rewards: JSON.parse(cacheed)});
-                            }
                             try{                              
                                 rewards = await reportAff.report(init, fin,ids[0].publisherId)
-                                cache.setAsync(`${init}_${fin}_${ids[0].publisherId}`, JSON.stringify(rewards));
                             }catch(err){
                                 rewards['totalReward'] = 0;
                                 rewards['totalConversionsCount'] = 0;
-                                cache.setAsync(`${init}_${fin}_${ids[0].publisherId}`, JSON.stringify(rewards));
                             }
 
                             res.status(200).json({success: true, table: table, rewards: rewards});

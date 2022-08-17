@@ -105,7 +105,7 @@ const getStats = (req) => {
         return reject(err)
       } else {
         for (const stat of rows) {
-          ads[stat.site] = stat.count
+          ads[stat.site] = (!ads[stat.site] ? 0 : ads[stat.site]) + stat.count
         }
 
         getImgPerPage(function (err, rows) {
@@ -113,7 +113,7 @@ const getStats = (req) => {
             return reject(err)
           } else {
             for (const stat of rows) {
-              imgs[stat.site] = stat.count
+              imgs[stat.site] = (!imgs[stat.site] ? 0 : imgs[stat.site]) + stat.count
             }
 
             getClicksAndViews(async function (err, rows) {
@@ -243,31 +243,15 @@ const getStats = (req) => {
                     const init = new Date(req.query.init).toISOString()
                     const fin = new Date(req.query.fin).toISOString()
                     let rewards = {}
-                    const cacheed = await cache.getAsync(
-                      `${init}_${fin}_${ids[0].publisherId}`,
-                    )
-
-                    if (cacheed) {
-                      rewards = cacheed
-                    } else {
-                      try {
-                        rewards = await reportAff.report(
-                          init,
-                          fin,
-                          ids[0].publisherId,
-                        )
-                        cache.setAsync(
-                          `${init}_${fin}_${ids[0].publisherId}`,
-                          JSON.stringify(rewards),
-                        )
-                      } catch (err) {
-                        rewards['totalReward'] = 0
-                        rewards['totalConversionsCount'] = 0
-                        cache.setAsync(
-                          `${init}_${fin}_${ids[0].publisherId}`,
-                          JSON.stringify(rewards),
-                        )
-                      }
+                    try {
+                      rewards = await reportAff.report(
+                        init,
+                        fin,
+                        ids[0].publisherId,
+                      )
+                    } catch (err) {
+                      rewards['totalReward'] = 0
+                      rewards['totalConversionsCount'] = 0
                     }
 
                     if (ids[0].enabled == 'true') {
@@ -322,7 +306,7 @@ const getStatsUrl = (req) => {
         return reject(err)
       } else {
         for (const stat of rows) {
-          ads[stat.site] = stat.count
+          ads[stat.site] = (!ads[stat.site] ? 0 : ads[stat.site]) + stat.count
         }
 
         getImgPerPage(async function (err, rows) {
@@ -330,7 +314,7 @@ const getStatsUrl = (req) => {
             return reject(err)
           } else {
             for (const stat of rows) {
-              imgs[stat.site] = stat.count
+              imgs[stat.site] = (!imgs[stat.site] ? 0 : imgs[stat.site]) + stat.count
             }
 
             getClicksAndViews(async function (err, rows) {
@@ -454,7 +438,7 @@ const getStatsUrl = (req) => {
                   let extension = Object.keys(imgsGrouped)[i].split(
                     req.query.url,
                   )[1]
-                  const def = 2
+                  const def = conf.get('max_ads_per_image') || 4
                   let adsPerImage, imgPerPage
                   if (ids[0].pages != null) {
                     const pages = JSON.parse(ids[0].pages)
@@ -490,8 +474,10 @@ const getStatsUrl = (req) => {
                 }
 
                 let rewards = {}
+                const init = new Date(req.query.init).toISOString()
+                const fin = new Date(req.query.fin).toISOString()
                 const cacheed = await cache.getAsync(
-                  `${req.query.init}_${req.query.fin}_${ids[0].publisherId}`,
+                  `${init}_${fin}_${ids[0].publisherId}`,
                 )
 
                 if (cacheed) {
@@ -499,19 +485,15 @@ const getStatsUrl = (req) => {
                 }
                 try {
                   rewards = await reportAff.report(
-                    req.query.init,
-                    req.query.fin,
+                    init,
+                    fin,
                     ids[0].publisherId,
-                  )
-                  cache.setAsync(
-                    `${req.query.init}_${req.query.fin}_${ids[0].publisherId}`,
-                    JSON.stringify(rewards),
                   )
                 } catch (err) {
                   rewards['totalReward'] = 0
                   rewards['totalConversionsCount'] = 0
                   cache.setAsync(
-                    `${req.query.init}_${req.query.fin}_${ids[0].publisherId}`,
+                    `${init}_${fin}_${ids[0].publisherId}`,
                     JSON.stringify(rewards),
                   )
                 }
