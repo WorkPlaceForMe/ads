@@ -29,18 +29,12 @@ $(document).ready(function () {
 
 $(document).on('mousedown', 'a.but1', function (e) {
 	if(e.button == 0 || e.button == 1){
-		let img;
-		if(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
-			img = e.srcElement.parentNode.parentElement.parentElement.firstChild.src
-		}else {
-			img = e.originalEvent.path[3].children[0].currentSrc
-		}
 		const data = {
 			time: new Date(),
 			url: window.location.href,
 			type: 1,
-			idItem: e.currentTarget.id,
-			img: img,
+			idItem: $(this).closest('div.ad-image-div').find('a').attr('id'),
+			img: $(this).closest('div.ad-image-div').find('img').prop('src'),
 			userId: userId,
 			sessionId: sessionId,
 			site: window.location.href
@@ -61,23 +55,12 @@ $(document).on('mousedown', 'a.but1', function (e) {
 
 $(document).on('mousedown', 'a.but2', function (e) {
 	if(e.button == 0 || e.button == 1){
-		let idItem, img;
-		if(navigator.userAgent.indexOf("Firefox") != -1 ) {
-			idItem = e.srcElement.parentNode.parentNode.parentNode.parentNode.parentNode.childNodes[1].id;
-			img = e.srcElement.parentNode.parentNode.parentNode.parentNode.parentNode.childNodes[0].currentSrc;
-		}else if(navigator.userAgent.indexOf("Safari") != -1) {
-			idItem = e.currentTarget.parentNode.parentNode.previousSibling.id;
-			img = e.currentTarget.parentElement.parentElement.parentElement.firstChild.currentSrc;
-		}else{
-			idItem = e.currentTarget.parentNode.parentNode.previousSibling.id;
-			img = e.originalEvent.path[5].children[0].currentSrc || e.originalEvent.path[6].children[0].currentSrc;
-		}
 		const data = {
 			time: new Date(),
 			url: window.location.href,
 			type: 2,
-			idItem: idItem,
-			img: img,
+			idItem: $(this).closest('div.ad-image-div').find('a').attr('id'),
+			img: $(this).closest('div.ad-image-div').find('img').prop('src'),
 			userId: userId,
 			sessionId: sessionId,
 			site: window.location.href
@@ -230,8 +213,8 @@ $(document).on('click', '.closeBut', function () {
 						time: new Date(),
 						url: window.location.href,
 						type: 1,
-						idItem: e.currentTarget.parentNode.parentNode.id,
-						img: e.currentTarget.parentNode.parentNode.parentNode.children[0].currentSrc,
+						idItem: $(this).closest('div.ad-image-div').find('a').attr('id'),
+						img: $(this).closest('div.ad-image-div').find('img').prop('src'),
 						userId: userId,
 						sessionId: sessionId,
 						site: window.location.href
@@ -313,6 +296,7 @@ $(document).on('click', '.closeBut', function () {
 	function g(b) {
 		var c = document.createElement('div')
 		c.style.position = 'relative'
+		c.className = 'ad-image-div'
 		var d = b.cloneNode(!0)
 		return a(d).appendTo(c), b.parentNode.replaceChild(c, b), c
 	}
