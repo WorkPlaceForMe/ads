@@ -8107,32 +8107,6 @@
     },
 
     /***/
-    "./src/app/models/IpServer.ts":
-    /*!************************************!*\
-      !*** ./src/app/models/IpServer.ts ***!
-      \************************************/
-
-    /*! exports provided: ip */
-
-    /***/
-    function srcAppModelsIpServerTs(module, __webpack_exports__, __webpack_require__) {
-      "use strict";
-
-      __webpack_require__.r(__webpack_exports__);
-      /* harmony export (binding) */
-
-
-      __webpack_require__.d(__webpack_exports__, "ip", function () {
-        return ip;
-      });
-
-      var ip = 'localhost'; // 10.245.1.161
-      // 192.168.0.168
-
-      /***/
-    },
-
-    /***/
     "./src/app/services/faces.service.ts":
     /*!*******************************************!*\
       !*** ./src/app/services/faces.service.ts ***!
@@ -8330,12 +8304,6 @@
       __webpack_require__.d(__webpack_exports__, "environment", function () {
         return environment;
       });
-      /* harmony import */
-
-
-      var _app_models_IpServer__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(
-      /*! ../app/models/IpServer */
-      "./src/app/models/IpServer.ts");
       /**
        * @license
        * Copyright Akveo. All Rights Reserved.
@@ -8348,7 +8316,7 @@
 
 
       var environment = {
-        api: 'http://' + _app_models_IpServer__WEBPACK_IMPORTED_MODULE_0__["ip"] + ':3310/api',
+        api: '/api',
         production: false
       };
       /***/

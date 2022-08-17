@@ -5083,23 +5083,6 @@ var api = url;
 
 /***/ }),
 
-/***/ "./src/app/models/IpServer.ts":
-/*!************************************!*\
-  !*** ./src/app/models/IpServer.ts ***!
-  \************************************/
-/*! exports provided: ip */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ip", function() { return ip; });
-var ip = 'localhost';
-// 10.245.1.161
-// 192.168.0.168
-
-
-/***/ }),
-
 /***/ "./src/app/services/faces.service.ts":
 /*!*******************************************!*\
   !*** ./src/app/services/faces.service.ts ***!
@@ -5210,7 +5193,6 @@ FacesService.ɵprov = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineInje
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "environment", function() { return environment; });
-/* harmony import */ var _app_models_IpServer__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../app/models/IpServer */ "./src/app/models/IpServer.ts");
 /**
  * @license
  * Copyright Akveo. All Rights Reserved.
@@ -5220,9 +5202,8 @@ __webpack_require__.r(__webpack_exports__);
 // The build system defaults to the dev environment which uses `environment.ts`, but if you do
 // `ng build --env=prod` then `environment.prod.ts` will be used instead.
 // The list of which env maps to which file can be found in `.angular-cli.json`.
-
 const environment = {
-    api: 'http://' + _app_models_IpServer__WEBPACK_IMPORTED_MODULE_0__["ip"] + ':3310/api',
+    api: '/api',
     production: false,
 };
 
