@@ -397,12 +397,6 @@ exports.getStatsImg = Controller(async(req, res) => {
                     for(let i = 0; i<rows.length; i++){
                         let img = rows[i].imgName.split('//')[1]
                         ads[img] = (ads[img]  || 0) + 1
-                        if(rows[i + 1] == undefined){
-                            break;
-                        }
-                        if(rows[i].idGeneration != rows[i + 1].idGeneration){
-                            break;
-                        }
                     }
                     getImgsList(urlQuery,function(err,rows){
                         if(err){

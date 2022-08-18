@@ -450,11 +450,14 @@ $(document).on('click', '.closeBut', function () {
 						dataType: 'json',
 						success: function (a) {
 							if ('false' == a.status) return c(l), b
-							var d = new Image()
-							;(d.onload = function () {
-								;(h.ori_width = d.width), (h.ori_height = d.height), f(a.results, h, k), e(h)
-							}),
-								(d.src = l)
+							var d = new Image();						
+							d.onload = function () {
+								h.ori_width = d.width;
+								h.ori_height = d.height;								
+								f(a.results, h, k);
+								e(h);
+							}
+							d.src = l;
 						},
 						error: function () {}
 					})
