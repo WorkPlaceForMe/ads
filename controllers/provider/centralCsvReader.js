@@ -65,7 +65,11 @@ exports.readCsv = function(data, id) {
             console.log(err)
           }
         })
-        .on('error', error => reject(error))
+        .on('error', error => {
+          console.log('Error in reading csv file')
+          console.log(error)
+          reject(error)
+        })
         .on('end', async () => {
           const products = await Promise.all(promises)
           var receiveDate = new Date().getTime()

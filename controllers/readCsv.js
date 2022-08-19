@@ -58,29 +58,34 @@ exports.readCsv = async (publisherId) => {
       
       try {
         for (const provider of providers){
-          const credentials = await aff.getAff()
-          const token = jwt.sign(
-            { sub: credentials.userUid },
-            credentials.secretKey,
-            {
-              algorithm: 'HS256',
-            },
-          )   
+          try {
+            const credentials = await aff.getAff()
+            const token = jwt.sign(
+              { sub: credentials.userUid },
+              credentials.secretKey,
+              {
+                algorithm: 'HS256',
+              },
+            )            
+         
+            let affiliateEndpoint = `${conf.get(
+                'accesstrade_endpoint',
+              )}/v1/publishers/me/sites/${publisherId}/campaigns/${provider.id}/productfeed/url`
 
-          let affiliateEndpoint = `${conf.get(
-              'accesstrade_endpoint',
-            )}/v1/publishers/me/sites/${publisherId}/campaigns/${provider.id}/productfeed/url`
+            console.log(`Downloading data for site ${publisherId} for provider ${provider.label} affiliateEndpoint ${affiliateEndpoint}`)
+            
+            const affiliateResponse = await axios.get(affiliateEndpoint, {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                'X-Accesstrade-User-Type': 'publisher',
+              },
+            })        
 
-          console.log(`Downloading data for site ${publisherId} for provider ${provider.label} affiliateEndpoint ${affiliateEndpoint}`)
-          
-          const affiliateResponse = await axios.get(affiliateEndpoint, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              'X-Accesstrade-User-Type': 'publisher',
-            },
-          })          
-
-          downloadPromises.push(download(affiliateResponse.data.baseUrl, publisherId, provider))            
+            downloadPromises.push(download(affiliateResponse.data.baseUrl, publisherId, provider))
+          } catch(err) {
+            console.log(`Error downloading csv data site ${publisherId} for provider ${provider.label}`)
+            console.log(err)
+          } 
         }
 
         await Promise.all(downloadPromises)
@@ -90,7 +95,9 @@ exports.readCsv = async (publisherId) => {
         
         resolve(getProductClothData(publisherId))
       } catch (err) {
+        console.log(`Error downloading and setting up csv data for publisher id ${publisherId}`)
         console.log(err)
+        cache.setAsync(`downloading-${publisherId}`, false)
         reject(err)
       }
     })
@@ -110,14 +117,19 @@ const download = (url, publisherId, provider) => {
   let csv = ''
 
   return new Promise((resolve, reject) => {  
-    const csvFileName = `./csv/${provider.id}-${publisherId}.csv`
+    const csvFileName = `csv/${provider.id}-${publisherId}.csv`
     
     try {
       var sendDate = new Date().getTime()
       console.log(`Downloading csv data for site ${publisherId} for provider ${provider.label}`)
       
       progress(request(url))
-        .on('error', error => reject(error))
+        .on('error', error => {
+          console.log(`Downloading csv data for site ${publisherId} for provider ${provider.label} failed`)
+          console.log(error)
+          fs.unlinkSync(csvFileName)
+          reject(error)          
+        })
         .on('end', async () => {
           console.log(`Response received for csv data for site ${publisherId} for provider ${provider.label}`)      
           var readStream = fs.createReadStream(csvFileName)     
@@ -150,21 +162,28 @@ const flatten = (ary) => {
 }
 
 const getProductClothData = async (publisherId) => {
-  const Clothing = clothing.findAll({
+  const maleClothing = clothing.findAll({
     raw: true,
-    where: { Page_ID: publisherId },
+    where: { Page_ID: publisherId, Gender: 'Male' },
+    limit: 5000,
+    order: db.sequelize.random()
+  })
+
+  const femaleClothing = clothing.findAll({
+    raw: true,
+    where: { Page_ID: publisherId, Gender: 'Female' },
     limit: 5000,
     order: db.sequelize.random()
   })
   
-  const Products = products.findAll({
+  const items = products.findAll({
     raw: true,
     where: { Page_ID: publisherId },
-    limit: 5000,
+    limit: 10000,
     order: db.sequelize.random()
   })
   
-  const dataValues = await Promise.all([Clothing, Products])
+  const dataValues = await Promise.all([maleClothing, femaleClothing, items])
   
   return flatten(dataValues)
 }

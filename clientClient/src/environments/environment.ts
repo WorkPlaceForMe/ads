@@ -11,6 +11,6 @@
 import { ip } from '../app/models/IpServer';
 
 export const environment = {
-  api: 'http://'+ ip +':3310/api',
+  api: '/api',
   production: false,
 };

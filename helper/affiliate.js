@@ -11,12 +11,13 @@ exports.getAff = async function(){
     const userPass = CryptoJS.SHA256(`${userAffiliate}:${passAffiliate}`)
 
     try{
+        console.log(`Calling url: ${affiliateEndpoint}`)
         const affiliateResponse = await axios.get(affiliateEndpoint, {
             headers: {
                 Authorization: userPass
             }
         })
-        return(affiliateResponse.data)
+        return affiliateResponse.data
     } catch(err) {
         console.error(err)
         return(err)

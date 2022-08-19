@@ -74,7 +74,6 @@ exports.getAds = Controller(async (req, res) => {
   }
   
   let extension = site.split(checker)
-  let cachedImg = await cache.getAsync(`${extension[1]}_${mobile}_${img_width}_${img_height}_${url}`)
 
   const aut = await auth(checker, site.split('/')[0])
   
@@ -82,6 +81,15 @@ exports.getAds = Controller(async (req, res) => {
     console.log("Cancelling")
     return res.status(400).json({ success: false, message: "Unauthorized" })
   }
+
+  let isImageBeingProcessed = await cache.getAsync(`downloading-${extension[1]}_${mobile}_${img_width}_${img_height}_${url}`)
+    
+  while (isImageBeingProcessed == 'true') {
+    isImageBeingProcessed = await cache.getAsync(`downloading-${extension[1]}_${mobile}_${img_width}_${img_height}_${url}`)
+    continue
+  }
+
+  let cachedImg = await cache.getAsync(`${extension[1]}_${mobile}_${img_width}_${img_height}_${url}`)  
   
   if (cachedImg && cachedImg !== '{}' && cachedImg !== '[]'){
     img = await getImg(url)
@@ -94,7 +102,9 @@ exports.getAds = Controller(async (req, res) => {
     return res.status(200).send({
         results: JSON.parse(cachedImg)
     })
-  } else{
+  } else{  
+    await cache.setAsync(`downloading-${extension[1]}_${mobile}_${img_width}_${img_height}_${url}`, true)
+
     let formData = new FormData()
     formData.append('upload', request(url))
     formData.append('subscriptions', 'face,fashion,Object,tags2,sport')
@@ -111,7 +121,7 @@ exports.getAds = Controller(async (req, res) => {
         data: formData
     }
        
-    let limit = 4
+    let limit = conf.get('max_ads_per_image') || 4
     
     if(aut['pages'] != null && JSON.parse(aut['pages'])[0] != null){
         limit = JSON.parse(aut['pages'])[0][extension[1]]
@@ -127,9 +137,9 @@ exports.getAds = Controller(async (req, res) => {
           resultsVista = response.data.results
       }
       const resultsAffiliate = await filler(resultsVista, serv, img_width, img_height, site, url, uid, objetos, mobile)
-      const flat = flatten(resultsAffiliate)
+      let flat = flatten(resultsAffiliate)
       if (flat.length > limit) {
-          flat.length = limit
+        flat = getDiversifiedResults(flat, limit)
       }
       const sendingResults = await convert(flat)
       cache.setAsync(`${extension[1]}_${mobile}_${img_width}_${img_height}_${url}`, JSON.stringify(sendingResults))
@@ -145,6 +155,8 @@ exports.getAds = Controller(async (req, res) => {
       if(img && publisher){
         await createClientImgPublData(userId, sessionId, img.id, img.img, publisher.id);
       }
+
+      await cache.setAsync(`downloading-${extension[1]}_${mobile}_${img_width}_${img_height}_${url}`, false)
         
       res.status(200).send({
         results: sendingResults
@@ -152,7 +164,8 @@ exports.getAds = Controller(async (req, res) => {
     } catch (err) {
       console.log('Error in processing')
       console.log(err)
-      cache.setAsync(`${extension[1]}_${mobile}_${img_width}_${img_height}_${url}`, JSON.stringify({}));
+      await cache.setAsync(`downloading-${extension[1]}_${mobile}_${img_width}_${img_height}_${url}`, false)
+      await cache.setAsync(`${extension[1]}_${mobile}_${img_width}_${img_height}_${url}`, JSON.stringify({}));
       return res.status(500).json({ success: false, message: "Vista Image failled", error: err, img: url })
     }
   }
@@ -327,13 +340,12 @@ const clothing_Filler = (
   const resultsAffiliate_Temp = []
   
   if (gender == 'Male') {
-    if (obj.class == 'upper' && obj.confidence > 0.6) {
+    if ((obj.class == 'person' || obj.class == 'upper') && obj.confidence > 0.6) {
       if (obj.deep_fashion_tf.sleeve_length[0].label == 'ExtraLongSleeves' ||
         obj.deep_fashion_tf.sleeve_length[0].label == 'LongSleeves') {
         const result = objetos.filter(
           (obj2) =>
             obj2.Gender == gender && obj2.Sub_Category_Name.toLowerCase().includes('jackets')
-            && !obj2.Main_Category_Name.toLowerCase().includes('women')
         )
         const count = result.length - 1
         if (count == -1) {
@@ -469,13 +481,11 @@ const clothing_Filler = (
     }
   }
   if (gender == 'Female') {
-    if (obj.class == 'upper' && obj.confidence > 0.6) {
+    if ((obj.class == 'person' || obj.class == 'upper') && obj.confidence > 0.6) {
       if (obj.deep_fashion_tf.sleeve_length[0].label == 'ExtraLongSleeves' ||
         obj.deep_fashion_tf.sleeve_length[0].label == 'LongSleeves'
       ) {
-        const prendras = objetos.filter((obj2) => obj2.Gender == gender 
-        && obj2.Sub_Category_Name.toLowerCase().includes('jackets'))
-        
+        const prendras = objetos.filter((obj2) => obj2.Sub_Category_Name.toLowerCase().includes('jackets'))        
         const count = prendras.length - 1
         if (count == -1) {
           return []
@@ -755,6 +765,37 @@ const sport_makeup_Filler = (
   }
 
   return resultsAffiliate_Temp
+}
+
+const getDiversifiedResults = (data, limit) => {
+  const newData = []
+  const rejectedData = []
+  const subCategories = []
+
+  for (const item of data) {
+    if(newData.length >= limit){
+      break
+    }
+    
+    const subCategory = item.affiliate.Sub_Category_Name
+    
+    if(!subCategory || !subCategories.includes(subCategory)){
+      newData.push(item)
+      subCategories.push(subCategory)
+    } else {
+      rejectedData.push(item)
+    }
+  }
+
+  if(newData.length < limit){
+    for (const item of rejectedData) {
+      if(newData.length < limit){
+        newData.push(item)
+      }
+    }
+  }
+
+  return newData
 }
 
 const flatten = (ary) => {

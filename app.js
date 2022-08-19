@@ -29,6 +29,8 @@ const User = db1.users
 const readCsv = require('./controllers/readCsv')
 const { delay } = require('bluebird')
 const bcrypt = require('bcrypt')
+const axios = require('axios');
+const axiosRetry = require('axios-retry');
 
 let server = conf.get('server').split('/')
 server[2] = `www.${server[2]}`
@@ -71,7 +73,13 @@ async function check() {
         clothing.findOne({ where: { Page_ID: publisher.dataValues.publisherId } })])
       const updatedAtTime = publisher.dataValues.updatedAt.getTime()
       
-      if((currentTime - updatedAtTime >= refreshTimeInterval) || (!sampleProductClothList[0] && !sampleProductClothList[1])) {
+      if((currentTime - updatedAtTime) >= refreshTimeInterval || (!sampleProductClothList[0] && !sampleProductClothList[1])) {
+        const publisherUpdateInProgress = await cache.getAsync(`downloading-${publisher.dataValues.publisherId}`)
+    
+        if (publisherUpdateInProgress == 'true') {
+          continue
+        }
+
         const productClothPromises = [];
 
         productClothPromises.push(clothing.destroy({
@@ -106,6 +114,10 @@ async function check() {
                   console.log(`All redis cache data deleted for Publisher ${publisher.dataValues.publisherId}`)
                 })
             })                  
+          }).catch(error => {
+            console.log(`Error downloading and setting up csv data for publisher id ${publisher.dataValues.publisherId}`)
+            console.log(error)
+            cache.setAsync(`downloading-${publisher.dataValues.publisherId}`, false)
           })
         })     
       }
@@ -137,6 +149,7 @@ if (conf.get('install') == true) {
       user: conf.get('user'),
       password: conf.get('password'),
       host: conf.get('host'),
+      port: conf.get('dbport')
     })
     .then((connection) => {
       connection
@@ -159,6 +172,7 @@ if (conf.get('install') == true) {
         })
     })
 } else {
+  console.log('Sequelize is connected.')
   check()
 }
 
@@ -208,12 +222,12 @@ app.get('*', function (req, res) {
   }
 })
 
-httpsServer.listen(portS || 3000, function () {
-  console.log(`App is running on HTTPS mode using port: ${portS || '3001'}`)
+httpsServer.listen(portS || 3311, function () {
+  console.log(`App is running on HTTPS mode using port: ${portS || '3311'}`)
 })
 
-httpServer.listen(port || 3000, function () {
-	console.log(`App is running on HTTP mode using port: ${port || '3000'}`)
+httpServer.listen(port || 3310, function () {
+	console.log(`App is running on HTTP mode using port: ${port || '3310'}`)
 })
 
 deleteRedisData = async (pattern) => {
@@ -235,3 +249,14 @@ deleteRedisData = async (pattern) => {
     }
   })
 }
+
+axiosRetry(axios, {
+  retries: 3,
+  retryDelay: (retryCount) => {
+    console.log(`retry attempt: ${retryCount}`)
+    return retryCount * 2000
+  },
+  retryCondition: (error) => {
+    return (error == null || error.reponse == null || error.response.status !== 200 || error.response.status !== 201)
+  }
+})

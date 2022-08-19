@@ -3,7 +3,7 @@ const aff = require('../helper/affiliate')
 const jwt = require('jsonwebtoken')
 const conf = require('../middleware/prop')
 
-exports.report = async function(init,fin,siteId,){
+exports.report = async function(init,fin,siteId){
     try{
         const credentials = await aff.getAff()
             const token = jwt.sign(
@@ -30,6 +30,7 @@ exports.report = async function(init,fin,siteId,){
                 const endpoint = `${conf.get('accesstrade_endpoint')}/v1/publishers/me/reports/conversion?fromDate=${encodeURIComponent(dateInit)}&toDate=${encodeURIComponent(dateFin)}&siteId=${siteId}&campaignId=${ids[id]}&periodBase=${periodBase}&conversionStatuses=${conversion}`
 
                 try{
+                    console.log(`Calling url: ${endpoint}`)
                     const affiliateResponse = await axios.get(endpoint, {
                         headers: {
                             'Authorization': `Bearer ${token}`,
@@ -38,7 +39,6 @@ exports.report = async function(init,fin,siteId,){
                     })
                     rewards['totalReward'] = (rewards['totalReward']  || 0) + (affiliateResponse.data.totalReward || 0)
                     rewards['totalConversionsCount'] = (rewards['totalConversionsCount']  || 0) + (affiliateResponse.data.totalConversionsCount || 0)
-
                 } catch(err) {
                     console.error(err)
                     rewards['totalReward'] = 0
@@ -46,7 +46,7 @@ exports.report = async function(init,fin,siteId,){
                 }
             }
 
-            return(rewards)
+            return rewards
     }catch(err){
         console.error(err)
     }
