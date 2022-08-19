@@ -57,12 +57,12 @@ exports.check = Controller(async(req, res) => {
         
             if(err){
                 res.status(500).json(err)
-                }
-            else{
+            } else{
                 if(rows.length == 0){
                     const locId = uuidv4();
                     let publisherId = ''
-                    const websiteResponse = await website.getWebsites()                
+                    console.log(`Trying to register a new site ${site}`) 
+                    const websiteResponse = await website.getWebsites()                                   
 
                     if(websiteResponse){
                         const currentSite = websiteResponse.filter( item => item.name == site)
@@ -70,13 +70,15 @@ exports.check = Controller(async(req, res) => {
                     }
 
                     if(!publisherId){
+                        console.log(`${site} does not exists at Accesstrade, creating a new site there`) 
                         publisherId = await website.createWebsite(site,req.query.site.split('/')[0])
                     }
 
+                    console.log(`Adding site ${site} to system`) 
                     const publisherData = await addPublisher(locId,site, publisherId)
                     createClientSession(sessionId, userId, publisherData.id);
                     return res.status(200).json({success: true, message: 'Site registered'})
-                }else{
+                } else {
                     createClientSession(sessionId, userId, rows[0].id)
                     const site = rows[0].name
                     let extension = req.query.site.split(site)
@@ -84,12 +86,13 @@ exports.check = Controller(async(req, res) => {
                     if(rows[0].pages != null){
                         if(JSON.parse(rows[0].pages)[1][extension[1]] != null){
                             imgs = JSON.parse(rows[0].pages)[1][extension[1]]
-                        }else{
-                        imgs = -1 
+                        } else{
+                            imgs = -1 
                         }
-                    }else{
+                    } else{
                         imgs = -1
                     }
+                    
                     res.status(200).json({success: true, site: site, message: 'Site already registered', imgs: imgs})
                 }
             }
