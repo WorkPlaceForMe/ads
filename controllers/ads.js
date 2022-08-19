@@ -88,14 +88,14 @@ exports.getAds = Controller(async (req, res) => {
     img = await addImg(dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url, uid, site)
   }
 
-  let isImageBeingProcessed = await cache.getAsync(`downloading-${extension[1]}_${mobile}_${img_width}_${img_height}_${url}`)
+  let isImageBeingProcessed = await cache.getAsync(`downloading-${extension[1]}_${mobile}_${img_width}_${img_height}_${url}_${site}`)
     
   while (isImageBeingProcessed == 'true') {
-    isImageBeingProcessed = await cache.getAsync(`downloading-${extension[1]}_${mobile}_${img_width}_${img_height}_${url}`)
+    isImageBeingProcessed = await cache.getAsync(`downloading-${extension[1]}_${mobile}_${img_width}_${img_height}_${url}_${site}`)
     continue
   }
 
-  let cachedImg = await cache.getAsync(`${extension[1]}_${mobile}_${img_width}_${img_height}_${url}`)  
+  let cachedImg = await cache.getAsync(`${extension[1]}_${mobile}_${img_width}_${img_height}_${url}_${site}`)  
   
   if (cachedImg && cachedImg !== '{}' && cachedImg !== '[]'){
     if(img && publisher){
@@ -106,7 +106,7 @@ exports.getAds = Controller(async (req, res) => {
         results: JSON.parse(cachedImg)
     })
   } else{  
-    await cache.setAsync(`downloading-${extension[1]}_${mobile}_${img_width}_${img_height}_${url}`, true)
+    await cache.setAsync(`downloading-${extension[1]}_${mobile}_${img_width}_${img_height}_${url}_${site}`, true)
 
     let formData = new FormData()
     formData.append('upload', request(url))
@@ -133,22 +133,26 @@ exports.getAds = Controller(async (req, res) => {
       console.log("Response received from Vista Server")
       const objetos = await readCsv.readCsv(aut['idP'])
       let resultsVista
+      
       if (response.data) {
           resultsVista = response.data.results
       }
+      
       const resultsAffiliate = await filler(resultsVista, serv, img_width, img_height, site, url, uid, objetos, mobile)
       let flat = flatten(resultsAffiliate)
+      
       if (flat.length > limit) {
         flat = getDiversifiedResults(flat, limit)
       }
+      
       const sendingResults = await convert(flat)
-      cache.setAsync(`${extension[1]}_${mobile}_${img_width}_${img_height}_${url}`, JSON.stringify(sendingResults))   
+      cache.setAsync(`${extension[1]}_${mobile}_${img_width}_${img_height}_${url}_${site}`, JSON.stringify(sendingResults))   
     
       if(img && publisher){
         await createClientImgPublData(userId, sessionId, img.id, img.img, publisher.id);
       }
 
-      await cache.setAsync(`downloading-${extension[1]}_${mobile}_${img_width}_${img_height}_${url}`, false)
+      await cache.setAsync(`downloading-${extension[1]}_${mobile}_${img_width}_${img_height}_${url}_${site}`, false)
         
       res.status(200).send({
         results: sendingResults
@@ -156,8 +160,8 @@ exports.getAds = Controller(async (req, res) => {
     } catch (err) {
       console.log('Error in processing')
       console.log(err)
-      await cache.setAsync(`downloading-${extension[1]}_${mobile}_${img_width}_${img_height}_${url}`, false)
-      await cache.setAsync(`${extension[1]}_${mobile}_${img_width}_${img_height}_${url}`, JSON.stringify({}));
+      await cache.setAsync(`downloading-${extension[1]}_${mobile}_${img_width}_${img_height}_${url}_${site}`, false)
+      await cache.setAsync(`${extension[1]}_${mobile}_${img_width}_${img_height}_${url}_${site}`, JSON.stringify({}));
       return res.status(500).json({ success: false, message: "Vista Image failled", error: err, img: url })
     }
   }
