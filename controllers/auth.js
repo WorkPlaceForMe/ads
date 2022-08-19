@@ -70,7 +70,7 @@ exports.check = Controller(async(req, res) => {
                     }
 
                     if(!publisherId){
-                        console.log(`${site} does not exists at Accesstrade, creating a new site there`) 
+                        console.log(`${site} does not exist at Accesstrade, creating a new site there`) 
                         publisherId = await website.createWebsite(site,req.query.site.split('/')[0])
                     }
 

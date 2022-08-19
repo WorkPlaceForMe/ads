@@ -63,8 +63,6 @@ exports.getAds = Controller(async (req, res) => {
   const password = conf.get('vista_api_password')
 
   const apiEndpoint = '/api/v1/sync'
-  let img = null;
-  let publisher = null;
     
   // getting query strings
   const { img_width, img_height, url, site, uid, serv, mobile, userId, sessionId } = req.query
@@ -82,6 +80,14 @@ exports.getAds = Controller(async (req, res) => {
     return res.status(400).json({ success: false, message: "Unauthorized" })
   }
 
+  let publisher = await getPublisher(checker);
+  let img = await getImg(url, site)
+
+  if(!img){
+    console.log(`Image ${url} does not exist for site ${site} - adding it`)
+    img = await addImg(dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url, uid, site)
+  }
+
   let isImageBeingProcessed = await cache.getAsync(`downloading-${extension[1]}_${mobile}_${img_width}_${img_height}_${url}`)
     
   while (isImageBeingProcessed == 'true') {
@@ -92,9 +98,6 @@ exports.getAds = Controller(async (req, res) => {
   let cachedImg = await cache.getAsync(`${extension[1]}_${mobile}_${img_width}_${img_height}_${url}`)  
   
   if (cachedImg && cachedImg !== '{}' && cachedImg !== '[]'){
-    img = await getImg(url, site)
-    publisher = await getPublisher(checker)
-
     if(img && publisher){
       await createClientImgPublData(userId, sessionId, img.id, img.img, publisher.id)
     }
@@ -108,6 +111,7 @@ exports.getAds = Controller(async (req, res) => {
     let formData = new FormData()
     formData.append('upload', request(url))
     formData.append('subscriptions', 'face,fashion,Object,tags2,sport')
+    
     const request_config = {
         method: 'post',
         url: vista_url + apiEndpoint,
@@ -138,16 +142,8 @@ exports.getAds = Controller(async (req, res) => {
         flat = getDiversifiedResults(flat, limit)
       }
       const sendingResults = await convert(flat)
-      cache.setAsync(`${extension[1]}_${mobile}_${img_width}_${img_height}_${url}`, JSON.stringify(sendingResults))
-
-      img = await getImg(url, site)
-
-      if(!img){
-        img = await addImg(dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url, uid, site)
-      }
-      
-      publisher = await getPublisher(checker);
-
+      cache.setAsync(`${extension[1]}_${mobile}_${img_width}_${img_height}_${url}`, JSON.stringify(sendingResults))   
+    
       if(img && publisher){
         await createClientImgPublData(userId, sessionId, img.id, img.img, publisher.id);
       }
