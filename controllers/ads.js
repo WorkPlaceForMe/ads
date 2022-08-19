@@ -92,7 +92,7 @@ exports.getAds = Controller(async (req, res) => {
   let cachedImg = await cache.getAsync(`${extension[1]}_${mobile}_${img_width}_${img_height}_${url}`)  
   
   if (cachedImg && cachedImg !== '{}' && cachedImg !== '[]'){
-    img = await getImg(url)
+    img = await getImg(url, site)
     publisher = await getPublisher(checker)
 
     if(img && publisher){
@@ -140,7 +140,7 @@ exports.getAds = Controller(async (req, res) => {
       const sendingResults = await convert(flat)
       cache.setAsync(`${extension[1]}_${mobile}_${img_width}_${img_height}_${url}`, JSON.stringify(sendingResults))
 
-      img = await getImg(url)
+      img = await getImg(url, site)
 
       if(!img){
         img = await addImg(dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url, uid, site)
@@ -180,9 +180,9 @@ const addImg = (time, imgName, idGeneration, site) => {
   })
 }
 
-const getImg = (url) => {
+const getImg = (url, site) => {
   return imgsPage.findOne({
-    where: { img: url }
+    where: { img: url, site: site}
   })
 }
 
