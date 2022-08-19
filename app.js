@@ -62,8 +62,7 @@ app.all(function (req, res, next) {
 })
 
 async function check() {
-  const currentTime = new Date().getTime()
-  const publisherList = await publishers.findAll({
+    const publisherList = await publishers.findAll({
     attributes: ['publisherId', 'name', 'updatedAt']
   })
   
@@ -72,6 +71,7 @@ async function check() {
       const sampleProductClothList = await Promise.all([products.findOne({ where: { Page_ID: publisher.dataValues.publisherId } }), 
         clothing.findOne({ where: { Page_ID: publisher.dataValues.publisherId } })])
       const updatedAtTime = publisher.dataValues.updatedAt.getTime()
+      const currentTime = new Date().getTime()
       
       if((currentTime - updatedAtTime) >= refreshTimeInterval || (!sampleProductClothList[0] && !sampleProductClothList[1])) {
         const publisherUpdateInProgress = await cache.getAsync(`downloading-${publisher.dataValues.publisherId}`)
@@ -83,13 +83,11 @@ async function check() {
         const productClothPromises = [];
 
         productClothPromises.push(clothing.destroy({
-          where: { Page_ID: publisher.dataValues.publisherId },
-          truncate: true
+          where: { Page_ID: publisher.dataValues.publisherId }
         }))
         
         productClothPromises.push(products.destroy({
-          where: { Page_ID: publisher.dataValues.publisherId },
-          truncate: true
+          where: { Page_ID: publisher.dataValues.publisherId }
         }))
         
         Promise.all(productClothPromises).then(() => {
@@ -257,6 +255,7 @@ axiosRetry(axios, {
     return retryCount * 2000
   },
   retryCondition: (error) => {
-    return (error == null || error.reponse == null || error.response.status !== 200 || error.response.status !== 201)
+    return (error == null || error.reponse == null || error.response.status !== 200 || 
+      error.response.status !== 201 || error.response.status !== 404 )
   }
 })

@@ -42,7 +42,7 @@ exports.readCsv = function(data, id) {
           const products = await Promise.all(promises)
           var receiveDate = new Date().getTime()
           var responseTimeMs = receiveDate - sendDate
-          console.log(`Completed setup for provider Big C in ${responseTimeMs}ms`)   
+          console.log(`Completed setup for site ${id} for provider Big C in ${responseTimeMs}ms`)   
           const dataValues = products.map((objects) => objects.dataValues)
     
           resolve(dataValues)

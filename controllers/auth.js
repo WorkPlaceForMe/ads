@@ -1,6 +1,6 @@
 const Controller = require('../helper/controller')
 const db = require('../helper/dbconnection')
-const crt = require('../helper/createWebsite')
+const website = require('../helper/website')
 const { v4: uuidv4 } = require('uuid')
 const seq = require('../campaigns-db/database')
 
@@ -44,40 +44,60 @@ exports.iframe = Controller(async(req, res) => {
 exports.check = Controller(async(req, res) => {   
     let userId = req.query.userId;
     let sessionId = req.query.sessionId;
-    let checker = req.query.site.split('/')[2];
-    if(checker.includes('www.')){
-        checker = checker.split('w.')[1]
+    let site = req.query.site.split('/')[2];
+    
+    if(site.includes('www.')){
+        site = site.split('w.')[1]
     }
-    checkSite(checker, async function(err,rows){
-        let data = null;
-       
-        if(err){
-            res.status(500).json(err);
-            }
-        else{
-            if(rows.length == 0){
-                const locId = uuidv4();
-                const data = await crt.create(locId,checker,req.query.site.split('/')[0])
-                createClientSession(sessionId, userId, data.id);
-                return res.status(200).json({success: true, message: 'Site registered'});
-            }else{
-                createClientSession(sessionId, userId, rows[0].id);
-                const site = rows[0].name
-                let extension = req.query.site.split(checker)
-                let imgs
-                if(rows[0].pages != null){
-                    if(JSON.parse(rows[0].pages)[1][extension[1]] != null){
-                        imgs = JSON.parse(rows[0].pages)[1][extension[1]]
-                    }else{
-                       imgs = -1 
-                    }
-                }else{
-                    imgs = -1
+    
+    
+    checkSite(site, async function(err,rows){
+        try {
+            let data = null
+        
+            if(err){
+                res.status(500).json(err)
                 }
-                res.status(200).json({success: true, site: site, message: 'Site already registered', imgs: imgs});
+            else{
+                if(rows.length == 0){
+                    const locId = uuidv4();
+                    let publisherId = ''
+                    const websiteResponse = await website.getWebsites()                
+
+                    if(websiteResponse){
+                        const currentSite = websiteResponse.filter( item => item.name == site)
+                        publisherId = currentSite[0] ? currentSite[0].id : ''
+                    }
+
+                    if(!publisherId){
+                        publisherId = await website.createWebsite(site,req.query.site.split('/')[0])
+                    }
+
+                    const publisherData = await addPublisher(locId,site, publisherId)
+                    createClientSession(sessionId, userId, publisherData.id);
+                    return res.status(200).json({success: true, message: 'Site registered'})
+                }else{
+                    createClientSession(sessionId, userId, rows[0].id)
+                    const site = rows[0].name
+                    let extension = req.query.site.split(site)
+                    let imgs
+                    if(rows[0].pages != null){
+                        if(JSON.parse(rows[0].pages)[1][extension[1]] != null){
+                            imgs = JSON.parse(rows[0].pages)[1][extension[1]]
+                        }else{
+                        imgs = -1 
+                        }
+                    }else{
+                        imgs = -1
+                    }
+                    res.status(200).json({success: true, site: site, message: 'Site already registered', imgs: imgs})
+                }
             }
+        } catch(err){
+            console.log(`Error in registering site ${site}`)
+            console.log(err)
         }
-    })
+    })    
 })
 
 function check(id,callback){
@@ -106,4 +126,13 @@ function getClientId(clientId) {
     return seq.client.findOne({
       where: { id: clientId }
     })
+}
+
+function addPublisher(id,site,idAffiliate){
+    return seq.publishers.create({
+        id: id,
+        name: site,
+        enabled: 'true',
+        publisherId: idAffiliate
+        })
 }

@@ -439,23 +439,9 @@ const getStatsUrl = (req) => {
                     req.query.url,
                   )[1]
                   const def = conf.get('max_ads_per_image') || 4
-                  let adsPerImage, imgPerPage
-                  if (ids[0].pages != null) {
-                    const pages = JSON.parse(ids[0].pages)
-                    if (pages[0][extension] != null) {
-                      adsPerImage = pages[0][extension]
-                    } else {
-                      adsPerImage = def
-                    }
-                    if (pages[1][extension] != null) {
-                      imgPerPage = pages[1][extension]
-                    } else {
-                      imgPerPage = imgsGrouped[Object.keys(imgsGrouped)[i]]
-                    }
-                  } else {
-                    adsPerImage = def
-                    imgPerPage = imgsGrouped[Object.keys(imgsGrouped)[i]]
-                  }
+                
+                  let adsPerImage = def
+                  let imgPerPage = imgsGrouped[Object.keys(imgsGrouped)[i]]
 
                   table[i] = {
                     url: Object.keys(imgsGrouped)[i],

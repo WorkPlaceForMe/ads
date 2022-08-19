@@ -123,10 +123,6 @@ exports.getAds = Controller(async (req, res) => {
        
     let limit = conf.get('max_ads_per_image') || 4
     
-    if(aut['pages'] != null && JSON.parse(aut['pages'])[0] != null){
-        limit = JSON.parse(aut['pages'])[0][extension[1]]
-    }
-    
     try {
       console.log("Sending request to Vista Server")
       const response = await axios(request_config)

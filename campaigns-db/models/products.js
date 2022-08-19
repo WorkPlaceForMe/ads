@@ -54,7 +54,7 @@ module.exports = (sequelize, Sequelize) => {
     allowNull: true
   },
   Page_ID:{
-    type: Sequelize.INTEGER,
+    type: Sequelize.STRING,
     allowNull: true
   },
   label: {

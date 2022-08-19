@@ -308,30 +308,10 @@ exports.getStatsUrl = Controller(async(req, res) => {
                                 }
 
                                 let extension = Object.keys(imgsGrouped)[i].split(req.query.url)[1]
-                                const def = conf.get('max_ads_per_image') || 4;
-                                let adsPerImage, imgPerPage, totImgs
-                                if(ids[0].pages != null){
-                                    const pages = JSON.parse(ids[0].pages)
-                                    if(pages[0][extension] != null){
-                                        adsPerImage = pages[0][extension]
-                                    }else{
-                                        adsPerImage = def
-                                    }
-                                    if(pages[1][extension] != null){
-                                        imgPerPage = pages[1][extension]
-                                    }else{
-                                        imgPerPage = imgsGrouped[Object.keys(imgsGrouped)[i]]
-                                    }
-                                    if(pages[2][extension] != null){
-                                        totImgs = pages[2][extension]
-                                    }else{
-                                        totImgs = imgsGrouped[Object.keys(imgsGrouped)[i]]
-                                    }
-                                }else{
-                                    adsPerImage = def
-                                    imgPerPage = imgsGrouped[Object.keys(imgsGrouped)[i]]
-                                    totImgs = imgsGrouped[Object.keys(imgsGrouped)[i]]
-                                }
+                                const def = conf.get('max_ads_per_image') || 4                               
+                                let adsPerImage = def
+                                let imgPerPage = imgsGrouped[Object.keys(imgsGrouped)[i]]
+                                let totImgs = imgsGrouped[Object.keys(imgsGrouped)[i]]
 
                                 table[i] = {
                                     url : Object.keys(imgsGrouped)[i],
@@ -349,15 +329,18 @@ exports.getStatsUrl = Controller(async(req, res) => {
                                     totImgs: totImgs
                                 }
                             }
+                            
                             if(table.length == 0){
                                 table.push({"url":"/","clicksPerImg":0,"viewsPerImg":0,"clicksPerAd":0,"viewsPerAd":0,"ctr":0,"images":0,"ads":0,"clicks":0,"views":0,"adsNum":0,"imgNum":0,"totImgs":0})
                             }
+                            
                             let rewards = {};
                             const init = new Date(req.query.init).toISOString();
                             const fin = new Date(req.query.fin).toISOString();
+                            
                             try{                              
                                 rewards = await reportAff.report(init, fin,ids[0].publisherId)
-                            }catch(err){
+                            } catch(err){
                                 rewards['totalReward'] = 0;
                                 rewards['totalConversionsCount'] = 0;
                             }

@@ -54,7 +54,7 @@ const clothing = sequelize.define("clothing", {
         allowNull: true
       },
       Page_ID:{
-        type: Sequelize.INTEGER,
+        type: Sequelize.STRING,
         allowNull: true
       },
       Gender:{
