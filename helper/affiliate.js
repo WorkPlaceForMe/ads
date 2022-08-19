@@ -17,7 +17,7 @@ exports.getAff = async function(){
                 Authorization: userPass
             }
         })
-        return(affiliateResponse.data)
+        return affiliateResponse.data
     } catch(err) {
         console.error(err)
         return(err)

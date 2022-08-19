@@ -58,29 +58,34 @@ exports.readCsv = async (publisherId) => {
       
       try {
         for (const provider of providers){
-          const credentials = await aff.getAff()
-          const token = jwt.sign(
-            { sub: credentials.userUid },
-            credentials.secretKey,
-            {
-              algorithm: 'HS256',
-            },
-          )   
+          try {
+            const credentials = await aff.getAff()
+            const token = jwt.sign(
+              { sub: credentials.userUid },
+              credentials.secretKey,
+              {
+                algorithm: 'HS256',
+              },
+            )            
+         
+            let affiliateEndpoint = `${conf.get(
+                'accesstrade_endpoint',
+              )}/v1/publishers/me/sites/${publisherId}/campaigns/${provider.id}/productfeed/url`
 
-          let affiliateEndpoint = `${conf.get(
-              'accesstrade_endpoint',
-            )}/v1/publishers/me/sites/${publisherId}/campaigns/${provider.id}/productfeed/url`
+            console.log(`Downloading data for site ${publisherId} for provider ${provider.label} affiliateEndpoint ${affiliateEndpoint}`)
+            
+            const affiliateResponse = await axios.get(affiliateEndpoint, {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                'X-Accesstrade-User-Type': 'publisher',
+              },
+            })        
 
-          console.log(`Downloading data for site ${publisherId} for provider ${provider.label} affiliateEndpoint ${affiliateEndpoint}`)
-          
-          const affiliateResponse = await axios.get(affiliateEndpoint, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              'X-Accesstrade-User-Type': 'publisher',
-            },
-          })          
-
-          downloadPromises.push(download(affiliateResponse.data.baseUrl, publisherId, provider))            
+            downloadPromises.push(download(affiliateResponse.data.baseUrl, publisherId, provider))
+          } catch(err) {
+            console.log(`Error downloading csv data site ${publisherId} for provider ${provider.label}`)
+            console.log(err)
+          } 
         }
 
         await Promise.all(downloadPromises)
