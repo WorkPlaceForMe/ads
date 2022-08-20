@@ -13,6 +13,7 @@ const  topsCsvReader  = require('./provider/topsCsvReader')
 const  jdCentralCsvReader  = require('./provider/jdCentralCsvReader')
 const  centralCsvReader  = require('./provider/centralCsvReader')
 const db = require('../campaigns-db/database')
+const { v4: uuidv4 } = require('uuid')
 const products = db.products
 const clothing = db.clothing
 
@@ -116,8 +117,9 @@ exports.readCsv = async (publisherId) => {
 const download = (url, publisherId, provider) => {
   let csv = ''
 
-  return new Promise((resolve, reject) => {  
-    const csvFileName = `csv/${provider.id}-${publisherId}.csv`
+  return new Promise((resolve, reject) => {
+    const uuid = uuidv4();  
+    const csvFileName = `csv/${provider.id}-${publisherId}-${uuid}.csv`
     
     try {
       var sendDate = new Date().getTime()
