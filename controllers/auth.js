@@ -8,43 +8,30 @@ exports.auth = Controller(async(req, res) => {
 
     check(req.params.id, function(err,rows){
         if(err){
-            res.status(500).json(err);
+            res.status(500).json(err)
             }
         else{
             if(rows.length == 0){
-                return res.status(401).json({success: false, type: 'notFound', message: 'Secret Code not valid'});
+                return res.status(401).json({success: false, type: 'notFound', message: 'Secret Code not valid'})
             }else{
                 const site = rows[0].name
-                res.status(200).json({success: true, site: site});
+                res.status(200).json({success: true, site: site})
             }
         }
     })
 })
 
 exports.iframe = Controller(async(req, res) => {    
-    let userId = req.query.userId;
-    let sessionId = uuidv4();
-    
-    if (userId) {
-        const clientIdFromDB = await getClientId(userId);
-        
-        if(!clientIdFromDB){
-            userId = '';
-        }
-    } 
-    
-    if (!userId) {
-        userId = uuidv4();
-        createClientId(userId);
-    } 
+    const userId = await getClientId(req.query.userId)
+    const sessionId = uuidv4()
 
-    return res.status(200).json({userId: userId, sessionId: sessionId});
+    return res.status(200).json({userId: userId, sessionId: sessionId})
 })
 
 exports.check = Controller(async(req, res) => {   
-    let userId = req.query.userId;
-    let sessionId = req.query.sessionId;
-    let site = req.query.site.split('/')[2];
+    const userId = await getClientId(req.query.userId)
+    const sessionId = req.query.sessionId
+    let site = req.query.site.split('/')[2]
     
     if(site.includes('www.')){
         site = site.split('w.')[1]
@@ -76,10 +63,20 @@ exports.check = Controller(async(req, res) => {
 
                     console.log(`Adding site ${site} to system`) 
                     const publisherData = await addPublisher(locId,site, publisherId)
-                    createClientSession(sessionId, userId, publisherData.id);
+
+                    const clientSession = await getClientSessionBySessionId(sessionId)
+
+                    if(!clientSession) {
+                        createClientSession(sessionId, userId, publisherData.id)
+                    }
                     return res.status(200).json({success: true, message: 'Site registered'})
                 } else {
-                    createClientSession(sessionId, userId, rows[0].id)
+                    const clientSession = await getClientSessionBySessionId(sessionId)
+
+                    if(!clientSession) {
+                        createClientSession(sessionId, userId, rows[0].id)
+                    }
+
                     const site = rows[0].name
                     let extension = req.query.site.split(site)
                     let imgs
@@ -125,12 +122,6 @@ function createClientSession(sessionId, clientId, publisherId) {
   })
 }
 
-function getClientId(clientId) {
-    return seq.client.findOne({
-      where: { id: clientId }
-    })
-}
-
 function addPublisher(id,site,idAffiliate){
     return seq.publishers.create({
         id: id,
@@ -138,4 +129,30 @@ function addPublisher(id,site,idAffiliate){
         enabled: 'true',
         publisherId: idAffiliate
         })
+}
+
+async function getClientId(userId){
+
+    if (userId && userId != 'null') {
+        const clientIdFromDB = await seq.client.findOne({
+            where: { id: userId }
+        })
+        
+        if(!clientIdFromDB){
+            userId = ''
+        }
+    } 
+    
+    if (!userId || userId == 'null') {
+        userId = uuidv4()
+        createClientId(userId)
+    } 
+
+    return userId
+}
+
+async function getClientSessionBySessionId(sessionId) {
+    return seq.clientSession.findOne({
+      where: { id: sessionId }
+    })
 }
