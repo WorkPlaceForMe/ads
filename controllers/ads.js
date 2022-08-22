@@ -83,51 +83,52 @@ exports.getAds = Controller(async (req, res) => {
   let publisher = await getPublisher(checker);
   let img = await getImg(url, site)
 
-  if(!img){
-    console.log(`Image ${url} does not exist for site ${site} - adding it`)
-    img = await addImg(dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url, uid, site)
-  }
 
-  let isImageBeingProcessed = await cache.getAsync(`downloading-${extension[1]}_${mobile}_${img_width}_${img_height}_${url}_${site}`)
-    
-  while (isImageBeingProcessed == 'true') {
-    isImageBeingProcessed = await cache.getAsync(`downloading-${extension[1]}_${mobile}_${img_width}_${img_height}_${url}_${site}`)
-    continue
-  }
-
-  let cachedImg = await cache.getAsync(`${extension[1]}_${mobile}_${img_width}_${img_height}_${url}_${site}`)  
-  
-  if (cachedImg && cachedImg !== '{}' && cachedImg !== '[]'){
-    if(img && publisher){
-      await createClientImgPublData(userId, sessionId, img.id, img.img, publisher.id)
+  try {
+    if(!img){
+      console.log(`Image ${url} does not exist for site ${site} - adding it`)
+      img = await addImg(dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url, uid, site)
     }
 
-    return res.status(200).send({
-        results: JSON.parse(cachedImg)
-    })
-  } else{  
-    await cache.setAsync(`downloading-${extension[1]}_${mobile}_${img_width}_${img_height}_${url}_${site}`, true)
-
-    let formData = new FormData()
-    formData.append('upload', request(url))
-    formData.append('subscriptions', 'face,fashion,Object,tags2,sport')
-    
-    const request_config = {
-        method: 'post',
-        url: vista_url + apiEndpoint,
-        headers: {
-            'Content-Type': `multipart/form-data; boundary=${formData._boundary}`
-        },
-        auth: {
-            username: user,
-            password: password
-        },
-        data: formData
+    let isImageBeingProcessed = await cache.getAsync(`downloading-${extension[1]}_${mobile}_${img_width}_${img_height}_${url}_${site}`)
+      
+    while (isImageBeingProcessed == 'true') {
+      isImageBeingProcessed = await cache.getAsync(`downloading-${extension[1]}_${mobile}_${img_width}_${img_height}_${url}_${site}`)
+      continue
     }
+
+    let cachedImg = await cache.getAsync(`${extension[1]}_${mobile}_${img_width}_${img_height}_${url}_${site}`)  
+    
+    if (cachedImg && cachedImg !== '{}' && cachedImg !== '[]'){
+      if(img && publisher){
+        await createClientImgPublData(userId, sessionId, img.id, img.img, publisher.id)
+      }
+
+      return res.status(200).send({
+          results: JSON.parse(cachedImg)
+      })
+    } else{  
+      await cache.setAsync(`downloading-${extension[1]}_${mobile}_${img_width}_${img_height}_${url}_${site}`, true)
+
+      let formData = new FormData()
+      formData.append('upload', request(url))
+      formData.append('subscriptions', 'face,fashion,Object,tags2,sport')
+      
+      const request_config = {
+          method: 'post',
+          url: vista_url + apiEndpoint,
+          headers: {
+              'Content-Type': `multipart/form-data; boundary=${formData._boundary}`
+          },
+          auth: {
+              username: user,
+              password: password
+          },
+          data: formData
+      }
        
-    let limit = conf.get('max_ads_per_image') || 4
-    
-    try {
+      let limit = conf.get('max_ads_per_image') || 4
+  
       console.log("Sending request to Vista Server")
       const response = await axios(request_config)
       console.log("Response received from Vista Server")
@@ -157,14 +158,14 @@ exports.getAds = Controller(async (req, res) => {
       res.status(200).send({
         results: sendingResults
       })
-    } catch (err) {
+    } 
+  } catch (err) {
       console.log('Error in processing')
       console.log(err)
       await cache.setAsync(`downloading-${extension[1]}_${mobile}_${img_width}_${img_height}_${url}_${site}`, false)
       await cache.setAsync(`${extension[1]}_${mobile}_${img_width}_${img_height}_${url}_${site}`, JSON.stringify({}));
       return res.status(500).json({ success: false, message: "Vista Image failled", error: err, img: url })
     }
-  }
 })
 
 function getAllCientImgPublData(site) {
