@@ -533,13 +533,15 @@ const getStatsImg = (req) => {
                     adsTotal = 0
                   }
                   let click = clicks[rows[i].img]
-                  if (click == undefined) {
+                  if (!click) {
                     click = 0
                   }
+                  
                   let view = views[rows[i].img]
-                  if (view == undefined) {
+                  if (!view) {
                     view = 0
                   }
+                  
                   let ctr = Math.round((click / view) * 100) / 100
                   if (Number.isNaN(ctr)) {
                     ctr = 0
@@ -554,11 +556,6 @@ const getStatsImg = (req) => {
                     ctr: ctr,
                     ads: adsTotal,
                   })
-                  if(i != rows.length - 1){
-                    if (rows[i].idGeneration != rows[i + 1].idGeneration) {
-                      break
-                    }
-                  }
                 }
                 resolve(imgs)
               }

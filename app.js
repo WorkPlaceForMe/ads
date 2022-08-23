@@ -15,8 +15,8 @@ const https = require('https')
 const http = require('http')
 const fs = require('fs')
 const options = {
-  key: fs.readFileSync('key.pem'),
-  cert: fs.readFileSync('cert.pem'),
+  key: fs.readFileSync(conf.get('ssl_key_file_path')),
+  cert: fs.readFileSync(conf.get('ssl_cert_file_path'))
 }
 const sequelize = require('./campaigns-db/database')
 const httpsServer = https.createServer(options, app)

@@ -8,6 +8,7 @@ const convert = require('../helper/convertObject').convert
 const dateFormat = require('dateformat')
 const auth = require('../helper/auth')
 const cache = require('../helper/cacheManager')
+const { getStrippedURL } = require('../helper/util')
 const db1 = require('../campaigns-db/database')
 const imgsPage = db1.imgsPage
 const publishers = db1.publishers
@@ -65,7 +66,12 @@ exports.getAds = Controller(async (req, res) => {
   const apiEndpoint = '/api/v1/sync'
     
   // getting query strings
-  const { img_width, img_height, url, site, uid, serv, mobile, userId, sessionId } = req.query
+  let { img_width, img_height, url, site, uid, serv, mobile, userId, sessionId } = req.query
+
+  if(site){
+    site = getStrippedURL(site)
+  }
+
   let checker = site.split('/')[2];
   if (checker.includes('www.')) {
       checker = checker.split('w.')[1]
@@ -83,10 +89,9 @@ exports.getAds = Controller(async (req, res) => {
   let publisher = await getPublisher(checker);
   let img = await getImg(url, site)
 
-
   try {
     if(!img){
-      console.log(`Image ${url} does not exist for site ${site} - adding it`)
+      console.log(`Image ${url} does not exist for page ${site} - adding it`)
       img = await addImg(dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url, uid, site)
     }
 

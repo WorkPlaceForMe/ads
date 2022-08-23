@@ -394,11 +394,13 @@ exports.getStatsImg = Controller(async(req, res) => {
                                     adsTotal = 0
                                 }
                                 let click = clicks[img]
-                                if(click == undefined){
+                                
+                                if(!click){
                                     click = 0
                                 }
+                                
                                 let view = views[img]
-                                if(view == undefined){
+                                if(!view){
                                     view = 0
                                 }
                                 let ctr = Math.round((click / view) * 100) / 100
@@ -406,12 +408,7 @@ exports.getStatsImg = Controller(async(req, res) => {
                                     ctr = 0
                                 }
                                 imgs.push({img: rows[i].img, title: rows[i].img.split('/')[rows[i].img.split('/').length - 1],clicks : click, views: view, ctr: ctr, ads: adsTotal})
-                                if(rows[i + 1] == undefined){
-                                    break;
-                                }
-                                if(rows[i].idGeneration != rows[i + 1].idGeneration){
-                                    break;
-                                }
+                    
                             }
                             res.status(200).json({success: true, table: imgs});
                         }

@@ -1,6 +1,7 @@
 const Controller = require('../helper/controller')
 const dateFormat = require('dateformat');
 const db = require('../campaigns-db/database')
+const { getStrippedURL } = require('../helper/util')
 
 exports.postData = Controller(async(req, res) => {
 
@@ -10,6 +11,10 @@ exports.postData = Controller(async(req, res) => {
     
     if (site.includes('www.')) {
         site = site.split('w.')[1]
+    }
+    
+    if(data.url){
+      data.url = getStrippedURL(data.url)
     }
 
     try{
