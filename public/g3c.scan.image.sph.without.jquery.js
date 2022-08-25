@@ -33,7 +33,7 @@ $(document).on('mousedown', 'a.but1', function (e) {
 			time: new Date(),
 			url: window.location.href,
 			type: 1,
-			idItem: $(this).closest('div.ad-image-div').find('a').attr('id'),
+			idItem: $(this).closest('.ad-image-div').find('a').attr('id'),
 			img: getImageURL(this),
 			userId: userId,
 			sessionId: sessionId,
@@ -59,7 +59,7 @@ $(document).on('mousedown', 'a.but2', function (e) {
 			time: new Date(),
 			url: window.location.href,
 			type: 2,
-			idItem: $(this).closest('div.ad-image-div').find('a').attr('id'),
+			idItem: $(this).closest('.ad-image-div').find('a').attr('id'),
 			img: getImageURL(this),
 			userId: userId,
 			sessionId: sessionId,
@@ -213,7 +213,7 @@ $(document).on('click', '.closeBut', function () {
 						time: new Date(),
 						url: window.location.href,
 						type: 1,
-						idItem: $(this).closest('div.ad-image-div').find('a').attr('id'),
+						idItem: $(this).closest('.ad-image-div').find('a').attr('id'),
 						img: getImageURL(this),
 						userId: userId,
 						sessionId: sessionId,
@@ -299,6 +299,7 @@ $(document).on('click', '.closeBut', function () {
 			c.style.position = 'relative'
 			c.className = 'ad-image-div'
 		} else {
+			c = document.createElement('span')
 			c.className = 'ad-image-div background-img-class'
 		}
 
@@ -571,7 +572,7 @@ function iconAndSize(file, big){
 }
 
 function getImageURL(element){
-	let imageURL = $(element).closest('div.ad-image-div').find('img').prop('src')
+	let imageURL = $(element).closest('.ad-image-div').find('img').prop('src')
 
 	if($(element).closest('div.background-img-class').length > 0){
 		$(element).closest('div.background-img-class').find('a, span, div').filter(function() {
