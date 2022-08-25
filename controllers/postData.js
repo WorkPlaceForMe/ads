@@ -18,8 +18,8 @@ exports.postData = Controller(async(req, res) => {
     }
 
     try{
-        await add(data.type,nD,data.url,data.idItem,data.img);
-        let img = await getImg(data.img);
+        await add(data.type, nD, data.url, data.idItem, data.img);
+        let img = await getImg(data.img, data.url);
         let publisher = await getPublisher(site);
 
         if(img && publisher){
@@ -41,10 +41,10 @@ async function add(type,date,url,id,img) {
     })
 }
 
-function getImg(url){
-    return db.imgsPage.findOne({
-      where: { img: url }
-    });
+function getImg(url, site){
+  return db.imgsPage.findOne({
+    where: { img: url, site: site}
+  })
 }
   
 function getPublisher(site) {

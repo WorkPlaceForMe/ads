@@ -34,7 +34,7 @@ $(document).on('mousedown', 'a.but1', function (e) {
 			url: window.location.href,
 			type: 1,
 			idItem: $(this).closest('div.ad-image-div').find('a').attr('id'),
-			img: $(this).closest('div.ad-image-div').find('img').prop('src'),
+			img: getImageURL(this),
 			userId: userId,
 			sessionId: sessionId,
 			site: window.location.href
@@ -60,7 +60,7 @@ $(document).on('mousedown', 'a.but2', function (e) {
 			url: window.location.href,
 			type: 2,
 			idItem: $(this).closest('div.ad-image-div').find('a').attr('id'),
-			img: $(this).closest('div.ad-image-div').find('img').prop('src'),
+			img: getImageURL(this),
 			userId: userId,
 			sessionId: sessionId,
 			site: window.location.href
@@ -214,7 +214,7 @@ $(document).on('click', '.closeBut', function () {
 						url: window.location.href,
 						type: 1,
 						idItem: $(this).closest('div.ad-image-div').find('a').attr('id'),
-						img: $(this).closest('div.ad-image-div').find('img').prop('src'),
+						img: getImageURL(this),
 						userId: userId,
 						sessionId: sessionId,
 						site: window.location.href
@@ -295,8 +295,13 @@ $(document).on('click', '.closeBut', function () {
 	}
 	function g(b) {
 		var c = document.createElement('div')
-		c.style.position = 'relative'
-		c.className = 'ad-image-div'
+		if($(b).is('img')){
+			c.style.position = 'relative'
+			c.className = 'ad-image-div'
+		} else {
+			c.className = 'ad-image-div background-img-class'
+		}
+
 		var d = b.cloneNode(!0)
 		return a(d).appendTo(c), b.parentNode.replaceChild(c, b), c
 	}
@@ -375,11 +380,20 @@ $(document).on('click', '.closeBut', function () {
 	;
 	let num = 0;
 	(a.GM = {}),
-		(a.GM.IMLayer = function (a, b) {
-			;(this.imgsrc = a),
-				(this.celement = b),
-				(this.cur_width = b.width),
-				(this.cur_height = b.height)
+		(a.GM.IMLayer = function (a, b, width, height) {
+				this.imgsrc = a
+				this.celement = b
+
+				if(width){
+					this.cur_width = width
+				} else {
+					this.cur_width = b.width
+				}
+				if(height){
+					this.cur_height = height
+				} else {
+					this.cur_height = b.height
+				}
 		}),
 		a.extend(a.GM.IMLayer.prototype, {
 			imageProcess: function () {
@@ -524,9 +538,15 @@ $(document).on('click', '.closeBut', function () {
 		pe = window.location.href
 		$(document).ready(function () {
 			var b = []
-			a('img').each(function () {
-					b.push(new a.GM.IMLayer(a(this).prop('src'), a(this)[0]))
-				})
+			$('a, span, div').filter(function() {
+				return this.style.backgroundImage
+			}).each(function() {
+				let imageURL = $(this).css("backgroundImage").replace('url(','').replace(')','').replace(/\"/gi, "")
+				b.push(new a.GM.IMLayer(imageURL, a(this)[0], $(this).width(), $(this).height()))
+			})
+			a('img').each(function() {
+				b.push(new a.GM.IMLayer($(this).prop('src'), a(this)[0]))
+			})
 			b.forEach(function (item) {
 				item.imageProcess()
 			})
@@ -548,4 +568,19 @@ function iconAndSize(file, big){
 	}
 	const str = `${file}) no-repeat ${rep}% ${rep}%;background-size: ${size}px;`
 	return str
+}
+
+function getImageURL(element){
+	let imageURL = $(element).closest('div.ad-image-div').find('img').prop('src')
+
+	if($(element).closest('div.background-img-class').length > 0){
+		$(element).closest('div.background-img-class').find('a, span, div').filter(function() {
+			return this.style.backgroundImage
+		}).each(function() {
+			imageURL = $(this).css("backgroundImage").replace('url(','').replace(')','').replace(/\"/gi, "")
+			return false
+		})
+	}
+
+	return imageURL
 }

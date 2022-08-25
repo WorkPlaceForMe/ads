@@ -557,6 +557,7 @@ const getStatsImg = (req) => {
                     ads: adsTotal,
                   })
                 }
+                
                 resolve(imgs)
               }
             })
