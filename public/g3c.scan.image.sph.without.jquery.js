@@ -295,11 +295,14 @@ $(document).on('click', '.closeBut', function () {
 	}
 	function g(b) {
 		var c = document.createElement('div')
+		c.className = 'ad-image-div'
+
 		if($(b).is('img')){
-			c.style.position = 'relative'
-			c.className = 'ad-image-div'
-		} else {
+			c.style.position = 'relative'			
+		} else if($(b).is('span')) {
 			c = document.createElement('span')
+			c.className = 'ad-image-div background-img-class'
+		} else {
 			c.className = 'ad-image-div background-img-class'
 		}
 
@@ -399,8 +402,8 @@ $(document).on('click', '.closeBut', function () {
 		a.extend(a.GM.IMLayer.prototype, {
 			imageProcess: function () {
 				var h = {
-					cur_width: this.cur_width,
-					cur_height: this.cur_height
+					cur_width: (this.cur_width ? this.cur_width : 220),
+					cur_height: (this.cur_height ? this.cur_height : 140)
 				}
 				if (!(200 > h.cur_width || 120 > h.cur_height)) {
 					'__gm__' + a.now()
@@ -539,8 +542,8 @@ $(document).on('click', '.closeBut', function () {
 		pe = window.location.href
 		$(document).ready(function () {
 			var b = []
-			$('a, span, div').filter(function() {
-				return this.style.backgroundImage
+			$('div, span').filter(function() {
+				return ($(this).css("backgroundImage") && $(this).css("backgroundImage") != 'none')
 			}).each(function() {
 				let imageURL = $(this).css("backgroundImage").replace('url(','').replace(')','').replace(/\"/gi, "")
 				b.push(new a.GM.IMLayer(imageURL, a(this)[0], $(this).width(), $(this).height()))
