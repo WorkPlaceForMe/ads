@@ -116,7 +116,7 @@ exports.getAds = Controller(async (req, res) => {
       await cache.setAsync(`downloading-${extension[1]}_${mobile}_${img_width}_${img_height}_${url}_${site}`, true)
 
       let formData = new FormData()
-      formData.append('upload', request(url))
+      formData.append('upload', request(encodeURI(url)))
       formData.append('subscriptions', 'face,fashion,Object,tags2,sport')
       
       const request_config = {

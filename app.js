@@ -249,13 +249,13 @@ deleteRedisData = async (pattern) => {
 }
 
 axiosRetry(axios, {
-  retries: 3,
+  retries: 2,
   retryDelay: (retryCount) => {
     console.log(`retry attempt: ${retryCount}`)
-    return retryCount * 2000
+    return retryCount * 1000
   },
   retryCondition: (error) => {
-    return (error == null || error.reponse == null || error.response.status !== 200 || 
-      error.response.status !== 201 || error.response.status !== 404 )
+    return (error && (error.reponse == null || error.response.status !== 200 || 
+      error.response.status !== 201 || error.response.status !== 404 || error.response.status !== 500))
   }
 })
