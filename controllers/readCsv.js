@@ -22,14 +22,8 @@ exports.readCsv = (publisherId) => {
   return new Promise(async (resolve, reject) => { 
     let cachedDown = await cache.getAsync(`downloading-${publisherId}`)
     let productAndClothsData = []
-
-    if(cachedDown && cachedDown == 'false'){
-      productAndClothsData = await getProductClothData(publisherId)
-    }
-    
-    if (productAndClothsData && productAndClothsData.length > 0) {
-      resolve(productAndClothsData)
-    } else if (!cachedDown)  {
+      
+    if (!cachedDown)  {
       await cache.setAsync(`downloading-${publisherId}`, true)     
       const downloadPromises = []     
       const providers = [       
@@ -47,16 +41,6 @@ exports.readCsv = (publisherId) => {
           id: conf.get('topsOnline.campaign_id'), 
           label: 'Tops Online', 
           csvReader: topsCsvReader
-        },
-        { 
-          id: conf.get('jdCentral.campaign_id'), 
-          label: 'JD Central', 
-          csvReader: jdCentralCsvReader
-        },
-        { 
-          id: conf.get('centralOnline.campaign_id'), 
-          label: 'Central Online',
-          csvReader: centralCsvReader
         }
       ]
       
@@ -106,9 +90,7 @@ exports.readCsv = (publisherId) => {
         await cache.setAsync(`downloading-${publisherId}`, false)
         reject(err)
       }
-    } else {
-      cachedDown = await cache.getAsync(`downloading-${publisherId}`)
-      
+    } else if(cachedDown == 'true') {      
       while (cachedDown == 'true') {
         cachedDown = await cache.getAsync(`downloading-${publisherId}`)
         continue
@@ -116,6 +98,12 @@ exports.readCsv = (publisherId) => {
 
       productAndClothsData = await getProductClothData(publisherId)
       resolve(productAndClothsData)
+    } else {
+      productAndClothsData = await getProductClothData(publisherId)
+    
+      if (productAndClothsData?.length > 0) {
+        resolve(productAndClothsData)
+      }
     }
   })
 }
@@ -200,8 +188,11 @@ const getProductClothData = async (publisherId) => {
       
       productAndClothsData = flatten(dataValues)
 
-      if (productAndClothsData?.length > 0) {
+      const productClothSavedFlag = await cache.getAsync(`saving-productAndClothsData-${publisherId}`)
+
+      if ((!productClothSavedFlag || productClothSavedFlag != 'true') && productAndClothsData?.length > 0) {
         console.log(`Saving productAndClothsData for publisher ${publisherId} into cache`)
+        await cache.setAsync(`saving-productAndClothsData-${publisherId}`, true)
         cache.setAsync(`productAndClothsData-${publisherId}`, JSON.stringify(productAndClothsData))
       }
 

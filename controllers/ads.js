@@ -92,13 +92,10 @@ exports.getAds = Controller(async (req, res) => {
     if (cachedImg && cachedImg !== '{}' && cachedImg !== '[]'){
       addImagePublisherMetadata(url, site, checker, uid, userId, sessionId).then()
 
-      console.log(`Ads data found for image ${url} for site ${checker} from cache`)
       return res.status(200).send({
           results: JSON.parse(cachedImg)
       })
-    } else{ 
-      console.log(`Ads data not found for image ${url} for site ${checker} from cache`) 
-
+    } else{
       let formData = new FormData()
       formData.append('upload', request(encodeURI(url)))
       formData.append('subscriptions', 'face,fashion,Object,tags2,sport')
