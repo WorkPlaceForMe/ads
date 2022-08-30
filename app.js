@@ -93,7 +93,8 @@ async function check() {
         Promise.all(productClothPromises).then(() => {
           console.log(`All products and cloths deleted for publisher: ${publisher.dataValues.publisherId}`)
 
-          cache.del(`downloading-${publisher.dataValues.publisherId}`)  
+          cache.del(`downloading-${publisher.dataValues.publisherId}`)
+          cache.del(`productAndClothsData-${publisher.dataValues.publisherId}`)  
           readCsv.readCsv(publisher.dataValues.publisherId).then(() => {
             
             //Need to update updatedAt time
@@ -106,10 +107,10 @@ async function check() {
                   publisherId: publisher.dataValues.publisherId
                 }
               }).then(() => {
-                console.log(`Publisher ${publisher.dataValues.publisherId} updated with latest products and cloths`) 
+                console.log(`Publisher ${publisher.dataValues.name} updated with latest products and cloths`) 
 
-                deleteRedisData(publisher.dataValues.name).then(() => {
-                  console.log(`All redis cache data deleted for Publisher ${publisher.dataValues.publisherId}`)
+                deleteRedisData(publisher.dataValues.name).then(() => {                 
+                  console.log(`All redis cache data deleted for Publisher ${publisher.dataValues.name}`)
                 })
             })                  
           }).catch(error => {

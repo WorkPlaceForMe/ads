@@ -17,18 +17,21 @@ const { v4: uuidv4 } = require('uuid')
 const products = db.products
 const clothing = db.clothing
 
-exports.readCsv = async (publisherId) => {  
-  let cachedDown = await cache.getAsync(`downloading-${publisherId}`)
-  const sampleProductClothList = await Promise.all([products.findOne({ where: { Page_ID: publisherId } }), 
-    clothing.findOne({ where: { Page_ID: publisherId } })])
-  
-  if (sampleProductClothList[0] && sampleProductClothList[1] ) {
-    return getProductClothData(publisherId)
-  } else if (!cachedDown)  {
+exports.readCsv = (publisherId) => {  
 
-    return new Promise(async (resolve, reject) => {   
-      const downloadPromises = []
-      await cache.setAsync(`downloading-${publisherId}`, true)
+  return new Promise(async (resolve, reject) => { 
+    let cachedDown = await cache.getAsync(`downloading-${publisherId}`)
+    let productAndClothsData = []
+
+    if(cachedDown && cachedDown == 'false'){
+      productAndClothsData = await getProductClothData(publisherId)
+    }
+    
+    if (productAndClothsData && productAndClothsData.length > 0) {
+      resolve(productAndClothsData)
+    } else if (!cachedDown)  {
+      await cache.setAsync(`downloading-${publisherId}`, true)     
+      const downloadPromises = []     
       const providers = [       
         {
           id: conf.get('bigc.campaign_id'),
@@ -92,26 +95,29 @@ exports.readCsv = async (publisherId) => {
         await Promise.all(downloadPromises)
         await cache.setAsync(`downloading-${publisherId}`, false)
 
-        console.log(`Setup completed for site ${publisherId} for all providers`)
+        console.log(`Setup completed for site ${publisherId} for all providers`) 
+
+        productAndClothsData = await getProductClothData(publisherId)
         
-        resolve(getProductClothData(publisherId))
+        resolve(productAndClothsData)
       } catch (err) {
         console.log(`Error downloading and setting up csv data for publisher id ${publisherId}`)
         console.log(err)
-        cache.setAsync(`downloading-${publisherId}`, false)
+        await cache.setAsync(`downloading-${publisherId}`, false)
         reject(err)
       }
-    })
-  } else {
-    cachedDown = await cache.getAsync(`downloading-${publisherId}`)
-    
-    while (cachedDown == 'true') {
+    } else {
       cachedDown = await cache.getAsync(`downloading-${publisherId}`)
-      continue
+      
+      while (cachedDown == 'true') {
+        cachedDown = await cache.getAsync(`downloading-${publisherId}`)
+        continue
+      }
+
+      productAndClothsData = await getProductClothData(publisherId)
+      resolve(productAndClothsData)
     }
-    
-    return getProductClothData(publisherId)
-  }
+  })
 }
 
 const download = (url, publisherId, provider) => {
@@ -119,7 +125,7 @@ const download = (url, publisherId, provider) => {
 
   return new Promise((resolve, reject) => {
     const uuid = uuidv4();  
-    const csvFileName = `csv/${provider.id}-${publisherId}-${uuid}.csv`
+    const csvFileName = `${conf.get('csv_download_folder_location')}/${provider.id}-${publisherId}-${uuid}.csv`
     
     try {
       var sendDate = new Date().getTime()
@@ -164,28 +170,52 @@ const flatten = (ary) => {
 }
 
 const getProductClothData = async (publisherId) => {
-  const maleClothing = clothing.findAll({
-    raw: true,
-    where: { Page_ID: publisherId, Gender: 'Male' },
-    limit: 5000,
-    order: db.sequelize.random()
-  })
+    let productAndClothsData = await cache.getAsync(`productAndClothsData-${publisherId}`)
 
-  const femaleClothing = clothing.findAll({
-    raw: true,
-    where: { Page_ID: publisherId, Gender: 'Female' },
-    limit: 5000,
-    order: db.sequelize.random()
-  })
-  
-  const items = products.findAll({
-    raw: true,
-    where: { Page_ID: publisherId },
-    limit: 10000,
-    order: db.sequelize.random()
-  })
-  
-  const dataValues = await Promise.all([maleClothing, femaleClothing, items])
-  
-  return flatten(dataValues)
+    if(productAndClothsData && productAndClothsData != '{}' && productAndClothsData != '[]'){
+      return shuffleArray(JSON.parse(productAndClothsData))
+    } else {
+      const maleClothing = clothing.findAll({
+        raw: true,
+        where: { Page_ID: publisherId, Gender: 'Male' },
+        limit: 5000,
+        order: db.sequelize.random()
+      })
+
+      const femaleClothing = clothing.findAll({
+        raw: true,
+        where: { Page_ID: publisherId, Gender: 'Female' },
+        limit: 5000,
+        order: db.sequelize.random()
+      })
+      
+      const items = products.findAll({
+        raw: true,
+        where: { Page_ID: publisherId },
+        limit: 10000,
+        order: db.sequelize.random()
+      })
+      
+      const dataValues = await Promise.all([maleClothing, femaleClothing, items])
+      
+      productAndClothsData = flatten(dataValues)
+
+      if (productAndClothsData?.length > 0) {
+        console.log(`Saving productAndClothsData for publisher ${publisherId} into cache`)
+        cache.setAsync(`productAndClothsData-${publisherId}`, JSON.stringify(productAndClothsData))
+      }
+
+      return productAndClothsData
+    }
+}
+
+const shuffleArray = (arr) => {
+  for (let i = arr.length -1; i > 0; i--) {
+    j = Math.floor(Math.random() * i)
+    k = arr[i]
+    arr[i] = arr[j]
+    arr[j] = k
+  }
+
+  return arr
 }

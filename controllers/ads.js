@@ -86,34 +86,18 @@ exports.getAds = Controller(async (req, res) => {
     return res.status(400).json({ success: false, message: "Unauthorized" })
   }
 
-  let publisher = await getPublisher(checker);
-  let img = await getImg(url, site)
-
   try {
-    if(!img){
-      console.log(`Image ${url} does not exist for page ${site} - adding it`)
-      img = await addImg(dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url, uid, site)
-    }
-
-    let isImageBeingProcessed = await cache.getAsync(`downloading-${extension[1]}_${mobile}_${img_width}_${img_height}_${url}_${site}`)
-      
-    while (isImageBeingProcessed == 'true') {
-      isImageBeingProcessed = await cache.getAsync(`downloading-${extension[1]}_${mobile}_${img_width}_${img_height}_${url}_${site}`)
-      continue
-    }
-
-    let cachedImg = await cache.getAsync(`${extension[1]}_${mobile}_${img_width}_${img_height}_${url}_${site}`)  
+    let cachedImg = await cache.getAsync(`${extension[1]}_${url}`)  
     
     if (cachedImg && cachedImg !== '{}' && cachedImg !== '[]'){
-      if(img && publisher){
-        await createClientImgPublData(userId, sessionId, img.id, img.img, publisher.id)
-      }
+      addImagePublisherMetadata(url, site, checker, uid, userId, sessionId).then()
 
+      console.log(`Ads data found for image ${url} for site ${checker} from cache`)
       return res.status(200).send({
           results: JSON.parse(cachedImg)
       })
-    } else{  
-      await cache.setAsync(`downloading-${extension[1]}_${mobile}_${img_width}_${img_height}_${url}_${site}`, true)
+    } else{ 
+      console.log(`Ads data not found for image ${url} for site ${checker} from cache`) 
 
       let formData = new FormData()
       formData.append('upload', request(encodeURI(url)))
@@ -134,9 +118,9 @@ exports.getAds = Controller(async (req, res) => {
        
       let limit = conf.get('max_ads_per_image') || 4
   
-      console.log("Sending request to Vista Server")
+      console.log(`Sending request to Vista Server for image ${url}`)
       const response = await axios(request_config)
-      console.log("Response received from Vista Server")
+      console.log(`Response received from Vista Server for image ${url}`)
       const objetos = await readCsv.readCsv(aut['idP'])
       let resultsVista
       
@@ -151,15 +135,12 @@ exports.getAds = Controller(async (req, res) => {
         flat = getDiversifiedResults(flat, limit)
       }
       
-      const sendingResults = await convert(flat)
-      cache.setAsync(`${extension[1]}_${mobile}_${img_width}_${img_height}_${url}_${site}`, JSON.stringify(sendingResults))   
+      const sendingResults = await convert(flat)      
+      
+      cache.setAsync(`${extension[1]}_${url}`, JSON.stringify(sendingResults))
+         
+      addImagePublisherMetadata(url, site, checker, uid, userId, sessionId).then()    
     
-      if(img && publisher){
-        await createClientImgPublData(userId, sessionId, img.id, img.img, publisher.id);
-      }
-
-      await cache.setAsync(`downloading-${extension[1]}_${mobile}_${img_width}_${img_height}_${url}_${site}`, false)
-        
       res.status(200).send({
         results: sendingResults
       })
@@ -167,8 +148,7 @@ exports.getAds = Controller(async (req, res) => {
   } catch (err) {
       console.log('Error in processing')
       console.log(err)
-      await cache.setAsync(`downloading-${extension[1]}_${mobile}_${img_width}_${img_height}_${url}_${site}`, false)
-      await cache.setAsync(`${extension[1]}_${mobile}_${img_width}_${img_height}_${url}_${site}`, JSON.stringify({}));
+      cache.setAsync(`${extension[1]}_${url}`, JSON.stringify({}));
       return res.status(500).json({ success: false, message: "Vista Image failled", error: err, img: url })
     }
 })
@@ -807,4 +787,26 @@ const flatten = (ary) => {
     }
     return a.concat(b)
   }, [])
+}
+
+const addImagePublisherMetadata = (imageURL, page, site, uid, userId, sessionId) => {
+  
+  return new Promise(async (resolve, reject) => {
+    let publisher = await getPublisher(site)
+    let img = await getImg(imageURL, page)
+
+    try {
+      if(!img){
+        console.log(`Image ${imageURL} does not exist for page ${page} - adding it`)
+        img = await addImg(dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), imageURL, uid, page)
+      }
+
+      await createClientImgPublData(userId, sessionId, img.id, img.img, publisher.id)
+      resolve('success')
+    } catch(err) {
+        console.log(`Adding image publisher metadata for image ${imageURL} failed for site ${site}`)
+        console.log(err)
+        reject(err)
+    }
+  })
 }
