@@ -402,10 +402,10 @@ $(document).on('click', '.closeBut', function () {
 		a.extend(a.GM.IMLayer.prototype, {
 			imageProcess: function () {
 				var h = {
-					cur_width: (this.cur_width ? this.cur_width : 170),
-					cur_height: (this.cur_height ? this.cur_height : 120)
+					cur_width: (this.cur_width ? this.cur_width : 120),
+					cur_height: (this.cur_height ? this.cur_height : 70)
 				}
-				if (!(150 > h.cur_width || 100 > h.cur_height)) {
+				if (!(100 > h.cur_width || 50 > h.cur_height)) {
 					'__gm__' + a.now()
 					var j = r(this.celement)
 					j || (j = '')
