@@ -10,7 +10,7 @@ module.exports = (sequelize, Sequelize) => {
             allowNull: true,
         },
         site: {
-            type: Sequelize.STRING(200),
+            type: Sequelize.STRING(600),
             allowNull: true,
         },
         time :{

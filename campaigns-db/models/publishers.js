@@ -5,11 +5,11 @@ module.exports = (sequelize, Sequelize) => {
             primaryKey: true,
         },
         name: {
-            type: Sequelize.STRING(45),
+            type: Sequelize.STRING(200),
             allowNull: true,
         },
         nickname: {
-            type: Sequelize.STRING(45),
+            type: Sequelize.STRING(200),
             allowNull: true,
         },
         enabled: {

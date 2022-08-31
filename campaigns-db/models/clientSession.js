@@ -14,7 +14,7 @@ module.exports = (sequelize, Sequelize) => {
        }
       },
       publId: {
-        type: Sequelize.STRING(40),
+        type: Sequelize.STRING(45),
         allowNull: false,
         references: {
           model: 'publishers',
