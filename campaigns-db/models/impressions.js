@@ -14,7 +14,7 @@ module.exports = (sequelize, Sequelize) => {
             allowNull: true
         },
         url: {
-            type: Sequelize.STRING(200),
+            type: Sequelize.STRING(600),
             allowNull: true,
         },
         idItem :{
@@ -22,7 +22,7 @@ module.exports = (sequelize, Sequelize) => {
             allowNull: true
         },
         img :{
-            type: Sequelize.STRING(200),
+            type: Sequelize.STRING(600),
             allowNull: true
         },
     });

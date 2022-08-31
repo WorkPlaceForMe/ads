@@ -10,7 +10,7 @@ module.exports = (sequelize, Sequelize) => {
             allowNull: true
         },
         img:{
-            type: Sequelize.STRING(200),
+            type: Sequelize.STRING(600),
             allowNull: true
         },
         idGeneration :{
@@ -22,11 +22,11 @@ module.exports = (sequelize, Sequelize) => {
             allowNull: true
         },
         keyword :{
-            type: Sequelize.STRING(40),
+            type: Sequelize.STRING(100),
             allowNull: true
         },
         category :{
-            type: Sequelize.STRING(40),
+            type: Sequelize.STRING(100),
             allowNull: true
         },
     },{

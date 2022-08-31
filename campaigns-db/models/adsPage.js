@@ -18,7 +18,7 @@ module.exports = (sequelize, Sequelize) => {
             allowNull: true
         },
         imgName :{
-            type: Sequelize.STRING(200),
+            type: Sequelize.STRING(600),
             allowNull: true
         },
         idGeneration :{

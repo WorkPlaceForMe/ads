@@ -31,7 +31,7 @@ module.exports = (sequelize, Sequelize) => {
        }
       },
       imgUrl: {
-        type: Sequelize.STRING(200),
+        type: Sequelize.STRING(600),
         allowNull: false
       },
       publId: {
