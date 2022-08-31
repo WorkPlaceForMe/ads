@@ -1,12 +1,12 @@
 module.exports = (sequelize, Sequelize) => {
     const Rel = sequelize.define('clientsession', {
       id: {
-        type: Sequelize.STRING(40),
+        type: Sequelize.STRING(100),
         allowNull: false,
         primaryKey: true
       },
       clientId: {
-        type: Sequelize.STRING(40),
+        type: Sequelize.STRING(100),
         allowNull: false,
         references: {
           model: 'client',

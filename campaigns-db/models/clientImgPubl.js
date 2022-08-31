@@ -7,7 +7,7 @@ module.exports = (sequelize, Sequelize) => {
         primaryKey: true
       },
       clientId: {
-        type: Sequelize.STRING(40),
+        type: Sequelize.STRING(100),
         allowNull: true,
         references: {
           model: 'client',
@@ -15,7 +15,7 @@ module.exports = (sequelize, Sequelize) => {
        }
       },
       sessionId: {
-        type: Sequelize.STRING(40),
+        type: Sequelize.STRING(100),
         allowNull: true,
         references: {
           model: 'clientsession',
