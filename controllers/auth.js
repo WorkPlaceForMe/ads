@@ -64,17 +64,21 @@ exports.check = Controller(async(req, res) => {
                     console.log(`Adding site ${site} to system`) 
                     const publisherData = await addPublisher(locId,site, publisherId)
 
-                    const clientSession = await getClientSessionBySessionId(sessionId)
+                    if(sessionId) {
+                        const clientSession = await getClientSessionBySessionId(sessionId)
 
-                    if(!clientSession) {
-                        createClientSession(sessionId, userId, publisherData.id)
+                        if(!clientSession && userId) {
+                            createClientSession(sessionId, userId, publisherData.id)
+                        }
                     }
                     return res.status(200).json({success: true, message: 'Site registered'})
                 } else {
-                    const clientSession = await getClientSessionBySessionId(sessionId)
+                    if(sessionId) {
+                        const clientSession = await getClientSessionBySessionId(sessionId)
 
-                    if(!clientSession) {
-                        createClientSession(sessionId, userId, rows[0].id)
+                        if(!clientSession && userId) {
+                            createClientSession(sessionId, userId, rows[0].id)
+                        }
                     }
 
                     const site = rows[0].name

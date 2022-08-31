@@ -90,7 +90,9 @@ exports.getAds = Controller(async (req, res) => {
     let cachedImg = await cache.getAsync(`${extension[1]}_${url}`)  
     
     if (cachedImg && cachedImg !== '{}' && cachedImg !== '[]'){
-      addImagePublisherMetadata(url, site, checker, uid, userId, sessionId).then()
+      addImagePublisherMetadata(url, site, checker, uid, userId, sessionId).then().catch(err => {
+        console.error(err, 'Error occurred in client publisher data saving')
+      })
 
       return res.status(200).send({
           results: JSON.parse(cachedImg)
@@ -136,7 +138,9 @@ exports.getAds = Controller(async (req, res) => {
       
       cache.setAsync(`${extension[1]}_${url}`, JSON.stringify(sendingResults))
          
-      addImagePublisherMetadata(url, site, checker, uid, userId, sessionId).then()    
+      addImagePublisherMetadata(url, site, checker, uid, userId, sessionId).then().catch(err => {
+        console.error(err, 'Error occurred in client publisher data saving')
+      })  
     
       res.status(200).send({
         results: sendingResults
@@ -789,19 +793,21 @@ const flatten = (ary) => {
 const addImagePublisherMetadata = (imageURL, page, site, uid, userId, sessionId) => {
   
   return new Promise(async (resolve, reject) => {
-    let publisher = await getPublisher(site)
-    let img = await getImg(imageURL, page)
-
+   
     try {
+      let publisher = await getPublisher(site)
+      let img = await getImg(imageURL, page)
+
       if(!img){
-        console.log(`Image ${imageURL} does not exist for page ${page} - adding it`)
         img = await addImg(dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), imageURL, uid, page)
       }
 
-      await createClientImgPublData(userId, sessionId, img.id, img.img, publisher.id)
+      if(img && publisher && userId && sessionId){
+        await createClientImgPublData(userId, sessionId, img.id, img.img, publisher.id)
+      }
       resolve('success')
     } catch(err) {
-        console.log(`Adding image publisher metadata for image ${imageURL} failed for site ${site}`)
+        console.log(`Adding image publisher metadata failed for site ${site}`)
         console.log(err)
         reject(err)
     }

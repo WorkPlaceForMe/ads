@@ -29,8 +29,8 @@ const User = db1.users
 const readCsv = require('./controllers/readCsv')
 const { delay } = require('bluebird')
 const bcrypt = require('bcrypt')
-const axios = require('axios');
-const axiosRetry = require('axios-retry');
+const axios = require('axios')
+const axiosRetry = require('axios-retry')
 
 let server = conf.get('server').split('/')
 server[2] = `www.${server[2]}`
@@ -114,10 +114,12 @@ async function check() {
 
                 deleteRedisData(publisher.dataValues.name).then(() => {                 
                   console.log(`All redis cache data deleted for publisher ${publisher.dataValues.name}`)
+                }).catch(error => {
+                  console.error(error, `Error deleting redis cachec data for publisher ${publisher.dataValues.name}`)
                 })
             })                  
           }).catch(error => {
-            console.log(`Error downloading and setting up csv data for publisher id ${publisher.dataValues.publisherId}`)
+            console.log(`Error downloading and setting up csv data for publisher ${publisher.dataValues.name}`)
             console.log(error)
             cache.setAsync(`downloading-${publisher.dataValues.publisherId}`, false)
           })
@@ -204,6 +206,11 @@ app.use('/management', express.static(conf.get('dashboardAis')))
 app.use('/client', express.static(conf.get('dashboardClient')))
 
 app.use('/api/pictures', express.static('./public/pictures'))
+
+app.use(function(err, req, res, next) {
+  console.error(err, 'Error occurred')
+  res.end(err.message)
+})
 
 // initialize routers
 app.use(routers)
