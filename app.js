@@ -49,6 +49,11 @@ function customHeaders(req, res, next) {
   next()
 }
 
+process.on('uncaughtException', (err) => {
+    console.log('Unexpected error occurred')
+    console.log(err)
+})
+
 app.use(customHeaders)
 
 app.all(function (req, res, next) {
@@ -206,11 +211,6 @@ app.use('/management', express.static(conf.get('dashboardAis')))
 app.use('/client', express.static(conf.get('dashboardClient')))
 
 app.use('/api/pictures', express.static('./public/pictures'))
-
-app.use(function(err, req, res, next) {
-  console.error(err, 'Error occurred')
-  res.end(err.message)
-})
 
 // initialize routers
 app.use(routers)
