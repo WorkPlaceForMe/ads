@@ -8,7 +8,7 @@ module.exports = (sequelize, Sequelize) => {
       },
       clientId: {
         type: Sequelize.STRING(40),
-        allowNull: false,
+        allowNull: true,
         references: {
           model: 'client',
           key: 'id'
@@ -16,7 +16,7 @@ module.exports = (sequelize, Sequelize) => {
       },
       sessionId: {
         type: Sequelize.STRING(40),
-        allowNull: false,
+        allowNull: true,
         references: {
           model: 'clientsession',
           key: 'id'
@@ -24,7 +24,7 @@ module.exports = (sequelize, Sequelize) => {
       },
       imgId: {
         type: Sequelize.INTEGER,
-        allowNull: false,
+        allowNull: true,
         references: {
           model: 'imgspages',
           key: 'id'
@@ -32,11 +32,11 @@ module.exports = (sequelize, Sequelize) => {
       },
       imgUrl: {
         type: Sequelize.STRING(600),
-        allowNull: false
+        allowNull: true
       },
       publId: {
         type: Sequelize.STRING(40),
-        allowNull: false,
+        allowNull: true,
         references: {
           model: 'publishers',
           key: 'id'
@@ -44,7 +44,7 @@ module.exports = (sequelize, Sequelize) => {
       },
       duration: {
         type: Sequelize.INTEGER,
-        allowNull: false,
+        allowNull: true,
         defaultValue: 0
       }
     }, {
