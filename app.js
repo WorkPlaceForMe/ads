@@ -1,7 +1,6 @@
 const express = require('express')
 const path = require('path')
 const cookieParser = require('cookie-parser')
-const logger = require('morgan')
 const handleError = require('./helper/handle-error')
 const routers = require('./routes')
 const cors = require('cors')
@@ -188,20 +187,6 @@ if (conf.get('install') == true) {
 // view engine setup
 app.set('views', path.join(__dirname, 'views'))
 app.set('view engine', 'jade')
-app.use(
-  logger(
-    'Date: :date[web] // Url: :remote-addr // Method: :method:url // Status::status // User-agent: :user-agent',
-  ),
-)
-app.use(
-  logger(
-    'Date: :date[web] // Url: :remote-addr // Method: :method:url // Status::status // User-agent: :user-agent',
-    {
-      stream: fs.createWriteStream('./access.log', { flags: 'a' }),
-    },
-  ),
-)
-
 app.use('/not-found', express.static('./views/error.html'))
 
 app.use('/system', express.static(path.join(__dirname, 'public')))

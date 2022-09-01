@@ -41,6 +41,16 @@ exports.readCsv = (publisherId) => {
           id: conf.get('topsOnline.campaign_id'), 
           label: 'Tops Online', 
           csvReader: topsCsvReader
+        },
+        { 
+          id: conf.get('jdCentral.campaign_id'), 
+          label: 'JD Central', 
+          csvReader: jdCentralCsvReader
+        },
+        { 
+          id: conf.get('centralOnline.campaign_id'), 
+          label: 'Central Online',
+          csvReader: centralCsvReader
         }
       ]
       
