@@ -128,6 +128,9 @@ exports.getAds = Controller(async (req, res) => {
       }
       
       const resultsAffiliate = await filler(resultsVista, serv, img_width, img_height, site, url, uid, objetos, mobile)
+      
+      resultsAffiliate.sort((item1, item2) => item2[0].vista.confidence - item1[0].vista.confidence)
+      
       let flat = flatten(resultsAffiliate)
       
       if (flat.length > limit) {
@@ -203,10 +206,9 @@ const filler = (
   const resultsAffiliate = []
   return new Promise((resolve) => {
     if (resultsVista.sport.length != 0) {
-      const bool = true
       for (const obj of resultsVista.sport) {
         const result = sport_makeup_Filler(
-          bool,
+          true,
           obj,
           objetos,
           serv,
@@ -221,64 +223,41 @@ const filler = (
           resultsAffiliate.push(result)
         }
       }
-    } else if (resultsVista.tags2.tags2.tags2.length != 0) {
-      if (resultsVista.tags2.tags2.tags2[0].label.toLowerCase().includes('lipstick') || resultsVista.tags2.tags2.tags2[0].label.toLowerCase().includes('hair') 
-          ||  resultsVista.tags2.tags2.tags2[0].label.toLowerCase().includes('face')
-          ||  resultsVista.tags2.tags2.tags2[0].label.toLowerCase().includes('perfume') || resultsVista.tags2.tags2.tags2[0].label.toLowerCase().includes('paintbrush')
-          ||  resultsVista.tags2.tags2.tags2[0].IAB.includes('IAB17-')) {
-        const bool = false
+    } 
+    
+    if (resultsVista.tags2.tags2.tags2.length != 0) {      
         for (const obj of resultsVista.tags2.tags2.tags2) {
-          const result = sport_makeup_Filler(
-            bool,
-            obj,
-            objetos,
-            serv,
-            img_width,
-            img_height,
-            site,
-            url,
-            uid,
-            mobile,
-          )
-          if (result.length != 0) {
-            resultsAffiliate.push(result)
+          if (obj.label && (obj.label.toLowerCase().includes('lipstick') || obj.label.toLowerCase().includes('hair') 
+          ||  obj.label.toLowerCase().includes('face')
+          ||  obj.label.toLowerCase().includes('perfume') || obj.label.toLowerCase().includes('paintbrush')
+          ||  obj.IAB.includes('IAB17-'))) {  
+            const result = sport_makeup_Filler(
+              false,
+              obj,
+              objetos,
+              serv,
+              img_width,
+              img_height,
+              site,
+              url,
+              uid,
+              mobile,
+            )
+            if (result.length != 0) {
+              resultsAffiliate.push(result)
+            }
           }
-        }
       }
     }
-    if (resultsVista['fashion'].length != 0) {
-      if (
-        resultsVista['face'].length != 0 &&
-        resultsVista['fashion'][0].confidence > 0.6
-      ) {
-        const gender = resultsVista.face[0].deep_gender.gender[0].label
-        for (const obj of resultsVista['fashion']) {
+    
+    if (resultsVista['fashion'].length != 0 && resultsVista['face'].length != 0) {
+      const gender = resultsVista.face[0].deep_gender.gender[0].label
+
+      for (const obj of resultsVista['fashion']) {
+        if(obj.confidence > 0.6) {
           const result = clothing_Filler(
             obj,
             gender,
-            objetos,
-            serv,
-            img_width,
-            img_height,
-            site,
-            url,
-            uid,
-            mobile,
-          )
-          if (result.length != 0) {
-            resultsAffiliate.push(result)
-          }
-        }
-      }
-    }
-    for (const obj of resultsVista['Object']) {
-      if (obj.class != 'person') {          
-          if(obj.class === 'cell_phone'){
-            obj.class = 'mobile'
-          }
-
-          const result = object_Filler(
-            obj,
             objetos,
             serv,
             img_width,
@@ -292,6 +271,33 @@ const filler = (
           if (result.length != 0) {
             resultsAffiliate.push(result)
           }
+        }
+      }
+    }
+
+    if (resultsVista['Object'].length != 0) {
+      for (const obj of resultsVista['Object']) {
+        if (obj.class != 'person') {          
+            if(obj.class === 'cell_phone'){
+              obj.class = 'mobile'
+            }
+
+            const result = object_Filler(
+              obj,
+              objetos,
+              serv,
+              img_width,
+              img_height,
+              site,
+              url,
+              uid,
+              mobile,
+            )
+            
+            if (result.length != 0) {
+              resultsAffiliate.push(result)
+            }
+        }
       }
     }
 
