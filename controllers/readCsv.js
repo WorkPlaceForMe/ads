@@ -14,6 +14,8 @@ const  jdCentralCsvReader  = require('./provider/jdCentralCsvReader')
 const  centralCsvReader  = require('./provider/centralCsvReader')
 const db = require('../campaigns-db/database')
 const { v4: uuidv4 } = require('uuid')
+const { shuffleArray } = require('../helper/util')
+const { excludedProducts } = require('../helper/productAliases')
 const products = db.products
 const clothing = db.clothing
 
@@ -176,21 +178,21 @@ const getProductClothData = async (publisherId) => {
       const maleClothing = clothing.findAll({
         raw: true,
         where: { Page_ID: publisherId, Gender: 'Male' },
-        limit: 5000,
+        limit: conf.get('male_cloth_dataset_size') || 7500,
         order: db.sequelize.random()
       })
-
+     
       const femaleClothing = clothing.findAll({
         raw: true,
         where: { Page_ID: publisherId, Gender: 'Female' },
-        limit: 5000,
+        limit: conf.get('femal_cloth_dataset_size') || 7500,
         order: db.sequelize.random()
       })
       
       const items = products.findAll({
         raw: true,
         where: { Page_ID: publisherId },
-        limit: 10000,
+        limit: conf.get('product_dataset_size') || 15000,
         order: db.sequelize.random()
       })
       
@@ -201,6 +203,18 @@ const getProductClothData = async (publisherId) => {
       const productClothSavedFlag = await cache.getAsync(`saving-productAndClothsData-${publisherId}`)
 
       if ((!productClothSavedFlag || productClothSavedFlag != 'true') && productAndClothsData?.length > 0) {
+        productAndClothsData = productAndClothsData.filter(item => {
+          if(item.Sub_Category_Name && excludedProducts?.length > 0){
+            for(const excludedProduct of excludedProducts){
+              if(item.Sub_Category_Name.toLowerCase().includes(excludedProduct.toLowerCase()) ){
+                return false
+              }
+            }
+          }
+
+          return true
+        })
+
         console.log(`Saving productAndClothsData for publisher ${publisherId} into cache`)
         await cache.setAsync(`saving-productAndClothsData-${publisherId}`, true)
         cache.setAsync(`productAndClothsData-${publisherId}`, JSON.stringify(productAndClothsData))
@@ -208,15 +222,4 @@ const getProductClothData = async (publisherId) => {
 
       return productAndClothsData
     }
-}
-
-const shuffleArray = (arr) => {
-  for (let i = arr.length -1; i > 0; i--) {
-    j = Math.floor(Math.random() * i)
-    k = arr[i]
-    arr[i] = arr[j]
-    arr[j] = k
-  }
-
-  return arr
 }
