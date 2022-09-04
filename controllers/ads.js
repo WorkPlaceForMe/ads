@@ -814,10 +814,10 @@ const addImagePublisherMetadata = (imageURL, page, site, uid, userId, sessionId)
 const matchCategoryWithProductAliases = (category, productName) => {
 
   if(category && productName){
-    let aliases = productAliases[productName]
+    let aliases = productAliases[productName.toLowerCase()]
 
     if(!aliases){
-      aliases = [productName]
+      aliases = [productName.toLowerCase()]
     }
 
     if(aliases){
