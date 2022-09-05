@@ -209,6 +209,7 @@ const getProductClothData = async (publisherId) => {
               if(item.Main_Category_Name.toLowerCase().includes(excludedProduct.toLowerCase()) ||
                 item.Category_Name.toLowerCase().includes(excludedProduct.toLowerCase()) || 
                 item.Sub_Category_Name.toLowerCase().includes(excludedProduct.toLowerCase())){
+                
                 return false
               }
             }
