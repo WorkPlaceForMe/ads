@@ -128,7 +128,7 @@ exports.getAds = Controller(async (req, res) => {
           resultsVista = response.data.results
       }
       
-      const resultsAffiliate = await filler(resultsVista, serv, img_width, img_height, site, url, uid, objetos, mobile)
+      const resultsAffiliate = await filler(resultsVista, serv, img_width, img_height, site, url, uid, shuffleArray(objetos), mobile)
    
       resultsAffiliate.sort((item1, item2) => item2[0].vista.confidence - item1[0].vista.confidence)
       
@@ -208,7 +208,6 @@ const filler = (
   return new Promise((resolve) => {
     if (resultsVista.sport.length != 0) {
       for (const obj of resultsVista.sport) {
-        if(obj.confidence > 0.6) {
           const result = sport_makeup_Filler(
             true,
             obj,
@@ -224,7 +223,6 @@ const filler = (
           if (result.length != 0) {
             resultsAffiliate.push(result)
           }
-        }
       }
     } 
     
@@ -233,7 +231,7 @@ const filler = (
           if ((obj.label && (obj.label.toLowerCase().includes('lipstick') || obj.label.toLowerCase().includes('hair') 
           ||  obj.label.toLowerCase().includes('face')
           ||  obj.label.toLowerCase().includes('perfume') || obj.label.toLowerCase().includes('paintbrush')
-          ||  obj.IAB)) && obj.confidence > 0.6) {  
+          ||  obj.IAB))) {  
             const result = sport_makeup_Filler(
               false,
               obj,
@@ -257,30 +255,28 @@ const filler = (
       const gender = resultsVista.face[0].deep_gender.gender[0].label
 
       for (const obj of resultsVista['fashion']) {
-        if(obj.confidence > 0.6) {
-          const result = clothing_Filler(
-            obj,
-            gender,
-            objetos,
-            serv,
-            img_width,
-            img_height,
-            site,
-            url,
-            uid,
-            mobile,
-          )
-          
-          if (result.length != 0) {
-            resultsAffiliate.push(result)
-          }
+        const result = clothing_Filler(
+          obj,
+          gender,
+          objetos,
+          serv,
+          img_width,
+          img_height,
+          site,
+          url,
+          uid,
+          mobile,
+        )
+        
+        if (result.length != 0) {
+          resultsAffiliate.push(result)
         }
       }
     }
 
     if (resultsVista['Object'].length != 0) {
       for (const obj of resultsVista['Object']) {
-        if (obj.class != 'person' &&  obj.confidence >= 0.6) {
+        if (obj.class != 'person') {
             const result = object_Filler(
               obj,
               objetos,
@@ -302,14 +298,14 @@ const filler = (
 
     const uniqueProductIdList = []
     
-    const uniqueItems =  shuffleArray(resultsAffiliate.filter(item => {
+    const uniqueItems =  resultsAffiliate.filter(item => {
         let valueDoesNotExits = uniqueProductIdList.indexOf(item[0].affiliate.Merchant_Product_ID) == -1
         uniqueProductIdList.push(item[0].affiliate.Merchant_Product_ID)
 
         return valueDoesNotExits
-    }))
+    })
     
-    resolve(uniqueItems)
+    resolve(shuffleArray(uniqueItems))
   })
 }
 
@@ -328,7 +324,7 @@ const clothing_Filler = (
   const resultsAffiliate_Temp = []
   
   if (gender == 'Male') {
-    if ((obj.class == 'person' || obj.class == 'upper') && obj.confidence > 0.6) {
+    if ((obj.class == 'person' || obj.class == 'upper')) {
       if (obj.deep_fashion_tf.sleeve_length[0].label == 'ExtraLongSleeves' ||
         obj.deep_fashion_tf.sleeve_length[0].label == 'LongSleeves') {
         const result = objetos.filter(
@@ -337,7 +333,7 @@ const clothing_Filler = (
         )
         const count = result.length - 1
 
-        if(count > 0){
+        if(count >= 0){
           let int = Math.floor(Math.random() * count)
           resultsAffiliate_Temp.push({
             vista: obj,
@@ -363,7 +359,7 @@ const clothing_Filler = (
         )
         const count = result.length - 1
 
-        if(count > 0){
+        if(count >= 0){
           let int = Math.floor(Math.random() * count)
           resultsAffiliate_Temp.push({
             vista: obj,
@@ -389,7 +385,7 @@ const clothing_Filler = (
             && !obj2.Main_Category_Name.toLowerCase().includes('women')
         )
         const count = result.length - 1
-        if(count > 0){
+        if(count >= 0){
           let int = Math.floor(Math.random() * count)
           resultsAffiliate_Temp.push({
             vista: obj,
@@ -413,7 +409,7 @@ const clothing_Filler = (
           && !obj2.Main_Category_Name.toLowerCase().includes('women')
         )
         const count = result.length - 1
-        if(count > 0){
+        if(count >= 0){
           let int = Math.floor(Math.random() * count)
           resultsAffiliate_Temp.push({
             vista: obj,
@@ -432,7 +428,7 @@ const clothing_Filler = (
         }
       }
     }
-    if (obj.class == 'lower' && obj.confidence > 0.6) {
+    if (obj.class == 'lower') {
       if (
         obj.deep_fashion_tf.pant_length[0].label == 'FullLength' ||
         obj.deep_fashion_tf.pant_length[0].label == 'CroppedPant' ||
@@ -445,7 +441,7 @@ const clothing_Filler = (
         )
         
         const count = result.length - 1
-        if(count > 0){
+        if(count >= 0){
           let int = Math.floor(Math.random() * count)
           resultsAffiliate_Temp.push({
             vista: obj,
@@ -466,14 +462,14 @@ const clothing_Filler = (
     }
   }
   if (gender == 'Female') {
-    if ((obj.class == 'person' || obj.class == 'upper') && obj.confidence > 0.6) {
+    if (obj.class == 'person' || obj.class == 'upper') {
       if (obj.deep_fashion_tf.sleeve_length[0].label == 'ExtraLongSleeves' ||
         obj.deep_fashion_tf.sleeve_length[0].label == 'LongSleeves'
       ) {
         const prendras = objetos.filter((obj2) => obj2.Sub_Category_Name.toLowerCase().includes('jackets'))        
         const count = prendras.length - 1
 
-        if(count > 0){
+        if(count >= 0){
           let int = Math.floor(Math.random() * count)
           resultsAffiliate_Temp.push({
             vista: obj,
@@ -497,7 +493,7 @@ const clothing_Filler = (
         const count = prendras.length - 1
         let int = Math.floor(Math.random() * count)
 
-        if(count > 0){
+        if(count >= 0){
           resultsAffiliate_Temp.push({
             vista: obj,
             affiliate: prendras[int],
@@ -515,7 +511,7 @@ const clothing_Filler = (
         }
       }
     }
-    if (obj.class == 'lower' && obj.confidence > 0.6) {
+    if (obj.class == 'lower') {
       if (
         obj.deep_fashion_tf.pant_length[0].label == 'FullLength' ||
         obj.deep_fashion_tf.pant_length[0].label == 'CroppedPant' ||
@@ -529,7 +525,7 @@ const clothing_Filler = (
         )
         const count = result.length - 1
 
-        if(count > 0){
+        if(count >= 0){
           let int = Math.floor(Math.random() * count)
           resultsAffiliate_Temp.push({
             vista: obj,
@@ -555,7 +551,7 @@ const clothing_Filler = (
         )
         const count = result.length - 1
 
-        if(count > 0){
+        if(count >= 0){
           let int = Math.floor(Math.random() * count)
           resultsAffiliate_Temp.push({
             vista: obj,
@@ -598,7 +594,7 @@ const object_Filler = (
   )
   const count = result.length - 1
 
-  if(count > 0){
+  if(count >= 0){
     const int = Math.floor(Math.random() * count)
     resultsAffiliate_Temp.push({
       vista: obj,
@@ -641,7 +637,7 @@ const sport_makeup_Filler = (
       )
       const count = result.length - 1
 
-      if(count > 0){
+      if(count >= 0){
         let int = Math.floor(Math.random() * count)
         resultsAffiliate_Temp.push({
           vista: obj,
@@ -670,7 +666,7 @@ const sport_makeup_Filler = (
       )
       const count = result.length - 1
 
-      if(count > 0){
+      if(count >= 0){
         let int = Math.floor(Math.random() * count)
         resultsAffiliate_Temp.push({
           vista: obj,
@@ -698,7 +694,7 @@ const sport_makeup_Filler = (
       )
       const count = result.length - 1
       
-      if(count > 0){
+      if(count >= 0){
         let int = Math.floor(Math.random() * count)
         resultsAffiliate_Temp.push({
           vista: obj,
@@ -726,7 +722,7 @@ const sport_makeup_Filler = (
       const count = result.length - 1
       let int = Math.floor(Math.random() * count)
 
-      if(count > 0){
+      if(count >= 0){
         resultsAffiliate_Temp.push({
           vista: obj,
           affiliate: result[int],
@@ -814,6 +810,7 @@ const addImagePublisherMetadata = (imageURL, page, site, uid, userId, sessionId)
 const matchCategoryWithProductAliases = (category, productName) => {
 
   if(category && productName){
+    productName = productName.replaceAll(' ', '_')
     let aliases = productAliases[productName.toLowerCase()]
 
     if(!aliases){

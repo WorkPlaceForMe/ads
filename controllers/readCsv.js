@@ -206,7 +206,9 @@ const getProductClothData = async (publisherId) => {
         productAndClothsData = productAndClothsData.filter(item => {
           if(item.Sub_Category_Name && excludedProducts?.length > 0){
             for(const excludedProduct of excludedProducts){
-              if(item.Sub_Category_Name.toLowerCase().includes(excludedProduct.toLowerCase()) ){
+              if(item.Main_Category_Name.toLowerCase().includes(excludedProduct.toLowerCase()) ||
+                item.Category_Name.toLowerCase().includes(excludedProduct.toLowerCase()) || 
+                item.Sub_Category_Name.toLowerCase().includes(excludedProduct.toLowerCase())){
                 return false
               }
             }
