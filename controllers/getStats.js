@@ -24,7 +24,9 @@ exports.getStats = Controller(async(req, res) => {
             }
         else{
             for(const stat of rows){
-                ads[stat.site] = (!ads[stat.site] ? 0 : ads[stat.site]) + stat.count
+                if(stat.site){
+                    ads[stat.site] = (!ads[stat.site] ? 0 : ads[stat.site]) + stat.count
+                }
             }
             getImgPerPage(function(err,rows){
                 if(err){
@@ -32,7 +34,9 @@ exports.getStats = Controller(async(req, res) => {
                     }
                 else{
                     for(const stat of rows){
-                        imgs[stat.site] = (!imgs[stat.site] ? 0 : imgs[stat.site]) + stat.count
+                        if(stat.site){
+                            imgs[stat.site] = (!imgs[stat.site] ? 0 : imgs[stat.site]) + stat.count
+                        }
                     }
                     getClicksAndViews(async function(err,rows){
                         if(err){
@@ -206,8 +210,18 @@ exports.getStatsUrl = Controller(async(req, res) => {
             }
         else{
             for(const stat of rows){
-                let name = stat.site.split('//')[1]
-                ads[name] = (!ads[name] ? 0 : ads[name]) + stat.count
+                let name = ''
+                if(stat.site){
+                    if(stat.site.includes('//')){
+                        name = stat.site.split('//')[1]
+                    } else {
+                        name = stat.site
+                    }                    
+                }
+                
+                if(name){
+                    ads[name] = (!ads[name] ? 0 : ads[name]) + stat.count
+                }
             }
             // console.table(ads)
             getImgPerPage(async function(err,rows){
@@ -215,9 +229,19 @@ exports.getStatsUrl = Controller(async(req, res) => {
                     res.status(500).json(err);
                     }
                 else{
-                    for(const stat of rows){
-                        let name = stat.site.split('//')[1]
-                        imgs[name] = (!imgs[name] ? 0 : imgs[name]) + stat.count
+                    for(const stat of rows){                       
+                        let name = ''
+                        if(stat.site){
+                            if(stat.site.includes('//')){
+                                name = stat.site.split('//')[1]
+                            } else {
+                                name = stat.site
+                            }                    
+                        }
+                        
+                        if(name){
+                            imgs[name] = (!imgs[name] ? 0 : imgs[name]) + stat.count
+                        }
                     }
                     //console.table(imgs)
                     getClicksAndViews(async function(err,rows){

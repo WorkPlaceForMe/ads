@@ -75,18 +75,6 @@ export class DashboardComponent implements OnInit {
       this.settings['actions'] = false
     }
 
-    if(path === 'site/image/ad'){
-      this.stage = 'ad'
-      this.face.getStatsAd(params.ad,params.site).subscribe(
-      res => {
-        this.source = res['table'];
-      },
-      err => {
-        console.error(err);
-        this.source = undefined;
-      },
-    );
-    }
     if(path === 'site/image'){
       this.stage = 'image'
       this.face.getStatsImg(params.img).subscribe(
@@ -563,7 +551,7 @@ export class ButtonViewComponent implements ViewCell, OnInit {
 @Component({
   selector: 'button-view',
   template: `
-  <button class='btn btn-link play-btn' (click)='onClick()'><img [src]="rowData.img" width='60' height='60'></button>
+  <button class='btn btn-link play-btn' style='cursor: default'><img [src]="rowData.img" width='60' height='60'></button>
   `,
 })
 export class IconComponent implements ViewCell, OnInit {
@@ -582,12 +570,6 @@ export class IconComponent implements ViewCell, OnInit {
   ngOnInit() {
     this.path = this.activatedRoute.snapshot.routeConfig.path;
     this.params = this.activatedRoute.snapshot.queryParams.img;
-  }
-
-  onClick() {
-    if(this.path == 'site/image'){
-      this.router.navigateByUrl(`/pages/site/image/ad?ad=${this.rowData.img}&site=${this.params}`)
-    }
   }
 }
 
