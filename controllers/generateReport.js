@@ -22,12 +22,26 @@ exports.generateReport = Controller(async (req, res) => {
           return res.status(400).json({ success: false, message: 'Not Found' })
         }
         req.query.url = stats.url
+
+        if(req.query.url && req.query.url.endsWith('/')){
+           req.query.url = req.query.url.substring(0, req.query.url.length - 1)
+        }
+
+        if(req.query.url && req.query.url.includes('www.')){
+           req.query.url = req.query.url.replaceAll('www.', '')
+        }
+
         responseData['stats'] = stats
         getStatsUrl(req)
           .then(async (statsUrl) => {
             responseData['stats']['statsUrl'] = statsUrl
             for (let i = 0; i < responseData.stats.statsUrl.table.length; i++) {
               req.query.imgs = responseData.stats.statsUrl.table[i].url
+
+              if(req.query.imgs && req.query.imgs.includes('www.')){
+                req.query.imgs = req.query.imgs.replaceAll('www.', '')
+              }
+
               await getStatsImg(req)
                 .then((images) => {
                   responseData.stats.statsUrl.table[i].images = images
@@ -113,8 +127,14 @@ const getStats = (req) => {
             return reject(err)
           } else {
             for (const stat of rows) {
-              imgs[stat.site] = (!imgs[stat.site] ? 0 : imgs[stat.site]) + stat.count
-            }
+              if(stat.site) {
+                if(stat.site.includes('www.')){
+                  stat.site = stat.site.replaceAll('www.', '')
+                }
+
+                imgs[stat.site] = (!imgs[stat.site] ? 0 : imgs[stat.site]) + stat.count
+              }
+            }            
 
             getClicksAndViews(async function (err, rows) {
               if (err) {
@@ -127,6 +147,9 @@ const getStats = (req) => {
 
                 for (const click in clicks) {
                   let url = click.split('/')[2]
+                  if(url.includes('www.')){
+                    url = url.replaceAll('www.', '')
+                  }
                   if (url == '') {
                     url = 'Static File'
                   }
@@ -134,12 +157,19 @@ const getStats = (req) => {
                 }
                 for (const view in views) {
                   let url = view.split('/')[2]
+                  if(url.includes('www.')){
+                    url = url.replaceAll('www.', '')
+                  }
                   if (url == '') {
                     url = 'Static File'
                   }
                   viewsGrouped[url] = (viewsGrouped[url] || 0) + views[view]
                 }
-                for (const img in imgs) {
+                for (let img in imgs) {
+                  if(img.includes('www.')){
+                    img = img.replaceAll('www.', '')
+                  }
+
                   let url = img.split('/')[2]
                   let term = img.split('/')[0]
                   if (url == '') {
@@ -149,7 +179,10 @@ const getStats = (req) => {
                   imgsGrouped[url] = (imgsGrouped[url] || 0) + imgs[img]
                   terminations[url] = term
                 }
-                for (const ad in ads) {
+                for (let ad in ads) {
+                  if(ad.includes('www.')){
+                    ad = ad.replaceAll('www.', '')
+                  }
                   let url = ad.split('/')[2]
                   if (url == '') {
                     url = 'Static File'
@@ -260,8 +293,18 @@ const getStats = (req) => {
                       ids[0].enabled = false
                     }
 
+                    let siteURL = Object.keys(imgsGrouped)[i]
+
+                    if(siteURL && !siteURL.includes('/')){
+                      siteURL += '/'
+                    }
+
+                    if(siteURL && siteURL.includes('www.')){
+                       siteURL = siteURL.replaceAll('www.', '')
+                    }
+
                     stats = {
-                      url: Object.keys(imgsGrouped)[i],
+                      url: siteURL,
                       clicksPerImg: clicksPerImg,
                       viewsPerImg: viewsPerImg,
                       clicksPerAd: clicksPerAd,
@@ -306,7 +349,12 @@ const getStatsUrl = (req) => {
         return reject(err)
       } else {
         for (const stat of rows) {
-          ads[stat.site] = (!ads[stat.site] ? 0 : ads[stat.site]) + stat.count
+          if(stat.site){
+            if(stat.site.includes('www.')){
+              stat.site = stat.site.replaceAll('www.', '')
+            }
+            ads[stat.site] = (!ads[stat.site] ? 0 : ads[stat.site]) + stat.count
+          }
         }
 
         getImgPerPage(async function (err, rows) {
@@ -314,7 +362,12 @@ const getStatsUrl = (req) => {
             return reject(err)
           } else {
             for (const stat of rows) {
-              imgs[stat.site] = (!imgs[stat.site] ? 0 : imgs[stat.site]) + stat.count
+              if(stat.site){
+                if(stat.site.includes('www.')){
+                  stat.site = stat.site.replaceAll('www.', '')
+                }
+                imgs[stat.site] = (!imgs[stat.site] ? 0 : imgs[stat.site]) + stat.count
+              }
             }
 
             getClicksAndViews(async function (err, rows) {
@@ -322,11 +375,20 @@ const getStatsUrl = (req) => {
                 return reject(err)
               } else {
                 for (const stat of rows) {
-                  clicks[stat.url] = stat.clicks
-                  views[stat.url] = stat.views
+                  if(stat.url){
+                    if(stat.url.includes('www.')){
+                      stat.url = stat.url.replaceAll('www.', '')
+                    }
+
+                    clicks[stat.url] = stat.clicks
+                    views[stat.url] = stat.views
+                  }
                 }
 
-                for (const click in clicks) {
+                for (let click in clicks) {
+                  if(click.includes('www.')){
+                    click = click.replaceAll('www.', '')
+                  }
                   let url = click.split('/')[2]
                   if (url == '') {
                     url = 'Static File'
@@ -336,7 +398,10 @@ const getStatsUrl = (req) => {
                       (clicksGrouped[click] || 0) + clicks[click]
                   }
                 }
-                for (const view in views) {
+                for (let view in views) {
+                  if(view.includes('www.')){
+                    view = view.replaceAll('www.', '')
+                  }
                   let url = view.split('/')[2]
                   if (url == '') {
                     url = 'Static File'
@@ -345,7 +410,10 @@ const getStatsUrl = (req) => {
                     viewsGrouped[view] = (viewsGrouped[view] || 0) + views[view]
                   }
                 }
-                for (const img in imgs) {
+                for (let img in imgs) {
+                  if(img.includes('www.')){
+                    img = img.replaceAll('www.', '')
+                  }
                   let url = img.split('/')[2]
                   if (url == '') {
                     url = 'Static File'
@@ -354,7 +422,10 @@ const getStatsUrl = (req) => {
                     imgsGrouped[img] = (imgsGrouped[img] || 0) + imgs[img]
                   }
                 }
-                for (const ad in ads) {
+                for (let ad in ads) {
+                  if(ad.includes('www.')){
+                    ad = ad.replaceAll('www.', '')
+                  }
                   let url = ad.split('/')[2]
                   if (url == '') {
                     url = 'Static File'
@@ -435,6 +506,10 @@ const getStatsUrl = (req) => {
                     viewsPerAd = 0
                   }
 
+                  if(req.query.url && req.query.url.includes('www.')){
+                    req.query.url = req.query.url.replaceAll('www.', '')
+                  }
+
                   let extension = Object.keys(imgsGrouped)[i].split(
                     req.query.url,
                   )[1]
@@ -443,8 +518,18 @@ const getStatsUrl = (req) => {
                   let adsPerImage = def
                   let imgPerPage = imgsGrouped[Object.keys(imgsGrouped)[i]]
 
+                  let siteURL = Object.keys(imgsGrouped)[i]
+
+                  if(siteURL && !siteURL.includes('/')){
+                      siteURL += '/'
+                  }
+
+                  if(siteURL && siteURL.includes('www.')){
+                     siteURL = siteURL.replaceAll('www.', '')
+                  }
+
                   table[i] = {
-                    url: Object.keys(imgsGrouped)[i],
+                    url: siteURL,
                     clicksPerImg: clicksPerImg,
                     viewsPerImg: viewsPerImg,
                     clicksPerAd: clicksPerAd,
@@ -504,6 +589,10 @@ const getStatsImg = (req) => {
         return reject(err)
       } else {
         for (const stat of rows) {
+          if(stat.img && stat.img.includes('www.')){
+            stat.img = stat.img.replaceAll('www.', '')
+          }
+
           clicks[stat.img] = stat.clicks
           views[stat.img] = stat.views
         }
