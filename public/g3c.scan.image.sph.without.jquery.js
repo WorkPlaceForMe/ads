@@ -577,8 +577,8 @@ function iconAndSize(file, big){
 function getImageURL(element){
 	let imageURL = $(element).closest('.ad-image-div').find('img').prop('src')
 
-	if($(element).closest('div.background-img-class').length > 0){
-		$(element).closest('div.background-img-class').find('a, span, div').filter(function() {
+	if($(element).closest('.background-img-class').length > 0){
+		$(element).closest('.background-img-class').find('a, span, div').filter(function() {
 			return this.style.backgroundImage
 		}).each(function() {
 			imageURL = $(this).css("backgroundImage").replace('url(','').replace(')','').replace(/\"/gi, "")
