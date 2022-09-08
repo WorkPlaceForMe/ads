@@ -26,8 +26,9 @@ exports.getStats = Controller(async(req, res) => {
             for(const stat of rows){
                 if(stat.site){
                     if(stat.site.includes('www.')){
-                        stat.site = stat.site.replaceAll('www.', '')
+                        stat.site = stat.site.replace('www.', '')
                     }
+                    
                     ads[stat.site] = (!ads[stat.site] ? 0 : ads[stat.site]) + stat.count
                 }
             }
@@ -39,7 +40,7 @@ exports.getStats = Controller(async(req, res) => {
                     for(const stat of rows){
                         if(stat.site){
                             if(stat.site.includes('www.')){
-                                stat.site = stat.site.replaceAll('www.', '')
+                                stat.site = stat.site.replace('www.', '')
                             }
                             imgs[stat.site] = (!imgs[stat.site] ? 0 : imgs[stat.site]) + stat.count
                         }
@@ -49,9 +50,12 @@ exports.getStats = Controller(async(req, res) => {
                             res.status(500).json(err);
                             }
                         else{
-                            for(const stat of rows){
+                            for(let stat of rows){
+                                if(stat.url){
+                                    stat.url = decodeURI(stat.url)
+                                }
                                 if(stat.url && stat.url.includes('www.')){
-                                    stat.url = stat.url.replaceAll('www.', '')
+                                    stat.url = stat.url.replace('www.', '')
                                 }
 
                                 clicks[stat.url] = stat.clicks
@@ -66,18 +70,12 @@ exports.getStats = Controller(async(req, res) => {
                             }
                             for(const view in views){
                                 let url = view.split('/')[2]
-                                if(url && url.includes('www.')){
-                                    url = url.replaceAll('www.', '')
-                                }
                                 if(url == ''){
                                     url = 'Static File'
                                 }
                                 viewsGrouped[url] = (viewsGrouped[url]  || 0) + views[view]
                             }
                             for(let img in imgs){
-                                if(img.includes('www.')){
-                                    img = img.replaceAll('www.', '')
-                                }
                                 let url = img.split('/')[2]
                                 let term = img.split('/')[0]
                                 if(url == ''){
@@ -88,9 +86,6 @@ exports.getStats = Controller(async(req, res) => {
                                 terminations[url] = term
                             }
                             for(let ad in ads){
-                                if(ad.includes('www.')){
-                                    ad = ad.replaceAll('www.', '')
-                                }
                                 let url = ad.split('/')[2]
                                 if(url == ''){
                                     url = 'Static File'
@@ -163,15 +158,25 @@ exports.getStats = Controller(async(req, res) => {
                                 let rewards = {};
                             
                                 try{
-                                    if(ids[0].publisherId != null){
-                                        rewards = await reportAff.report(init,fin,ids[0].publisherId)
-                                        }else{
-                                        rewards['totalReward'] = 0;
-                                        rewards['totalConversionsCount'] = 0;
+                                    if(ids[0].publisherId){
+                                        rewards = await cache.getAsync(`${init}_${fin}_${ids[0].publisherId}`)
+                                        
+                                        if(rewards){
+                                            rewards = JSON.parse(rewards)
+                                        } else {
+                                            rewards = await reportAff.report(init,fin,ids[0].publisherId)
+
+                                            if(rewards){
+                                                cache.setAsync(`${init}_${fin}_${ids[0].publisherId}`, JSON.stringify(rewards)).then()
+                                            }
+                                        }
+                                    } else{
+                                        rewards['totalReward'] = 0
+                                        rewards['totalConversionsCount'] = 0
                                     }
                                 }catch(err){
                                     rewards['totalReward'] = 0;
-                                    rewards['totalConversionsCount'] = 0;
+                                    rewards['totalConversionsCount'] = 0
                                 }
 
                                 if(ids[0].enabled == 'true'){
@@ -183,7 +188,7 @@ exports.getStats = Controller(async(req, res) => {
                                     let siteURL = Object.keys(imgsGrouped)[i]
                 
                                     if(siteURL && siteURL.includes('www.')){
-                                       siteURL = siteURL.replaceAll('www.', '')
+                                       siteURL = siteURL.replace('www.', '')
                                     }                
 
                                     table[i] = {
@@ -201,7 +206,7 @@ exports.getStats = Controller(async(req, res) => {
                                         id: ids[0].id,
                                         rewards: rewards['totalReward'],
                                         conversions: rewards['totalConversionsCount'],
-                                        nickname: ids[0].nickname
+                                        nickname: ids[0].nickname || siteURL
                                     }
 
                             }
@@ -215,13 +220,13 @@ exports.getStats = Controller(async(req, res) => {
             })
         }
     })
-    // res.status(200).json({success: true})
 })
 
 exports.getStatsUrl = Controller(async(req, res) => {
     const urlQuery = req.query.url
     // console.log(urlQuery)
     let ads = {},
+    imagesWithAds = {},
     clicks = {},
     views = {},
     imgs = {},
@@ -243,13 +248,14 @@ exports.getStatsUrl = Controller(async(req, res) => {
                         name = stat.site
                     } 
                     
-                    if(stat.site && stat.site.includes('www.')){
-                        stat.site = stat.site.replaceAll('www.', '')
+                    if(name && name.startsWith('www.')){
+                        name = name.replace('www.', '')
                     }
                 }
                 
                 if(name){
                     ads[name] = (!ads[name] ? 0 : ads[name]) + stat.count
+                    imagesWithAds[name] = (!imagesWithAds[name] ? 0 : imagesWithAds[name]) + 1
                 }
             }
             // console.table(ads)
@@ -267,8 +273,8 @@ exports.getStatsUrl = Controller(async(req, res) => {
                                 name = stat.site
                             }
                             
-                            if(stat.site && stat.site.includes('www.')){
-                                stat.site = stat.site.replaceAll('www.', '')
+                            if(name && name.startsWith('www.')){
+                                name = name.replace('www.', '')
                             }
                         }
                         
@@ -283,20 +289,24 @@ exports.getStatsUrl = Controller(async(req, res) => {
                             }
                         else{
                             for(const stat of rows){
-                                let name = stat.url.split('//')[1]
-                                if(name && name.includes('www.')){
-                                    name = name.replaceAll('www.', '')
+                                if(stat.url){
+                                    let name = decodeURI(stat.url)
+                                    if(name.includes('//')){
+                                        name = name.split('//')[1]
+                                    }
+                                    if(name && name.startsWith('www.')){
+                                        name = name.replace('www.', '')
+                                    }
+                                    clicks[name] = stat.clicks
+                                    views[name] = stat.views
                                 }
-                                clicks[name] = stat.clicks
-                                views[name] = stat.views
                             }
-                            // console.table(clicks)
-                            // console.table(views)
+                          
                             for(const click in clicks){
                                 let url = click.split('/')[0]
 
                                 if(url && url.includes('www.')){
-                                    url = url.replaceAll('www.', '')
+                                    url = url.replace('www.', '')
                                 }
 
                                 if(url == ''){
@@ -319,7 +329,7 @@ exports.getStatsUrl = Controller(async(req, res) => {
                                 let url = img.split('/')[0]
 
                                 if(url && url.includes('www.')){
-                                    url = url.replaceAll('www.', '')
+                                    url = url.replace('www.', '')
                                 }
 
                                 if(url == ''){
@@ -333,7 +343,7 @@ exports.getStatsUrl = Controller(async(req, res) => {
                                 let url = ad.split('/')[0]
 
                                 if(url && url.includes('www.')){
-                                    url = url.replaceAll('www.', '')
+                                    url = url.replace('www.', '')
                                 }
 
                                 if(url == ''){
@@ -343,15 +353,10 @@ exports.getStatsUrl = Controller(async(req, res) => {
                                     adsGrouped[ad] = (adsGrouped[ad]  || 0) + ads[ad]
                                 }
                             }
-                            // console.table(imgsGrouped)
-                            // console.table(clicksGrouped)
-                            // console.table(viewsGrouped)
-                            // console.table(adsGrouped)
+                          
                             let table = []
                             const ids = await getPublisherId(req.query.url)
                             for(let i = 0; i < Object.keys(imgsGrouped).length; i++){
-                                // const url = Object.keys(imgsGrouped)[i].split('/')[2]
-                                // console.log(url)
                                 if(!clicksGrouped[Object.keys(imgsGrouped)[i]]){
                                     clicksGrouped[Object.keys(imgsGrouped)[i]] = 0
                                 }
@@ -385,7 +390,7 @@ exports.getStatsUrl = Controller(async(req, res) => {
                                 let extension = Object.keys(imgsGrouped)[i].split(req.query.url)[1]
                                 const def = conf.get('max_ads_per_image') || 4                               
                                 let adsPerImage = def
-                                let imgPerPage = imgsGrouped[Object.keys(imgsGrouped)[i]]
+                                let imgPerPage = imagesWithAds[Object.keys(imgsGrouped)[i]]
                                 let totImgs = imgsGrouped[Object.keys(imgsGrouped)[i]]
 
                                 let siteURL = Object.keys(imgsGrouped)[i]
@@ -395,7 +400,7 @@ exports.getStatsUrl = Controller(async(req, res) => {
                                 }
 
                                 if(siteURL && siteURL.includes('www.')){
-                                    siteURL = siteURL.replaceAll('www.', '')
+                                    siteURL = siteURL.replace('www.', '')
                                 }
 
                                 table[i] = {
@@ -410,7 +415,7 @@ exports.getStatsUrl = Controller(async(req, res) => {
                                     clicks: clicksGrouped[Object.keys(imgsGrouped)[i]],
                                     views: viewsGrouped[Object.keys(imgsGrouped)[i]],
                                     adsNum: adsPerImage,
-                                    imgNum: imgPerPage,
+                                    imgNum: imgPerPage || 0,
                                     totImgs: totImgs
                                 }
                             }
@@ -424,10 +429,20 @@ exports.getStatsUrl = Controller(async(req, res) => {
                             const fin = new Date(req.query.fin).toISOString();
                             
                             try{                              
-                                rewards = await reportAff.report(init, fin,ids[0].publisherId)
+                                rewards = await cache.getAsync(`${init}_${fin}_${ids[0].publisherId}`)
+                                        
+                                if(rewards){
+                                    rewards = JSON.parse(rewards)
+                                } else {
+                                    rewards = await reportAff.report(init,fin,ids[0].publisherId)
+
+                                    if(rewards){
+                                        cache.setAsync(`${init}_${fin}_${ids[0].publisherId}`, JSON.stringify(rewards)).then()
+                                    }
+                                }
                             } catch(err){
-                                rewards['totalReward'] = 0;
-                                rewards['totalConversionsCount'] = 0;
+                                rewards['totalReward'] = 0
+                                rewards['totalConversionsCount'] = 0
                             }
 
                             res.status(200).json({success: true, table: table, rewards: rewards});
@@ -447,7 +462,7 @@ exports.getStatsImg = Controller(async(req, res) => {
     }
 
     if(urlQuery && urlQuery.includes('www.')){
-        urlQuery = urlQuery.replaceAll('www.', '')
+        urlQuery = urlQuery.replace('www.', '')
       }
 
     let clicks = {},
@@ -458,12 +473,23 @@ exports.getStatsImg = Controller(async(req, res) => {
             }
         else{
             for(const stat of rows){
-                if(stat.img == null){
-                    continue;
+                if(stat.img){
+                    let name = decodeURI(stat.img)
+
+                    if(name.includes('//')){
+                        name = name.split('//')[1]
+                    }
+
+                    if(name.startsWith('www.')){
+                        name = name.replace('www.', '')
+                    }                   
+
+                    if(name){
+                        clicks[name] = (clicks[name]  || 0) + stat.clicks
+                        views[name] = (views[name]  || 0) + stat.views
+                    }
                 }
-                let name = stat.img.split('//')[1]
-                clicks[name] = stat.clicks
-                views[name] = stat.views
+                
             }
             getAdsListPerImg(urlQuery,function(err,rows){
                 if(err){
@@ -472,8 +498,19 @@ exports.getStatsImg = Controller(async(req, res) => {
                 else{
                     let ads = {}
                     for(let i = 0; i<rows.length; i++){
-                        let img = rows[i].imgName.split('//')[1]
-                        ads[img] = (ads[img]  || 0) + 1
+                        let img = decodeURI(rows[i].imgName)
+
+                        if(img){
+                            if(img.includes('//')){
+                                img = img.split('//')[1]
+                            }
+
+                            if(img && img.startsWith('www.')){
+                                img = img.replace('www.', '')
+                            }
+
+                            ads[img] = (ads[img]  || 0) + 1
+                        }
                     }
                     getImgsList(urlQuery,function(err,rows){
                         if(err){
@@ -482,10 +519,14 @@ exports.getStatsImg = Controller(async(req, res) => {
                         else{
                             let imgs = []
                             for(let i = 0; i<rows.length; i++){
-                                let img = rows[i].img.split('//')[1]
+                                let img = decodeURI(rows[i].img)
 
-                                if(img && img.includes('www.')){
-                                    img = img.replaceAll('www.', '')
+                                if(img.includes('//')){
+                                   img = img.split('//')[1]
+                                }
+
+                                if(img && img.startsWith('www.')){
+                                    img = img.replace('www.', '')
                                 }
 
                                 let adsTotal = ads[img]
@@ -575,7 +616,7 @@ exports.getStatsAd = (req) => {
 }
 
 function getAdsPerPage(callback){
-    return db.query(`SELECT count(*) as count, idGeneration as uid, (select site from ${conf.get('database')}.adspages where idGeneration = uid limit 1) as site FROM ${conf.get('database')}.adspages group by idGeneration order by uid asc`,callback)
+    return db.query(`SELECT count(*) as count, site, imgName FROM ${conf.get('database')}.adspages group by site, imgName order by site asc;`, callback)
 }
 
 function getImgPerPage(callback){
@@ -604,6 +645,7 @@ function getAdsList(img,site,callback){
 }
 
 function getAdsClicksAndViews(img,site,callback){
+    site = encodeURI(site)
     return db.query(`SELECT idItem,img, COUNT( CASE WHEN type = '2' THEN 1 END ) AS clicks, COUNT( CASE WHEN type = '1' THEN 1 END ) AS views FROM ${conf.get('database')}.impressions where ( url = 'https://${site}' OR url = 'https://www.${site}' OR url = 'http://${site}' OR url = 'http://www.${site}' ) and img= '${img}' group by idItem;`,callback)
 }
 

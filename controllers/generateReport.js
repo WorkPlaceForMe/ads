@@ -28,7 +28,7 @@ exports.generateReport = Controller(async (req, res) => {
         }
 
         if(req.query.url && req.query.url.includes('www.')){
-           req.query.url = req.query.url.replaceAll('www.', '')
+           req.query.url = req.query.url.replace('www.', '')
         }
 
         responseData['stats'] = stats
@@ -39,7 +39,7 @@ exports.generateReport = Controller(async (req, res) => {
               req.query.imgs = responseData.stats.statsUrl.table[i].url
 
               if(req.query.imgs && req.query.imgs.includes('www.')){
-                req.query.imgs = req.query.imgs.replaceAll('www.', '')
+                req.query.imgs = req.query.imgs.replace('www.', '')
               }
 
               await getStatsImg(req)
@@ -129,7 +129,7 @@ const getStats = (req) => {
             for (const stat of rows) {
               if(stat.site) {
                 if(stat.site.includes('www.')){
-                  stat.site = stat.site.replaceAll('www.', '')
+                  stat.site = stat.site.replace('www.', '')
                 }
 
                 imgs[stat.site] = (!imgs[stat.site] ? 0 : imgs[stat.site]) + stat.count
@@ -148,7 +148,7 @@ const getStats = (req) => {
                 for (const click in clicks) {
                   let url = click.split('/')[2]
                   if(url.includes('www.')){
-                    url = url.replaceAll('www.', '')
+                    url = url.replace('www.', '')
                   }
                   if (url == '') {
                     url = 'Static File'
@@ -158,7 +158,7 @@ const getStats = (req) => {
                 for (const view in views) {
                   let url = view.split('/')[2]
                   if(url.includes('www.')){
-                    url = url.replaceAll('www.', '')
+                    url = url.replace('www.', '')
                   }
                   if (url == '') {
                     url = 'Static File'
@@ -167,7 +167,7 @@ const getStats = (req) => {
                 }
                 for (let img in imgs) {
                   if(img.includes('www.')){
-                    img = img.replaceAll('www.', '')
+                    img = img.replace('www.', '')
                   }
 
                   let url = img.split('/')[2]
@@ -181,7 +181,7 @@ const getStats = (req) => {
                 }
                 for (let ad in ads) {
                   if(ad.includes('www.')){
-                    ad = ad.replaceAll('www.', '')
+                    ad = ad.replace('www.', '')
                   }
                   let url = ad.split('/')[2]
                   if (url == '') {
@@ -190,16 +190,6 @@ const getStats = (req) => {
                   adsGrouped[url] = (adsGrouped[url] || 0) + ads[ad]
                 }
                 for (let i = 0; i < Object.keys(imgsGrouped).length; i++) {
-                  // let count = 0;
-                  // for(const pub of publ){
-                  //     if(pub.dataValues.name != Object.keys(imgsGrouped)[i]){
-                  //         count ++;
-                  //     }
-                  // }
-                  // console.log(count, Object.keys(imgsGrouped).length)
-                  // if(count == Object.keys(imgsGrouped).length -1){
-                  //     continue;
-                  // }
                   if (!clicksGrouped[Object.keys(imgsGrouped)[i]]) {
                     clicksGrouped[Object.keys(imgsGrouped)[i]] = 0
                   }
@@ -277,11 +267,17 @@ const getStats = (req) => {
                     const fin = new Date(req.query.fin).toISOString()
                     let rewards = {}
                     try {
-                      rewards = await reportAff.report(
-                        init,
-                        fin,
-                        ids[0].publisherId,
-                      )
+                      rewards = await cache.getAsync(`${init}_${fin}_${ids[0].publisherId}`)
+                                        
+                      if(rewards){
+                          rewards = JSON.parse(rewards)
+                      } else {
+                          rewards = await reportAff.report(init,fin,ids[0].publisherId)
+
+                          if(rewards){
+                              cache.setAsync(`${init}_${fin}_${ids[0].publisherId}`, JSON.stringify(rewards)).then()
+                          }
+                      }
                     } catch (err) {
                       rewards['totalReward'] = 0
                       rewards['totalConversionsCount'] = 0
@@ -300,7 +296,7 @@ const getStats = (req) => {
                     }
 
                     if(siteURL && siteURL.includes('www.')){
-                       siteURL = siteURL.replaceAll('www.', '')
+                       siteURL = siteURL.replace('www.', '')
                     }
 
                     stats = {
@@ -351,7 +347,7 @@ const getStatsUrl = (req) => {
         for (const stat of rows) {
           if(stat.site){
             if(stat.site.includes('www.')){
-              stat.site = stat.site.replaceAll('www.', '')
+              stat.site = stat.site.replace('www.', '')
             }
             ads[stat.site] = (!ads[stat.site] ? 0 : ads[stat.site]) + stat.count
           }
@@ -364,7 +360,7 @@ const getStatsUrl = (req) => {
             for (const stat of rows) {
               if(stat.site){
                 if(stat.site.includes('www.')){
-                  stat.site = stat.site.replaceAll('www.', '')
+                  stat.site = stat.site.replace('www.', '')
                 }
                 imgs[stat.site] = (!imgs[stat.site] ? 0 : imgs[stat.site]) + stat.count
               }
@@ -377,7 +373,7 @@ const getStatsUrl = (req) => {
                 for (const stat of rows) {
                   if(stat.url){
                     if(stat.url.includes('www.')){
-                      stat.url = stat.url.replaceAll('www.', '')
+                      stat.url = stat.url.replace('www.', '')
                     }
 
                     clicks[stat.url] = stat.clicks
@@ -387,7 +383,7 @@ const getStatsUrl = (req) => {
 
                 for (let click in clicks) {
                   if(click.includes('www.')){
-                    click = click.replaceAll('www.', '')
+                    click = click.replace('www.', '')
                   }
                   let url = click.split('/')[2]
                   if (url == '') {
@@ -400,7 +396,7 @@ const getStatsUrl = (req) => {
                 }
                 for (let view in views) {
                   if(view.includes('www.')){
-                    view = view.replaceAll('www.', '')
+                    view = view.replace('www.', '')
                   }
                   let url = view.split('/')[2]
                   if (url == '') {
@@ -412,7 +408,7 @@ const getStatsUrl = (req) => {
                 }
                 for (let img in imgs) {
                   if(img.includes('www.')){
-                    img = img.replaceAll('www.', '')
+                    img = img.replace('www.', '')
                   }
                   let url = img.split('/')[2]
                   if (url == '') {
@@ -424,7 +420,7 @@ const getStatsUrl = (req) => {
                 }
                 for (let ad in ads) {
                   if(ad.includes('www.')){
-                    ad = ad.replaceAll('www.', '')
+                    ad = ad.replace('www.', '')
                   }
                   let url = ad.split('/')[2]
                   if (url == '') {
@@ -507,7 +503,7 @@ const getStatsUrl = (req) => {
                   }
 
                   if(req.query.url && req.query.url.includes('www.')){
-                    req.query.url = req.query.url.replaceAll('www.', '')
+                    req.query.url = req.query.url.replace('www.', '')
                   }
 
                   let extension = Object.keys(imgsGrouped)[i].split(
@@ -525,7 +521,7 @@ const getStatsUrl = (req) => {
                   }
 
                   if(siteURL && siteURL.includes('www.')){
-                     siteURL = siteURL.replaceAll('www.', '')
+                     siteURL = siteURL.replace('www.', '')
                   }
 
                   table[i] = {
@@ -547,26 +543,22 @@ const getStatsUrl = (req) => {
                 let rewards = {}
                 const init = new Date(req.query.init).toISOString()
                 const fin = new Date(req.query.fin).toISOString()
-                const cacheed = await cache.getAsync(
-                  `${init}_${fin}_${ids[0].publisherId}`,
-                )
-
-                if (cacheed) {
-                  return resolve({ table, rewards: JSON.parse(cacheed) })
-                }
+                
                 try {
-                  rewards = await reportAff.report(
-                    init,
-                    fin,
-                    ids[0].publisherId,
-                  )
+                  rewards = await cache.getAsync(`${init}_${fin}_${ids[0].publisherId}`)
+                                        
+                  if(rewards){
+                      rewards = JSON.parse(rewards)
+                  } else {
+                      rewards = await reportAff.report(init,fin,ids[0].publisherId)
+
+                      if(rewards){
+                          cache.setAsync(`${init}_${fin}_${ids[0].publisherId}`, JSON.stringify(rewards)).then()
+                      }
+                  }
                 } catch (err) {
                   rewards['totalReward'] = 0
                   rewards['totalConversionsCount'] = 0
-                  cache.setAsync(
-                    `${init}_${fin}_${ids[0].publisherId}`,
-                    JSON.stringify(rewards),
-                  )
                 }
 
                 resolve({ table, rewards })
@@ -590,7 +582,7 @@ const getStatsImg = (req) => {
       } else {
         for (const stat of rows) {
           if(stat.img && stat.img.includes('www.')){
-            stat.img = stat.img.replaceAll('www.', '')
+            stat.img = stat.img.replace('www.', '')
           }
 
           clicks[stat.img] = stat.clicks
