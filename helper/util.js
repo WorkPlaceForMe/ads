@@ -1,3 +1,5 @@
+const cache = require('./cacheManager')
+
 exports.getStrippedURL = url => {
     let newURL = url
   
@@ -21,4 +23,24 @@ exports.getStrippedURL = url => {
     }
   
     return arr
+  }
+
+  exports.deleteRedisData = async (pattern) => {
+
+    return new Promise(async (resolve, reject) => {
+      try {
+        cache.keys('*', (err, keys) => {
+          for (const key of keys) {
+            if(key.includes(pattern)){
+              cache.del(key)
+            }
+          }
+  
+          resolve()
+        })      
+      } catch (err) {
+        console.log(err)
+        reject(err)
+      }
+    })
   }

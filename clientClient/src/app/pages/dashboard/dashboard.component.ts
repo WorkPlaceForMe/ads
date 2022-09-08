@@ -269,6 +269,11 @@ export class DashboardComponent implements OnInit {
         type: 'string',
         filter: false,
       },
+      adsperimage: {
+        title: 'Ads Per Image',
+        type: 'string',
+        filter: false,
+      },
       ads: {
         title: 'Total Number of Ads',
         type: 'string',

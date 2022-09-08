@@ -30,6 +30,7 @@ const { delay } = require('bluebird')
 const bcrypt = require('bcrypt')
 const axios = require('axios')
 const axiosRetry = require('axios-retry')
+const { deleteRedisData } = require('./helper/util')
 
 let server = conf.get('server').split('/')
 server[2] = `www.${server[2]}`
@@ -223,26 +224,6 @@ httpsServer.listen(portS || 3311, function () {
 httpServer.listen(port || 3310, function () {
 	console.log(`App is running on HTTP mode using port: ${port || '3310'}`)
 })
-
-deleteRedisData = async (pattern) => {
-
-  return new Promise(async (resolve, reject) => {
-    try {
-      cache.keys('*', (err, keys) => {
-        for (const key of keys) {
-          if(key.includes(pattern)){
-            cache.del(key)
-          }
-        }
-
-        resolve()
-      })      
-    } catch (err) {
-      console.log(err)
-      reject(err)
-    }
-  })
-}
 
 axiosRetry(axios, {
   retries: 2,

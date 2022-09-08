@@ -509,9 +509,8 @@ const getStatsUrl = (req) => {
                   let extension = Object.keys(imgsGrouped)[i].split(
                     req.query.url,
                   )[1]
-                  const def = conf.get('max_ads_per_image') || 4
                 
-                  let adsPerImage = def
+                  let adsPerImage = ids[0].adsperimage
                   let imgPerPage = imgsGrouped[Object.keys(imgsGrouped)[i]]
 
                   let siteURL = Object.keys(imgsGrouped)[i]

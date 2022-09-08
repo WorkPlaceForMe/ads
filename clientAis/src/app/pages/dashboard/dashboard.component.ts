@@ -107,7 +107,7 @@ export class DashboardComponent implements OnInit {
       this.face.getStats(this.range).subscribe(
         res => {
           this.settings['columns']['nickname'] = {
-            title: 'Name',
+            title: 'Nick Name',
             type: 'string',
             filter: false,
             sort: true
@@ -384,6 +384,11 @@ export class DashboardComponent implements OnInit {
       },
         images: {
         title: 'Total Number of Images',
+        type: 'string',
+        filter: false,
+      },
+      adsperimage: {
+        title: 'Ads Per Image',
         type: 'string',
         filter: false,
       },

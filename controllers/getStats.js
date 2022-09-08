@@ -206,7 +206,8 @@ exports.getStats = Controller(async(req, res) => {
                                         id: ids[0].id,
                                         rewards: rewards['totalReward'],
                                         conversions: rewards['totalConversionsCount'],
-                                        nickname: ids[0].nickname || siteURL
+                                        nickname: ids[0].nickname || siteURL,
+                                        adsperimage: ids[0].adsperimage                                       
                                     }
 
                             }
@@ -386,10 +387,8 @@ exports.getStatsUrl = Controller(async(req, res) => {
                                 if(Number.isNaN(viewsPerAd)){
                                     viewsPerAd = 0;
                                 }
-
-                                let extension = Object.keys(imgsGrouped)[i].split(req.query.url)[1]
-                                const def = conf.get('max_ads_per_image') || 4                               
-                                let adsPerImage = def
+                         
+                                let adsPerImage = ids[0].adsperimage
                                 let imgPerPage = imagesWithAds[Object.keys(imgsGrouped)[i]]
                                 let totImgs = imgsGrouped[Object.keys(imgsGrouped)[i]]
 

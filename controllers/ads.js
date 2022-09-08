@@ -116,7 +116,17 @@ exports.getAds = Controller(async (req, res) => {
           data: formData
       }
        
-      let limit = conf.get('max_ads_per_image') || 4
+
+      let publisher = await cache.getAsync(`${checker}-publisher`)
+
+      if(publisher){
+        publisher = JSON.parse(publisher)
+      } else {
+        publisher = await getPublisher(checker)
+        cache.setAsync(`${checker}-publisher`, JSON.stringify(publisher)).then()
+      }
+
+      let limit = publisher ? publisher.adsperimage : 1
   
       console.log(`Sending request to Vista Server for image ${url}`)
       const response = await axios(request_config)
@@ -135,7 +145,7 @@ exports.getAds = Controller(async (req, res) => {
       let flat = flatten(resultsAffiliate)
       
       if (flat.length > limit) {
-        flat = getDiversifiedResults(flat, limit)
+        flat.length = limit
       }
       
       const sendingResults = await convert(flat)      

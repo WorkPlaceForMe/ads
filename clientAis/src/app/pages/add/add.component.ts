@@ -36,6 +36,7 @@ export class AddComponent implements OnInit {
             console.log(res)
             this.registerForm.controls['name'].setValue(res['publ'].name)
             this.registerForm.controls['nickname'].setValue(res['publ'].nickname)
+            this.registerForm.controls['adsperimage'].setValue(res['publ'].adsperimage)
           },
           err => console.error(err)
       )
@@ -47,6 +48,7 @@ export class AddComponent implements OnInit {
 
     this.registerForm = this.formBuilder.group({
       nickname: ['', ],
+      adsperimage: [1, ],
       name: ['', [Validators.required]],
     });
   }
@@ -57,7 +59,8 @@ export class AddComponent implements OnInit {
   this.submitted = true;
   this.values = {
     name: 'primary',
-    nickname: 'primary',
+    adsperimage: 1,
+    nickname: 'primary'
   }
   // stop here if form is invalid
   if (this.registerForm.invalid) {

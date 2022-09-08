@@ -23,7 +23,12 @@ module.exports = (sequelize, Sequelize) => {
         pages: {
             type: Sequelize.JSON,
             allowNull: true,
-        }
+        },
+        adsperimage: {
+            type: Sequelize.INTEGER,
+            allowNull: true,
+            defaultValue: 1
+        },
     });
   
     return publishers;

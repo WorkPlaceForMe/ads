@@ -10,16 +10,20 @@
 
         <form [formGroup]="registerForm" (ngSubmit)='onSubmit()'>
             <div class="form-group">
-              <label for="nickname" class="label">Name</label>
-              <input type="text" class="form-control" formControlName="nickname" [ngClass]="{ 'is-invalid': submitted && f.nickname.errors }" nbInput fullWidth id="nickname" autofocus placeholder="Name" [status]='values.nickname' />
+              <label for="nickname" class="label">Nick Name</label>
+              <input type="text" class="form-control" formControlName="nickname" [ngClass]="{ 'is-invalid': submitted && f.nickname.errors }" nbInput fullWidth id="nickname" autofocus placeholder="Website Nick Name" [status]='values.nickname' />
               <div *ngIf="submitted && f.nickname.errors" class="invalid-feedback">
                 <div *ngIf="f.nickname.errors.required">Name is required</div>
                 <div *ngIf="f.nickname.errors.pattern">Name can not contain numbers or special characters.</div>
             </div>
+            <div class="form-group">
+              <label for="adsperimage" class="label">Ads Per Image</label>
+              <input type="number" min=1 max=4 class="form-control" formControlName="adsperimage" [ngClass]="{ 'is-invalid': submitted && f.adsperimage.errors }" nbInput fullWidth id="adsperimage" [status]='values.adsperimage' />
+            </div>
             </div>
             <div class="form-group">
               <label for="name" class="label">Publisher Website</label>
-              <input type="text" class="form-control" formControlName="name" [ngClass]="{ 'is-invalid': submitted && f.name.errors }" nbInput fullWidth id="name" autofocus placeholder="Name" [status]='values.name' />
+              <input type="text" class="form-control" formControlName="name" [ngClass]="{ 'is-invalid': submitted && f.name.errors }" nbInput fullWidth id="name" autofocus placeholder="Website Name" [status]='values.name' />
               <div *ngIf="submitted && f.name.errors" class="invalid-feedback">
                 <div *ngIf="f.name.errors.cantMatch">Publisher has been registered, try another one</div>
                 <div *ngIf="f.name.errors.required">Publisher Website is required</div>

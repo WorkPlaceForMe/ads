@@ -34,7 +34,7 @@ exports.getWebsites = async function(){
     }
 }    
 
-exports.createWebsite = async function(site,term){
+exports.createWebsite = async function(site, term){
     const affiliateEndpoint = `${conf.get('accesstrade_endpoint')}/v1/publishers/me/sites`
     const affiliateEndpointCampaings = `${conf.get('accesstrade_endpoint')}/v1/campaigns/affiliate`
     
@@ -47,12 +47,14 @@ exports.createWebsite = async function(site,term){
             algorithm: "HS256"
             }
         )
+
+        let url = term ? `${term}//${site}` : site
            
         console.log(`Calling url: ${affiliateEndpoint}`)
         const affiliateResponse = await axios.put(affiliateEndpoint, 
             {
                 "name": site,
-                "url": `${term}//${site}`,
+                "url": url,
                 "type": "PORTAL",
                 "categories": [
                     {
