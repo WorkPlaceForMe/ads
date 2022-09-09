@@ -84,10 +84,13 @@ exports.generateReport = Controller(async (req, res) => {
 
             readStream.pipe(res)
           })
-          .catch((err) => res.status(500).json(err))
+          .catch((err) => {
+            console.log(err)
+            res.status(500).json(err)
+          })
       })
-      .catch((err) => res.status(500).json(err))
   } catch (err) {
+    console.log(error)
     res.status(500).json(err)
   }
 })
