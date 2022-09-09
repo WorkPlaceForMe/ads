@@ -21,6 +21,10 @@ export class AddComponent implements OnInit {
   @Input() onChange: Function;
   @Input() id: string;
   snippet: string;
+  minPossibleAdsCount: number = 1
+  maxPossibleAdsCount: number = 4
+  error: string = null
+  
   constructor(
     private formBuilder: FormBuilder,
     protected windowRef: NbWindowRef,
@@ -28,27 +32,37 @@ export class AddComponent implements OnInit {
     ) { }
 
   ngOnInit(): void {
-    if(this.id != undefined){
+    if(this.id){
       this.edit = true
       this.facesService.getSite(this.id)
         .subscribe(
           res =>{
-            console.log(res)
+            console.log(res)           
+            this.minPossibleAdsCount = res['minPossibleAdsCount']
+            this.maxPossibleAdsCount = res['maxPossibleAdsCount']
             this.registerForm.controls['name'].setValue(res['publ'].name)
             this.registerForm.controls['nickname'].setValue(res['publ'].nickname)
             this.registerForm.controls['adsperimage'].setValue(res['publ'].adsperimage)
-          },
+
+            this.registerForm.controls['adsperimage'].setValidators([Validators.required, Validators.min(this.minPossibleAdsCount), Validators.max(this.maxPossibleAdsCount)])          },
           err => console.error(err)
       )
     }else{
       this.facesService.getServer().subscribe(
-        res =>  this.snippet = `'<script type="text/javascript" src="${res['server']}/system/g3c.scan.image.sph.js"></script>'`
+        res =>  {
+          this.snippet = `'<script type="text/javascript" src="${res['server']}/system/g3c.scan.image.sph.js"></script>'`
+          this.minPossibleAdsCount = res['minPossibleAdsCount']
+          this.maxPossibleAdsCount = res['maxPossibleAdsCount']
+          this.registerForm.controls['adsperimage'].setValue(this.minPossibleAdsCount)
+
+          this.registerForm.controls['adsperimage'].setValidators([Validators.required, Validators.min(this.minPossibleAdsCount), Validators.max(this.maxPossibleAdsCount)])
+        }        
       )
     }
-
+    
     this.registerForm = this.formBuilder.group({
-      nickname: ['', ],
-      adsperimage: [1, ],
+      nickname: ['', [Validators.required]],
+      adsperimage: [this.minPossibleAdsCount, ],
       name: ['', [Validators.required]],
     });
   }
@@ -56,6 +70,7 @@ export class AddComponent implements OnInit {
   get f() { return this.registerForm.controls; }
 
   onSubmit() {
+  this.error = null
   this.submitted = true;
   this.values = {
     name: 'primary',
@@ -73,22 +88,24 @@ export class AddComponent implements OnInit {
       return;
   }
   this.is_saving = true;
-  if(this.edit == false){
+  if(!this.edit){
     this.facesService.saveSite(this.registerForm.value).subscribe(
     res => {
       this.onChange()
       this.windowRef.close();
     },
     err => {
-      this.is_saving = false;
-      // this.registerForm.controls[err.error].setErrors({used:true})
+      this.is_saving = false
       if (err.error.repeated === 'name'){
           this.values.name = 'danger';
           this.registerForm.controls['name'].setErrors({cantMatch: true});
       }
+      
+      this.is_saving = false
+      this.error = err.error.mess
     }
     )
-  }else if(this.edit == true){
+  } else {
     this.registerForm.value.id = this.id
     this.facesService.updateSite(this.registerForm.value)
     .subscribe(
@@ -96,7 +113,11 @@ export class AddComponent implements OnInit {
       this.onChange()
       this.windowRef.close();
     },
-    err => console.log(err)
+      err => {
+        console.log(err)
+        this.is_saving = false
+        this.error = err.error.mess
+      }
   );
   }
 

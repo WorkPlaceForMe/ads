@@ -13,9 +13,16 @@ const website = require('../helper/website')
 exports.register = Controller(async(req, res) => {
     const locId = uuidv4();
     const data = req.body
+    const minPossibleAdsCount = conf.get('min_possible_ads_count') || 1
+    const maxPossibleAdsCount = conf.get('max_possible_ads_count') || 4
     
     try{       
         let publisherId = ''
+        
+        if(data.adsperimage < minPossibleAdsCount || data.adsperimage > maxPossibleAdsCount){
+            return res.status(500).json({success: false, mess: `Wrong max ads per image no specified, it should be between ${minPossibleAdsCount} to ${maxPossibleAdsCount}`})
+        }
+
         console.log(`Trying to register a new site ${data.name}`) 
         const websiteResponse = await website.getWebsites()                                   
 
@@ -32,25 +39,27 @@ exports.register = Controller(async(req, res) => {
         console.log(`Adding site ${data.name}} to system`)
         if(publisherId){
             await createPublisher(locId, data.name, data.nickname, publisherId, data.adsperimage)
-            res.status(200).json({success: true});
+            return res.status(200).json({success: true});
         } else {
             console.log(`Cannot add site ${data.name}} to system`)
-            res.status(500).json({success: false, mess: err})
+            return res.status(500).json({success: false, mess: `Cannot add site ${data.name}} to system`})
         }
        
-    }catch(err){
+    } catch(err){
         console.log(`Cannot add site ${site} to system`)
-        res.status(500).json({success: false, mess: err})
+        return res.status(500).json({success: false, mess: 'Unknow error occurred, please contact site Administrator'})
     }
 
 })
 
 exports.update = Controller(async(req, res) => {
+    const minPossibleAdsCount = conf.get('min_possible_ads_count') || 1
+    const maxPossibleAdsCount = conf.get('max_possible_ads_count') || 4
     const data = req.body
     
     try{
-        if(data.adsperimage <= 0){
-            return res.status(500).json({success: false, mess: 'Wrong ads per image no specified'})
+        if(data.adsperimage < minPossibleAdsCount || data.adsperimage > maxPossibleAdsCount){
+            return res.status(500).json({success: false, mess: `Wrong max ads per image no specified, it should be between ${minPossibleAdsCount} to ${maxPossibleAdsCount}`})
         }
 
         let oldAdsPerImage = 0
@@ -71,9 +80,9 @@ exports.update = Controller(async(req, res) => {
               })
         }
 
-        res.status(200).json({success: true});
+        return res.status(200).json({success: true});
     }catch(err){
-        res.status(500).json({success: false, mess: err})
+        return res.status(500).json({success: false, mess: 'Unknow error occurred, please contact site Administrator'})
     }
 })
 
@@ -81,7 +90,12 @@ exports.get = Controller(async(req, res) => {
     const publ = await publishers.findOne({
         where: { id: req.params.id },
     })
-    res.status(200).json({success: true, publ: publ});
+
+
+    const minPossibleAdsCount = conf.get('min_possible_ads_count') || 1
+    const maxPossibleAdsCount = conf.get('max_possible_ads_count') || 4
+
+    return res.status(200).json({success: true, publ: publ, minPossibleAdsCount: minPossibleAdsCount, maxPossibleAdsCount: maxPossibleAdsCount});
 })
 
 exports.getAll = Controller(async(req, res) => {
@@ -91,7 +105,10 @@ exports.getAll = Controller(async(req, res) => {
 
 exports.getServer = Controller(async(req, res) => {
     const server = conf.get('server')
-    res.status(200).json({success: true, server: server});
+    const minPossibleAdsCount = conf.get('min_possible_ads_count') || 1
+    const maxPossibleAdsCount = conf.get('max_possible_ads_count') || 4
+    
+    return res.status(200).json({success: true, server: server, minPossibleAdsCount: minPossibleAdsCount, maxPossibleAdsCount: maxPossibleAdsCount});
 })
 
 exports.del = Controller(async(req, res) => {

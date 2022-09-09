@@ -153,7 +153,7 @@ export class DashboardComponent implements OnInit {
       this.face.getStatsUrl(params.url,this.range).subscribe(
       res => {
         this.settings['columns']['adsNum'] = {
-          title: 'Ads per image',
+          title: 'Max Ads per image',
           type: 'custom',
           filter: false,
           valuePrepareFunction: (value, row, cell) => {
@@ -388,7 +388,7 @@ export class DashboardComponent implements OnInit {
         filter: false,
       },
       adsperimage: {
-        title: 'Ads Per Image',
+        title: 'Max Ads Per Image',
         type: 'string',
         filter: false,
       },

@@ -3,6 +3,7 @@ const db = require('../helper/dbconnection')
 const website = require('../helper/website')
 const { v4: uuidv4 } = require('uuid')
 const seq = require('../campaigns-db/database')
+const conf = require('../middleware/prop')
 
 exports.auth = Controller(async(req, res) => {
 
@@ -61,8 +62,9 @@ exports.check = Controller(async(req, res) => {
                         publisherId = await website.createWebsite(site, req.query.site.split('/')[0])
                     }
 
-                    console.log(`Adding site ${site} to system`) 
-                    const publisherData = await addPublisher(locId,site, publisherId)
+                    console.log(`Adding site ${site} to system`)
+                    const minPossibleAdsCount = conf.get('min_possible_ads_count') || 1
+                    const publisherData = await addPublisher(locId,site, publisherId, minPossibleAdsCount)
 
                     if(sessionId) {
                         const clientSession = await getClientSessionBySessionId(sessionId)
@@ -126,12 +128,13 @@ function createClientSession(sessionId, clientId, publisherId) {
   })
 }
 
-function addPublisher(id,site,idAffiliate){
+function addPublisher(id, site, idAffiliate, minPossibleAdsCount){
     return seq.publishers.create({
         id: id,
         name: site,
         enabled: 'true',
-        publisherId: idAffiliate
+        publisherId: idAffiliate,
+        adsperimage: minPossibleAdsCount
         })
 }
 

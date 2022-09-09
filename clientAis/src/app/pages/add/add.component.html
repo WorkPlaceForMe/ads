@@ -2,7 +2,8 @@
   <div class='col-md-12'>
     <nb-card>  
       <nb-card-body>
-
+        <span *ngIf="error" class="invalid-feedback" [ngStyle]="{'display': 'block', 'padding-bottom': '10px'}">{{error}}</span>
+        
         <div *ngIf="!edit">
             <p>To add a new site please add this snippet into the head of the website that is being added:</p>
             <p>{{snippet}}</p>
@@ -10,16 +11,20 @@
 
         <form [formGroup]="registerForm" (ngSubmit)='onSubmit()'>
             <div class="form-group">
-              <label for="nickname" class="label">Nick Name</label>
+              <label for="nickname" class="label">Publisher Nick Name</label>
               <input type="text" class="form-control" formControlName="nickname" [ngClass]="{ 'is-invalid': submitted && f.nickname.errors }" nbInput fullWidth id="nickname" autofocus placeholder="Website Nick Name" [status]='values.nickname' />
               <div *ngIf="submitted && f.nickname.errors" class="invalid-feedback">
-                <div *ngIf="f.nickname.errors.required">Name is required</div>
-                <div *ngIf="f.nickname.errors.pattern">Name can not contain numbers or special characters.</div>
+                <div *ngIf="f.nickname.errors.required">Nick Name is required</div>
+                <div *ngIf="f.nickname.errors.pattern">Nick Name can not contain numbers or special characters.</div>
+              </div>
             </div>
             <div class="form-group">
-              <label for="adsperimage" class="label">Ads Per Image</label>
-              <input type="number" min=1 max=4 class="form-control" formControlName="adsperimage" [ngClass]="{ 'is-invalid': submitted && f.adsperimage.errors }" nbInput fullWidth id="adsperimage" [status]='values.adsperimage' />
-            </div>
+              <label for="adsperimage" class="label">Max Ads Per Image</label>
+              <input type="number" min={{minPossibleAdsCount}} max={{maxPossibleAdsCount}} class="form-control" formControlName="adsperimage" [ngClass]="{ 'is-invalid': submitted && f.adsperimage.errors }" nbInput fullWidth id="adsperimage" [status]='values.adsperimage' />
+              <div *ngIf="submitted && f.adsperimage.errors" class="invalid-feedback">
+                <div *ngIf="f.adsperimage.errors.required">Max Ads Per Image is required</div>
+                <div *ngIf="f.adsperimage.errors.min || f.adsperimage.errors.max">Max Ads Per Image value will be between {{minPossibleAdsCount}} to {{maxPossibleAdsCount}}</div>
+              </div>
             </div>
             <div class="form-group">
               <label for="name" class="label">Publisher Website</label>
@@ -27,12 +32,12 @@
               <div *ngIf="submitted && f.name.errors" class="invalid-feedback">
                 <div *ngIf="f.name.errors.cantMatch">Publisher has been registered, try another one</div>
                 <div *ngIf="f.name.errors.required">Publisher Website is required</div>
-            </div>
+              </div>
             </div>
 
 
-    <button [status]="'success'" nbButton class="btn-block" *ngIf="is_saving == false">Save</button>
-    <button [status]="'success'" nbButton class="btn-block" *ngIf="is_saving == true" [nbSpinner]="is_saving" nbSpinnerSize="medium" nbSpinnerStatus="primary">&nbsp;</button>
+    <button [status]="'success'" nbButton class="btn-block" *ngIf="!is_saving">Save</button>
+    <button [status]="'success'" nbButton class="btn-block" *ngIf="is_saving" [nbSpinner]="is_saving" nbSpinnerSize="medium" nbSpinnerStatus="primary">&nbsp;</button>
     </form>
       </nb-card-body>
       </nb-card>

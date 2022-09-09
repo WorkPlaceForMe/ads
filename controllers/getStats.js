@@ -207,7 +207,7 @@ exports.getStats = Controller(async(req, res) => {
                                         rewards: rewards['totalReward'],
                                         conversions: rewards['totalConversionsCount'],
                                         nickname: ids[0].nickname || siteURL,
-                                        adsperimage: ids[0].adsperimage                                       
+                                        adsperimage: ids[0].adsperimage
                                     }
 
                             }
