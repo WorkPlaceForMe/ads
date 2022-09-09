@@ -333,6 +333,16 @@ export class DashboardComponent implements OnInit {
         type: 'string',
         filter: false,
       },
+      usercount: {
+        title: 'Unique Visitors Count',
+        type: 'string',
+        filter: false,
+      },
+      duration: {
+        title: 'Total View Duration(In Sec)',
+        type: 'string',
+        filter: false,
+      }
     },
   };
 

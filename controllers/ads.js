@@ -70,7 +70,12 @@ exports.getAds = Controller(async (req, res) => {
   let { img_width, img_height, url, site, uid, serv, mobile, userId, sessionId } = req.query
 
   if(site){
+    site = decodeURIComponent(site)
     site = getStrippedURL(site)
+  }
+
+  if(url){
+    url = decodeURIComponent(url)
   }
 
   let checker = site.split('/')[2];
@@ -798,7 +803,15 @@ const addImagePublisherMetadata = (imageURL, page, site, uid, userId, sessionId)
   return new Promise(async (resolve, reject) => {
    
     try {
-      let publisher = await getPublisher(site)
+      let publisher = await cache.getAsync(`${site}-publisher`)
+
+      if(publisher){
+        publisher = JSON.parse(publisher)
+      } else {
+        publisher = await getPublisher(checker)
+        cache.setAsync(`${site}-publisher`, JSON.stringify(publisher)).then()
+      }
+
       let img = await getImg(imageURL, page)
 
       if(!img){

@@ -5,6 +5,8 @@ const cache = require('../helper/cacheManager')
 const conf = require('../middleware/prop')
 const xlsx = require('node-xlsx').default
 var stream = require('stream')
+const db1 = require('../campaigns-db/database')
+const publishers = db1.publishers
 
 exports.generateReport = Controller(async (req, res) => {
   const responseData = {}
@@ -257,36 +259,35 @@ const getStats = (req) => {
                   if (Number.isNaN(viewsPerAd)) {
                     viewsPerAd = 0
                   }
+                
+                  let publisher = await cache.getAsync(`${Object.keys(imgsGrouped)[i]}-publisher`);
 
-                  const ids = await getPublisherId(Object.keys(imgsGrouped)[i])
-                  if(ids.length == 0){
-                    continue;
+                  if(publisher){
+                      publisher = JSON.parse(publisher);
+                  } else {
+                      publisher = await getPublisher(Object.keys(imgsGrouped)[i]);
+                      cache.setAsync(`${Object.keys(imgsGrouped)[i]}-publisher`, JSON.stringify(publisher)).then();
                   }
-                  if (ids[0].id === req.query.id) {
+                  
+                  if (publisher && publisher.id === req.query.id) {
                     const init = new Date(req.query.init).toISOString()
                     const fin = new Date(req.query.fin).toISOString()
                     let rewards = {}
                     try {
-                      rewards = await cache.getAsync(`${init}_${fin}_${ids[0].publisherId}`)
+                      rewards = await cache.getAsync(`${init}_${fin}_${publisher.publisherId}`)
                                         
                       if(rewards){
                           rewards = JSON.parse(rewards)
                       } else {
-                          rewards = await reportAff.report(init,fin,ids[0].publisherId)
+                          rewards = await reportAff.report(init, fin, publisher.publisherId)
 
                           if(rewards){
-                              cache.setAsync(`${init}_${fin}_${ids[0].publisherId}`, JSON.stringify(rewards)).then()
+                              cache.setAsync(`${init}_${fin}_${publisher.publisherId}`, JSON.stringify(rewards)).then()
                           }
                       }
                     } catch (err) {
                       rewards['totalReward'] = 0
                       rewards['totalConversionsCount'] = 0
-                    }
-
-                    if (ids[0].enabled == 'true') {
-                      ids[0].enabled = true
-                    } else if (ids[0].enabled == 'false') {
-                      ids[0].enabled = false
                     }
 
                     let siteURL = Object.keys(imgsGrouped)[i]
@@ -310,8 +311,8 @@ const getStats = (req) => {
                       ads: adsGrouped[Object.keys(imgsGrouped)[i]],
                       clicks: clicksGrouped[Object.keys(imgsGrouped)[i]],
                       views: viewsGrouped[Object.keys(imgsGrouped)[i]],
-                      enabled: ids[0].enabled,
-                      id: ids[0].id,
+                      enabled: publisher.enabled,
+                      id: publisher.id,
                       rewards: rewards['totalReward'],
                       conversions: rewards['totalConversionsCount'],
                     }
@@ -432,7 +433,15 @@ const getStatsUrl = (req) => {
                 }
 
                 let table = []
-                const ids = await getPublisherId(req.query.url)
+                let publisher = await cache.getAsync(`${req.query.url}-publisher`)
+
+                if(publisher){
+                    publisher = JSON.parse(publisher)
+                } else {
+                    publisher = await getPublisher(req.query.url)
+                    cache.setAsync(`${req.query.url}-publisher`, JSON.stringify(publisher)).then()
+                }
+
                 for (let i = 0; i < Object.keys(imgsGrouped).length; i++) {
                   if (!clicksGrouped[Object.keys(imgsGrouped)[i]]) {
                     clicksGrouped[Object.keys(imgsGrouped)[i]] = 0
@@ -510,7 +519,7 @@ const getStatsUrl = (req) => {
                     req.query.url,
                   )[1]
                 
-                  let adsPerImage = ids[0].adsperimage
+                  let adsPerImage = publisher.adsperimage
                   let imgPerPage = imgsGrouped[Object.keys(imgsGrouped)[i]]
 
                   let siteURL = Object.keys(imgsGrouped)[i]
@@ -544,15 +553,15 @@ const getStatsUrl = (req) => {
                 const fin = new Date(req.query.fin).toISOString()
                 
                 try {
-                  rewards = await cache.getAsync(`${init}_${fin}_${ids[0].publisherId}`)
+                  rewards = await cache.getAsync(`${init}_${fin}_${publisher.publisherId}`)
                                         
                   if(rewards){
                       rewards = JSON.parse(rewards)
                   } else {
-                      rewards = await reportAff.report(init,fin,ids[0].publisherId)
+                      rewards = await reportAff.report(init, fin, publisher.publisherId)
 
                       if(rewards){
-                          cache.setAsync(`${init}_${fin}_${ids[0].publisherId}`, JSON.stringify(rewards)).then()
+                          cache.setAsync(`${init}_${fin}_${publisher.publisherId}`, JSON.stringify(rewards)).then()
                       }
                   }
                 } catch (err) {
@@ -571,10 +580,37 @@ const getStatsUrl = (req) => {
 }
 
 const getStatsImg = (req) => {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     const urlQuery = req.query.imgs
     let clicks = {},
       views = {}
+
+    let site = urlQuery
+    let publisher = ''
+    
+    if (site.includes('www.')) {
+      site = site.split('w.')[1]
+    }
+
+    if (site.includes('//')) {
+      site = site.split('//')[1]
+    }
+
+    if (site.includes('/')) {
+      site = site.split('/')[0]
+    }
+
+    if(site){
+        publisher = await cache.getAsync(`${site}-publisher`);
+
+        if(publisher){
+            publisher = JSON.parse(publisher);
+        } else {
+            publisher = await getPublisher(site);
+            cache.setAsync(`${site}-publisher`, JSON.stringify(publisher)).then();
+        } 
+    }
+
     getClicksAndViewsPerImg(urlQuery, function (err, rows) {
       if (err) {
         return reject(err)
@@ -602,7 +638,7 @@ const getStatsImg = (req) => {
               }
 
             }
-            getImgsList(urlQuery, function (err, rows) {
+            getImgsList(urlQuery, publisher.id, function (err, rows) {
               if (err) {
                 return reject(err)
               } else {
@@ -635,6 +671,8 @@ const getStatsImg = (req) => {
                     views: view,
                     ctr: ctr,
                     ads: adsTotal,
+                    usercount: rows[i].usercount,
+                    duration: rows[i].duration                    
                   })
                 }
                 
@@ -679,13 +717,14 @@ function getClicksAndViews(callback) {
   )
 }
 
-function getImgsList(site, callback) {
-  return db.query(
-    `SELECT img, idGeneration FROM ${conf.get(
-      'database',
-    )}.imgspages where site = '${site}' order by idGeneration desc;`,
-    callback,
-  )
+function getImgsList(site, publisherId, callback){   
+  return db.query( `SELECT imguser.img, case when sum(duration) > 0 then count(*) else 0 END as usercount, sum(imguser.duration) as duration from
+  (SELECT ipg.img, sum(duration) as duration FROM ${conf.get('database')}.imgspages ipg,  ${conf.get('database')}.clientimgpubl cipl  
+  where publId = '${publisherId}' and cipl.imgUrl = ipg.img
+  and ipg.site = '${site}'
+  group by cipl.clientId, ipg.img 
+  order by ipg.idGeneration desc) imguser
+  group by imguser.img`, callback)
 }
 
 function getClicksAndViewsPerImg(site, callback) {
@@ -706,17 +745,8 @@ function getAdsListPerImg(site, callback) {
   )
 }
 
-const getPublisherId = async function (site) {
-  return new Promise(function (resolve, reject) {
-    db.query(
-      `SELECT * from publishers where name ='${site}';`,
-      (error, elements) => {
-        if (error) {
-          return reject(error)
-          console.log(error)
-        }
-        return resolve(elements)
-      },
-    )
-  })
+function getPublisher(site) {
+  return publishers.findOne({
+    where: { name: site }
+  });
 }

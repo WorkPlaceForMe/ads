@@ -64,7 +64,7 @@ exports.check = Controller(async(req, res) => {
 
                     console.log(`Adding site ${site} to system`)
                     const minPossibleAdsCount = conf.get('min_possible_ads_count') || 1
-                    const publisherData = await addPublisher(locId,site, publisherId, minPossibleAdsCount)
+                    const publisherData = await addPublisher(locId, site, publisherId, minPossibleAdsCount)
 
                     if(sessionId) {
                         const clientSession = await getClientSessionBySessionId(sessionId)
@@ -132,6 +132,7 @@ function addPublisher(id, site, idAffiliate, minPossibleAdsCount){
     return seq.publishers.create({
         id: id,
         name: site,
+        nickname: site,
         enabled: 'true',
         publisherId: idAffiliate,
         adsperimage: minPossibleAdsCount

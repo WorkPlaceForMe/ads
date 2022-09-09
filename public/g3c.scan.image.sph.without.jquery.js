@@ -448,9 +448,9 @@ $(document).on('click', '.closeBut', function () {
 							'&media_type=' +
 							w +
 							'&url=' +
-							l +
+							encodeURIComponent(l)  +
 							'&site=' +
-							pe + 
+							encodeURIComponent(pe) + 
 							'&uid=' +
 							uuid + 
 							'&serv=' +

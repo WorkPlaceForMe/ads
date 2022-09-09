@@ -2,6 +2,7 @@ const Controller = require('../helper/controller')
 const dateFormat = require('dateformat');
 const db = require('../campaigns-db/database')
 const { getStrippedURL } = require('../helper/util')
+const cache = require('../helper/cacheManager')
 
 exports.postData = Controller(async(req, res) => {
 
@@ -19,8 +20,17 @@ exports.postData = Controller(async(req, res) => {
 
     try{
         await add(data.type, nD, data.url, data.idItem, data.img);
+
         let img = await getImg(data.img, data.url);
-        let publisher = await getPublisher(site);
+
+        let publisher = await cache.getAsync(`${site}-publisher`);
+
+        if(publisher){
+          publisher = JSON.parse(publisher);
+        } else {
+          publisher = await getPublisher(site);
+          cache.setAsync(`${site}-publisher`, JSON.stringify(publisher)).then();
+        }  
 
         if(img && publisher){
           await updateDurationInImgPublData(data.userId, data.sessionId, img.img, publisher.id);

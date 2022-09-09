@@ -1,6 +1,5 @@
 const Controller = require('../helper/controller')
 const db = require('../helper/dbconnection')
-const readCsv = require('./readCsv')
 const reportAff = require('../helper/reportAff')
 const auth = require('../helper/auth')
 const cache = require('../helper/cacheManager')
@@ -96,7 +95,7 @@ exports.getStats = Controller(async(req, res) => {
                             let table = []
                             const publ = await getPublsh()
                             for(const pub of publ){
-                                if(imgsGrouped[pub.dataValues.name] ===  undefined){
+                                if(!imgsGrouped[pub.dataValues.name]){
                                     imgsGrouped[pub.dataValues.name] = 0
                                     clicksGrouped[pub.dataValues.name] = 0
                                     adsGrouped[pub.dataValues.name] = 0
@@ -145,29 +144,30 @@ exports.getStats = Controller(async(req, res) => {
                                     viewsPerAd = 0;
                                 }
 
-                                const ids = await getPublisherId(Object.keys(imgsGrouped)[i])
-                                if(ids.length == 0){
-                                    ids[0] = {
-                                        enabled: false,
-                                        id: 0
-                                    }
-                                }
+                                let publisher = await cache.getAsync(`${Object.keys(imgsGrouped)[i]}-publisher`);
+
+                                if(publisher){
+                                    publisher = JSON.parse(publisher);
+                                } else {
+                                    publisher = await getPublisher(Object.keys(imgsGrouped)[i]);
+                                    cache.setAsync(`${Object.keys(imgsGrouped)[i]}-publisher`, JSON.stringify(publisher)).then();
+                                } 
 
                                 const init = new Date(req.query.init).toISOString()
                                 const fin = new Date(req.query.fin).toISOString()
                                 let rewards = {};
                             
                                 try{
-                                    if(ids[0].publisherId){
-                                        rewards = await cache.getAsync(`${init}_${fin}_${ids[0].publisherId}`)
+                                    if(publisher.publisherId){
+                                        rewards = await cache.getAsync(`${init}_${fin}_${publisher.publisherId}`)
                                         
                                         if(rewards){
                                             rewards = JSON.parse(rewards)
                                         } else {
-                                            rewards = await reportAff.report(init,fin,ids[0].publisherId)
+                                            rewards = await reportAff.report(init, fin, publisher.publisherId)
 
                                             if(rewards){
-                                                cache.setAsync(`${init}_${fin}_${ids[0].publisherId}`, JSON.stringify(rewards)).then()
+                                                cache.setAsync(`${init}_${fin}_${publisher.publisherId}`, JSON.stringify(rewards)).then()
                                             }
                                         }
                                     } else{
@@ -179,36 +179,30 @@ exports.getStats = Controller(async(req, res) => {
                                     rewards['totalConversionsCount'] = 0
                                 }
 
-                                if(ids[0].enabled == 'true'){
-                                        ids[0].enabled  = true
-                                    }else if(ids[0].enabled == 'false'){
-                                        ids[0].enabled  = false
-                                    }
+                                let siteURL = Object.keys(imgsGrouped)[i]
+            
+                                if(siteURL && siteURL.includes('www.')){
+                                    siteURL = siteURL.replace('www.', '')
+                                }                
 
-                                    let siteURL = Object.keys(imgsGrouped)[i]
-                
-                                    if(siteURL && siteURL.includes('www.')){
-                                       siteURL = siteURL.replace('www.', '')
-                                    }                
-
-                                    table[i] = {
-                                        url : siteURL,
-                                        clicksPerImg: clicksPerImg,
-                                        viewsPerImg : viewsPerImg,
-                                        clicksPerAd: clicksPerAd,
-                                        viewsPerAd : viewsPerAd,
-                                        ctr: ctr,
-                                        images: imgsGrouped[Object.keys(imgsGrouped)[i]],
-                                        ads: adsGrouped[Object.keys(imgsGrouped)[i]],
-                                        clicks: clicksGrouped[Object.keys(imgsGrouped)[i]],
-                                        views: viewsGrouped[Object.keys(imgsGrouped)[i]],
-                                        enabled: ids[0].enabled,
-                                        id: ids[0].id,
-                                        rewards: rewards['totalReward'],
-                                        conversions: rewards['totalConversionsCount'],
-                                        nickname: ids[0].nickname || siteURL,
-                                        adsperimage: ids[0].adsperimage
-                                    }
+                                table[i] = {
+                                    url : siteURL,
+                                    clicksPerImg: clicksPerImg,
+                                    viewsPerImg : viewsPerImg,
+                                    clicksPerAd: clicksPerAd,
+                                    viewsPerAd : viewsPerAd,
+                                    ctr: ctr,
+                                    images: imgsGrouped[Object.keys(imgsGrouped)[i]],
+                                    ads: adsGrouped[Object.keys(imgsGrouped)[i]],
+                                    clicks: clicksGrouped[Object.keys(imgsGrouped)[i]],
+                                    views: viewsGrouped[Object.keys(imgsGrouped)[i]],
+                                    enabled: publisher.enabled,
+                                    id: publisher.id,
+                                    rewards: rewards['totalReward'],
+                                    conversions: rewards['totalConversionsCount'],
+                                    nickname: publisher.nickname || siteURL,
+                                    adsperimage: publisher.adsperimage
+                                }
 
                             }
                             let filtered = table.filter(function (el) {
@@ -225,7 +219,6 @@ exports.getStats = Controller(async(req, res) => {
 
 exports.getStatsUrl = Controller(async(req, res) => {
     const urlQuery = req.query.url
-    // console.log(urlQuery)
     let ads = {},
     imagesWithAds = {},
     clicks = {},
@@ -356,7 +349,15 @@ exports.getStatsUrl = Controller(async(req, res) => {
                             }
                           
                             let table = []
-                            const ids = await getPublisherId(req.query.url)
+                            let publisher = await cache.getAsync(`${req.query.url}-publisher`)
+
+                            if(publisher){
+                                publisher = JSON.parse(publisher)
+                            } else {
+                                publisher = await getPublisher(req.query.url)
+                                cache.setAsync(`${req.query.url}-publisher`, JSON.stringify(publisher)).then()
+                            }  
+                            
                             for(let i = 0; i < Object.keys(imgsGrouped).length; i++){
                                 if(!clicksGrouped[Object.keys(imgsGrouped)[i]]){
                                     clicksGrouped[Object.keys(imgsGrouped)[i]] = 0
@@ -388,7 +389,7 @@ exports.getStatsUrl = Controller(async(req, res) => {
                                     viewsPerAd = 0;
                                 }
                          
-                                let adsPerImage = ids[0].adsperimage
+                                let adsPerImage = publisher.adsperimage
                                 let imgPerPage = imagesWithAds[Object.keys(imgsGrouped)[i]]
                                 let totImgs = imgsGrouped[Object.keys(imgsGrouped)[i]]
 
@@ -428,15 +429,15 @@ exports.getStatsUrl = Controller(async(req, res) => {
                             const fin = new Date(req.query.fin).toISOString();
                             
                             try{                              
-                                rewards = await cache.getAsync(`${init}_${fin}_${ids[0].publisherId}`)
+                                rewards = await cache.getAsync(`${init}_${fin}_${publisher.publisherId}`)
                                         
                                 if(rewards){
                                     rewards = JSON.parse(rewards)
                                 } else {
-                                    rewards = await reportAff.report(init,fin,ids[0].publisherId)
+                                    rewards = await reportAff.report(init, fin, publisher.publisherId)
 
                                     if(rewards){
-                                        cache.setAsync(`${init}_${fin}_${ids[0].publisherId}`, JSON.stringify(rewards)).then()
+                                        cache.setAsync(`${init}_${fin}_${publisher.publisherId}`, JSON.stringify(rewards)).then()
                                     }
                                 }
                             } catch(err){
@@ -462,7 +463,21 @@ exports.getStatsImg = Controller(async(req, res) => {
 
     if(urlQuery && urlQuery.includes('www.')){
         urlQuery = urlQuery.replace('www.', '')
-      }
+    }
+
+    let site = urlQuery ? urlQuery.split('/')[0] : '';
+    let publisher = ''
+
+    if(site){
+        publisher = await cache.getAsync(`${site}-publisher`);
+
+        if(publisher){
+            publisher = JSON.parse(publisher);
+        } else {
+            publisher = await getPublisher(site);
+            cache.setAsync(`${site}-publisher`, JSON.stringify(publisher)).then();
+        } 
+    }
 
     let clicks = {},
     views = {}
@@ -511,7 +526,7 @@ exports.getStatsImg = Controller(async(req, res) => {
                             ads[img] = (ads[img]  || 0) + 1
                         }
                     }
-                    getImgsList(urlQuery,function(err,rows){
+                    getImgsList(urlQuery, publisher.id, function(err,rows){
                         if(err){
                             res.status(500).json(err);
                             }
@@ -546,7 +561,8 @@ exports.getStatsImg = Controller(async(req, res) => {
                                 if(Number.isNaN(ctr)){
                                     ctr = 0
                                 }
-                                imgs.push({img: rows[i].img, title: rows[i].img.split('/')[rows[i].img.split('/').length - 1],clicks : click, views: view, ctr: ctr, ads: adsTotal})
+                                imgs.push({img: rows[i].img, title: rows[i].img.split('/')[rows[i].img.split('/').length - 1], 
+                                clicks : click, views: view, ctr: ctr, ads: adsTotal, usercount: rows[i].usercount, duration: rows[i].duration})
                     
                             }
                             res.status(200).json({success: true, table: imgs});
@@ -626,11 +642,17 @@ function getClicksAndViews(callback){
     return db.query(`SELECT url, COUNT( CASE WHEN type = '2' THEN 1 END ) AS clicks, COUNT( CASE WHEN type = '1' THEN 1 END ) AS views FROM ${conf.get('database')}.impressions group by url;`,callback)
 }
 
-function getImgsList(site,callback){
-    return db.query(`SELECT img, idGeneration FROM ${conf.get('database')}.imgspages where site = 'https://${site}' OR site = 'https://www.${site}' OR site = 'http://${site}' OR site = 'http://www.${site}' order by idGeneration desc;`,callback)
+function getImgsList(site, publisherId, callback){   
+    return db.query( `SELECT imguser.img, case when sum(duration) > 0 then count(*) else 0 END as usercount, sum(imguser.duration) as duration from
+    (SELECT ipg.img, sum(duration) as duration FROM ${conf.get('database')}.imgspages ipg,  ${conf.get('database')}.clientimgpubl cipl  
+    where publId = '${publisherId}' and cipl.imgUrl = ipg.img
+    and ipg.site = 'https://${site}' OR ipg.site = 'https://www.${site}' OR ipg.site = 'http://${site}' OR ipg.site = 'http://www.${site}'
+    group by cipl.clientId, ipg.img 
+    order by ipg.idGeneration desc) imguser
+    group by imguser.img`, callback)
 }
 
-function getClicksAndViewsPerImg(site,callback){
+function getClicksAndViewsPerImg(site, callback){
     site = encodeURI(site)
     return db.query(`SELECT img, COUNT( CASE WHEN type = '2' THEN 1 END ) AS clicks, COUNT( CASE WHEN type = '1' THEN 1 END ) AS views FROM ${conf.get('database')}.impressions where url = 'https://${site}' OR url = 'https://www.${site}' OR url = 'http://${site}' OR url = 'http://www.${site}' group by img;`,callback)
 }
@@ -648,18 +670,13 @@ function getAdsClicksAndViews(img,site,callback){
     return db.query(`SELECT idItem,img, COUNT( CASE WHEN type = '2' THEN 1 END ) AS clicks, COUNT( CASE WHEN type = '1' THEN 1 END ) AS views FROM ${conf.get('database')}.impressions where ( url = 'https://${site}' OR url = 'https://www.${site}' OR url = 'http://${site}' OR url = 'http://www.${site}' ) and img= '${img}' group by idItem;`,callback)
 }
 
-const getPublisherId = async function(site){
-    return new Promise(function(resolve, reject){
-        db.query(`SELECT * from publishers where name ='${site}';`,  (error, elements)=>{
-                if(error){
-                    return reject(error);
-                }
-                return resolve(elements);
-            });
-    });
-}
-
 const getPublsh = async function(){
     const publ = await publishers.findAll()
     return publ
+}
+
+function getPublisher(site) {
+    return publishers.findOne({
+      where: { name: site }
+    });
 }
