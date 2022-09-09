@@ -48,7 +48,10 @@ exports.generateReport = Controller(async (req, res) => {
                 .then((images) => {
                   responseData.stats.statsUrl.table[i].images = images
                 })
-                .catch((err) => res.status(500).json(err))
+                .catch((err) => {
+                  console.log(err)
+                  res.status(500).json(err)
+                })
             }
 
             const webpageRes = [...responseData.stats.statsUrl.table]
@@ -725,8 +728,7 @@ function getImgsList(site, publisherId, callback){
   (SELECT ipg.img, sum(duration) as duration FROM ${conf.get('database')}.imgspages ipg,  ${conf.get('database')}.clientimgpubl cipl  
   where publId = '${publisherId}' and cipl.imgUrl = ipg.img
   and ipg.site = '${site}'
-  group by cipl.clientId, ipg.img 
-  order by ipg.idGeneration desc) imguser
+  group by cipl.clientId, ipg.img) imguser
   group by imguser.img`, callback)
 }
 
