@@ -14,44 +14,15 @@ const db1 = require('../campaigns-db/database')
 const imgsPage = db1.imgsPage
 const publishers = db1.publishers
 const clientImgPubl = db1.clientImgPubl
+const clientSession = db1.clientSession
 
-exports.getAllClientData = Controller(async (req, res) => {
-  const data = {}
-  const cientImgPublDataList = await getAllCientImgPublData()
-
-  if(cientImgPublDataList){
-    cientImgPublDataList.forEach((elem) => {
-      const clientId = elem.clientId
-      const sessionId = elem.sessionId
-      const imgUrl = elem.imgUrl
-      const duration = elem.duration
-      const publisherId = elem.publId
-      let clientData = data[clientId]
-
-      if(!clientData){
-        clientData = {}
-      }
-
-      let sessionData = clientData[sessionId]
-
-      if(!sessionData){
-        sessionData = []
-      }
-
-      sessionData.push({
-        imgUrl,
-        duration,
-        publisherId
-      })
-
-      clientData[sessionId] = sessionData
-      data[clientId] = clientData
-    })
-  }
-
+exports.sessionData = Controller(async (req, res) => {
+  updateSessionData(req.query.sessionId, 5).then().catch(err => {
+    console.error(err, 'Error occurred in session duration saving')
+  })
 
   res.status(200).send({
-    results: data
+    success: true, message: "Session data saved"
   })
 })
 
@@ -173,9 +144,6 @@ exports.getAds = Controller(async (req, res) => {
     }
 })
 
-function getAllCientImgPublData(site) {
-  return db1.clientImgPubl.findAll();
-}
 
 const addImg = (time, imgName, idGeneration, site) => {
   return imgsPage.create({
@@ -206,6 +174,15 @@ function createClientImgPublData(clientId, sessionId, imageId, imgUrl, publisher
         imgUrl: imgUrl,
         publId: publisherId
   })
+}
+
+function updateClientSessionData(sessionId, timeSlice) {
+  return clientSession.increment(
+    { duration: +timeSlice },
+    {
+      where: { id: sessionId }
+    }
+  )
 }
 
 const filler = (
@@ -821,6 +798,7 @@ const addImagePublisherMetadata = (imageURL, page, site, uid, userId, sessionId)
       if(img && publisher && userId && sessionId){
         await createClientImgPublData(userId, sessionId, img.id, img.img, publisher.id)
       }
+      
       resolve('success')
     } catch(err) {
         console.log(`Adding image publisher metadata failed for site ${site}`)
@@ -850,4 +828,23 @@ const matchCategoryWithProductAliases = (category, productName) => {
   }
 
   return false
+}
+
+const updateSessionData = (sessionId, duration) => {
+  
+  return new Promise(async (resolve, reject) => {
+   
+    try {
+      if(sessionId){
+        updateClientSessionData(sessionId, duration)
+      }
+      
+      resolve('success')
+    } catch(err) {
+        console.log(`Updating duration for ${sessionId}`)
+        console.log(err)
+        
+        reject(err)
+    }
+  })
 }

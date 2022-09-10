@@ -82,32 +82,6 @@ export class DashboardComponent implements OnInit {
       this.settings.columns.url.title = 'Webpage'
       this.face.getStatsUrl(params.url,this.range).subscribe(
       res => {
-        this.settings['columns']['adsNum'] = {
-          title: 'Max Ads per image',
-          type: 'custom',
-          filter: false,
-          valuePrepareFunction: (value, row, cell) => {
-            return 'adsNum';
-          },
-          renderComponent: NumsComponent,
-          onComponentInitFunction:(instance) => {
-            instance.save.subscribe((row: string)  => {
-            });
-            }
-        }
-        this.settings['columns']['imgNum'] = {
-          title: 'Images with ads',
-          type: 'custom',
-          filter: false,        
-          valuePrepareFunction: (value, row, cell) => {
-            return 'imgNum';
-          },
-          renderComponent: NumsComponent,
-          onComponentInitFunction:(instance) => {
-            instance.save.subscribe((row: string)  => {
-            });
-            }
-        }
         this.rewards = res['rewards']
         this.settings = Object.assign({},this.settings)
         this.source = res['table'];

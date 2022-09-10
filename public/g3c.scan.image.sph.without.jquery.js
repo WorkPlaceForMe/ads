@@ -27,6 +27,20 @@ $(document).ready(function () {
 	})
 })
 
+$(document).ready(function () {	
+	setInterval(
+		() => $.ajax({
+			url: `${serv}/api/session`,
+			type: 'GET',
+			async: true,
+			data: `sessionId=${sessionId}`,
+			dataType: 'json',
+			success: function (a) {
+			},
+			error: function (e) {console.error(e)}
+		}), 5000)
+})
+
 $(document).on('mousedown', 'a.but1', function (e) {
 	if(e.button == 0 || e.button == 1){
 		const data = {

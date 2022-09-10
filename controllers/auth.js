@@ -38,6 +38,11 @@ exports.check = Controller(async(req, res) => {
         site = site.split('w.')[1]
     }
     
+    let page = req.query.site
+
+    if(page && page.endsWith('/')){
+        page = page.substring(0, page.length -1)
+    }
     
     checkSite(site, async function(err,rows){
         try {
@@ -70,7 +75,7 @@ exports.check = Controller(async(req, res) => {
                         const clientSession = await getClientSessionBySessionId(sessionId)
 
                         if(!clientSession && userId) {
-                            createClientSession(sessionId, userId, publisherData.id)
+                            createClientSession(sessionId, userId, publisherData.id, page, 5)
                         }
                     }
                     return res.status(200).json({success: true, message: 'Site registered'})
@@ -79,7 +84,7 @@ exports.check = Controller(async(req, res) => {
                         const clientSession = await getClientSessionBySessionId(sessionId)
 
                         if(!clientSession && userId) {
-                            createClientSession(sessionId, userId, rows[0].id)
+                            createClientSession(sessionId, userId, rows[0].id, page, 5)
                         }
                     }
 
@@ -107,11 +112,11 @@ exports.check = Controller(async(req, res) => {
 })
 
 function check(id,callback){
-    return db.query(`SELECT * from publishers where id ='${id}'`,callback)
+    return db.query(`SELECT * from publishers where id ='${id}'`, callback)
 }
 
 function checkSite(site,callback){
-    return db.query(`SELECT * from publishers where name ='${site}'`,callback)
+    return db.query(`SELECT * from publishers where name ='${site}'`, callback)
 }
 
 function createClientId(clientId) {
@@ -120,11 +125,13 @@ function createClientId(clientId) {
     })
   }
 
-function createClientSession(sessionId, clientId, publisherId) {
+function createClientSession(sessionId, clientId, publisherId, page, timeSlice) {
   return seq.clientSession.create({
         id: sessionId,
         clientId: clientId,
-        publId: publisherId
+        publId: publisherId,
+        site: page,
+        duration: timeSlice
   })
 }
 

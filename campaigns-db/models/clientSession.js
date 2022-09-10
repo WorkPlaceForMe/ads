@@ -21,6 +21,15 @@ module.exports = (sequelize, Sequelize) => {
           key: 'id'
        }
       },
+      site: {
+        type: Sequelize.STRING(600),
+        allowNull: true,
+      },
+      duration: {
+        type: Sequelize.INTEGER,
+        allowNull: true,
+        defaultValue: 0
+      },
       createdAt: {
         type: Sequelize.DATE
       }

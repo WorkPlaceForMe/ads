@@ -102,113 +102,120 @@ exports.getStats = Controller(async(req, res) => {
                                     viewsGrouped[pub.dataValues.name] = 0
                                 }
                             }
-                            for(let i = 0; i < Object.keys(imgsGrouped).length; i++){
-                                if(publ.length != Object.keys(imgsGrouped).length){
-                                    let count = 0;
-                                    for(const pub of publ){
-                                        if(pub.dataValues.name != Object.keys(imgsGrouped)[i]){
-                                            count ++;
-                                        }
-                                    }
-                                    if(count == Object.keys(imgsGrouped).length -1){
-                                        continue;
-                                    }
-                                }
-                                if(!clicksGrouped[Object.keys(imgsGrouped)[i]]){
-                                    clicksGrouped[Object.keys(imgsGrouped)[i]] = 0
-                                }
-                                if(!viewsGrouped[Object.keys(imgsGrouped)[i]]){
-                                    viewsGrouped[Object.keys(imgsGrouped)[i]] = 0
-                                }
-                                if(adsGrouped[Object.keys(imgsGrouped)[i]] == undefined || adsGrouped[Object.keys(imgsGrouped)[i]] == null){
-                                    adsGrouped[Object.keys(imgsGrouped)[i]] = 0;
-                                }
-                                let ctr = Math.round(((Math.round((clicksGrouped[Object.keys(imgsGrouped)[i]] / imgsGrouped[Object.keys(imgsGrouped)[i]]) * 100) / 100) / (Math.round((viewsGrouped[Object.keys(imgsGrouped)[i]] / imgsGrouped[Object.keys(imgsGrouped)[i]]) * 100) / 100)) * 100) / 100;
-                                if(Number.isNaN(ctr)){
-                                    ctr = 0;
-                                }
-                                let clicksPerImg = Math.round((clicksGrouped[Object.keys(imgsGrouped)[i]] / imgsGrouped[Object.keys(imgsGrouped)[i]]) * 100) / 100;
-                                if(Number.isNaN(clicksPerImg)){
-                                    clicksPerImg = 0;
-                                }
-                                let viewsPerImg = Math.round((viewsGrouped[Object.keys(imgsGrouped)[i]] / imgsGrouped[Object.keys(imgsGrouped)[i]]) * 100) / 100;
-                                if(Number.isNaN(viewsPerImg)){
-                                    viewsPerImg = 0;
-                                }
-                                let clicksPerAd = Math.round((clicksGrouped[Object.keys(imgsGrouped)[i]] / adsGrouped[Object.keys(imgsGrouped)[i]]) * 100) / 100;
-                                if(Number.isNaN(clicksPerAd)){
-                                    clicksPerAd = 0;
-                                }
-                                let viewsPerAd = Math.round((viewsGrouped[Object.keys(imgsGrouped)[i]] / adsGrouped[Object.keys(imgsGrouped)[i]]) * 100) / 100;
-                                if(Number.isNaN(viewsPerAd)){
-                                    viewsPerAd = 0;
-                                }
 
-                                let publisher = await cache.getAsync(`${Object.keys(imgsGrouped)[i]}-publisher`);
-
-                                if(publisher){
-                                    publisher = JSON.parse(publisher);
-                                } else {
-                                    publisher = await getPublisher(Object.keys(imgsGrouped)[i]);
-                                    cache.setAsync(`${Object.keys(imgsGrouped)[i]}-publisher`, JSON.stringify(publisher)).then();
-                                } 
-
-                                const init = new Date(req.query.init).toISOString()
-                                const fin = new Date(req.query.fin).toISOString()
-                                let rewards = {};
-                            
-                                try{
-                                    if(publisher.publisherId){
-                                        rewards = await cache.getAsync(`${init}_${fin}_${publisher.publisherId}`)
-                                        
-                                        if(rewards){
-                                            rewards = JSON.parse(rewards)
-                                        } else {
-                                            rewards = await reportAff.report(init, fin, publisher.publisherId)
-
-                                            if(rewards){
-                                                cache.setAsync(`${init}_${fin}_${publisher.publisherId}`, JSON.stringify(rewards)).then()
+                            getAllClientSessionData(async function(err, rows){
+                                for(let i = 0; i < Object.keys(imgsGrouped).length; i++){
+                                    if(publ.length != Object.keys(imgsGrouped).length){
+                                        let count = 0;
+                                        for(const pub of publ){
+                                            if(pub.dataValues.name != Object.keys(imgsGrouped)[i]){
+                                                count ++;
                                             }
                                         }
-                                    } else{
-                                        rewards['totalReward'] = 0
+                                        if(count == Object.keys(imgsGrouped).length -1){
+                                            continue;
+                                        }
+                                    }
+                                    if(!clicksGrouped[Object.keys(imgsGrouped)[i]]){
+                                        clicksGrouped[Object.keys(imgsGrouped)[i]] = 0
+                                    }
+                                    if(!viewsGrouped[Object.keys(imgsGrouped)[i]]){
+                                        viewsGrouped[Object.keys(imgsGrouped)[i]] = 0
+                                    }
+                                    if(adsGrouped[Object.keys(imgsGrouped)[i]] == undefined || adsGrouped[Object.keys(imgsGrouped)[i]] == null){
+                                        adsGrouped[Object.keys(imgsGrouped)[i]] = 0;
+                                    }
+                                    let ctr = Math.round(((Math.round((clicksGrouped[Object.keys(imgsGrouped)[i]] / imgsGrouped[Object.keys(imgsGrouped)[i]]) * 100) / 100) / (Math.round((viewsGrouped[Object.keys(imgsGrouped)[i]] / imgsGrouped[Object.keys(imgsGrouped)[i]]) * 100) / 100)) * 100) / 100;
+                                    if(Number.isNaN(ctr)){
+                                        ctr = 0;
+                                    }
+                                    let clicksPerImg = Math.round((clicksGrouped[Object.keys(imgsGrouped)[i]] / imgsGrouped[Object.keys(imgsGrouped)[i]]) * 100) / 100;
+                                    if(Number.isNaN(clicksPerImg)){
+                                        clicksPerImg = 0;
+                                    }
+                                    let viewsPerImg = Math.round((viewsGrouped[Object.keys(imgsGrouped)[i]] / imgsGrouped[Object.keys(imgsGrouped)[i]]) * 100) / 100;
+                                    if(Number.isNaN(viewsPerImg)){
+                                        viewsPerImg = 0;
+                                    }
+                                    let clicksPerAd = Math.round((clicksGrouped[Object.keys(imgsGrouped)[i]] / adsGrouped[Object.keys(imgsGrouped)[i]]) * 100) / 100;
+                                    if(Number.isNaN(clicksPerAd)){
+                                        clicksPerAd = 0;
+                                    }
+                                    let viewsPerAd = Math.round((viewsGrouped[Object.keys(imgsGrouped)[i]] / adsGrouped[Object.keys(imgsGrouped)[i]]) * 100) / 100;
+                                    if(Number.isNaN(viewsPerAd)){
+                                        viewsPerAd = 0;
+                                    }
+
+                                    let publisher = await cache.getAsync(`${Object.keys(imgsGrouped)[i]}-publisher`);
+
+                                    if(publisher){
+                                        publisher = JSON.parse(publisher);
+                                    } else {
+                                        publisher = await getPublisher(Object.keys(imgsGrouped)[i]);
+                                        cache.setAsync(`${Object.keys(imgsGrouped)[i]}-publisher`, JSON.stringify(publisher)).then();
+                                    } 
+
+                                    const init = new Date(req.query.init).toISOString()
+                                    const fin = new Date(req.query.fin).toISOString()
+                                    let rewards = {};
+                                
+                                    try{
+                                        if(publisher.publisherId){
+                                            rewards = await cache.getAsync(`${init}_${fin}_${publisher.publisherId}`)
+                                            
+                                            if(rewards){
+                                                rewards = JSON.parse(rewards)
+                                            } else {
+                                                rewards = await reportAff.report(init, fin, publisher.publisherId)
+
+                                                if(rewards){
+                                                    cache.setAsync(`${init}_${fin}_${publisher.publisherId}`, JSON.stringify(rewards)).then()
+                                                }
+                                            }
+                                        } else{
+                                            rewards['totalReward'] = 0
+                                            rewards['totalConversionsCount'] = 0
+                                        }
+                                    }catch(err){
+                                        rewards['totalReward'] = 0;
                                         rewards['totalConversionsCount'] = 0
                                     }
-                                }catch(err){
-                                    rewards['totalReward'] = 0;
-                                    rewards['totalConversionsCount'] = 0
+
+                                    let siteURL = Object.keys(imgsGrouped)[i]
+                
+                                    if(siteURL && siteURL.includes('www.')){
+                                        siteURL = siteURL.replace('www.', '')
+                                    }
+                                    
+                                    let userDuration = getUserDuration(rows, publisher.id, null)
+
+                                    table[i] = {
+                                        url : siteURL,
+                                        clicksPerImg: clicksPerImg,
+                                        viewsPerImg : viewsPerImg,
+                                        clicksPerAd: clicksPerAd,
+                                        viewsPerAd : viewsPerAd,
+                                        ctr: ctr,
+                                        images: imgsGrouped[Object.keys(imgsGrouped)[i]],
+                                        ads: adsGrouped[Object.keys(imgsGrouped)[i]],
+                                        clicks: clicksGrouped[Object.keys(imgsGrouped)[i]],
+                                        views: viewsGrouped[Object.keys(imgsGrouped)[i]],
+                                        enabled: publisher.enabled,
+                                        id: publisher.id,
+                                        rewards: rewards['totalReward'],
+                                        conversions: rewards['totalConversionsCount'],
+                                        nickname: publisher.nickname || siteURL,
+                                        adsperimage: publisher.adsperimage,
+                                        usercount: userDuration ? userDuration.usercount : 0, 
+                                        duration: userDuration ? Math.round((userDuration.duration/60.0)*100)/100 : 0.0
+                                    }
+
                                 }
-
-                                let siteURL = Object.keys(imgsGrouped)[i]
-            
-                                if(siteURL && siteURL.includes('www.')){
-                                    siteURL = siteURL.replace('www.', '')
-                                }                
-
-                                table[i] = {
-                                    url : siteURL,
-                                    clicksPerImg: clicksPerImg,
-                                    viewsPerImg : viewsPerImg,
-                                    clicksPerAd: clicksPerAd,
-                                    viewsPerAd : viewsPerAd,
-                                    ctr: ctr,
-                                    images: imgsGrouped[Object.keys(imgsGrouped)[i]],
-                                    ads: adsGrouped[Object.keys(imgsGrouped)[i]],
-                                    clicks: clicksGrouped[Object.keys(imgsGrouped)[i]],
-                                    views: viewsGrouped[Object.keys(imgsGrouped)[i]],
-                                    enabled: publisher.enabled,
-                                    id: publisher.id,
-                                    rewards: rewards['totalReward'],
-                                    conversions: rewards['totalConversionsCount'],
-                                    nickname: publisher.nickname || siteURL,
-                                    adsperimage: publisher.adsperimage
-                                }
-
-                            }
-                            let filtered = table.filter(function (el) {
-                                return el != null;
-                            });
-                            res.status(200).json({success: true, table: filtered});
+                                let filtered = table.filter(function (el) {
+                                    return el != null;
+                                });
+                                res.status(200).json({success: true, table: filtered});
+                            })
                         }
                     })
                 }
@@ -276,8 +283,7 @@ exports.getStatsUrl = Controller(async(req, res) => {
                             imgs[name] = (!imgs[name] ? 0 : imgs[name]) + stat.count
                         }
                     }
-                    //console.table(imgs)
-                    getClicksAndViews(async function(err,rows){
+                    getClicksAndViews(async function(err, rows){
                         if(err){
                             res.status(500).json(err);
                             }
@@ -356,96 +362,107 @@ exports.getStatsUrl = Controller(async(req, res) => {
                             } else {
                                 publisher = await getPublisher(req.query.url)
                                 cache.setAsync(`${req.query.url}-publisher`, JSON.stringify(publisher)).then()
-                            }  
+                            } 
                             
-                            for(let i = 0; i < Object.keys(imgsGrouped).length; i++){
-                                if(!clicksGrouped[Object.keys(imgsGrouped)[i]]){
-                                    clicksGrouped[Object.keys(imgsGrouped)[i]] = 0
-                                }
-                                if(!viewsGrouped[Object.keys(imgsGrouped)[i]]){
-                                    viewsGrouped[Object.keys(imgsGrouped)[i]] = 0
-                                }
-                                if(adsGrouped[Object.keys(imgsGrouped)[i]] == undefined || adsGrouped[Object.keys(imgsGrouped)[i]] == null){
-                                    adsGrouped[Object.keys(imgsGrouped)[i]] = 0;
-                                }
-                                let ctr = Math.round(((Math.round((clicksGrouped[Object.keys(imgsGrouped)[i]] / imgsGrouped[Object.keys(imgsGrouped)[i]]) * 100) / 100) / (Math.round((viewsGrouped[Object.keys(imgsGrouped)[i]] / imgsGrouped[Object.keys(imgsGrouped)[i]]) * 100) / 100)) * 100) / 100;
-                                if(Number.isNaN(ctr)){
-                                    ctr = 0;
-                                }
-                                let clicksPerImg = Math.round((clicksGrouped[Object.keys(imgsGrouped)[i]] / imgsGrouped[Object.keys(imgsGrouped)[i]]) * 100) / 100;
-                                if(Number.isNaN(clicksPerImg)){
-                                    clicksPerImg = 0;
-                                }
-                                let viewsPerImg = Math.round((viewsGrouped[Object.keys(imgsGrouped)[i]] / imgsGrouped[Object.keys(imgsGrouped)[i]]) * 100) / 100;
-                                if(Number.isNaN(viewsPerImg)){
-                                    viewsPerImg = 0;
-                                }
-                                let clicksPerAd = Math.round((clicksGrouped[Object.keys(imgsGrouped)[i]] / adsGrouped[Object.keys(imgsGrouped)[i]]) * 100) / 100;
-                                if(Number.isNaN(clicksPerAd)){
-                                    clicksPerAd = 0;
-                                }
-                                let viewsPerAd = Math.round((viewsGrouped[Object.keys(imgsGrouped)[i]] / adsGrouped[Object.keys(imgsGrouped)[i]]) * 100) / 100;
-                                if(Number.isNaN(viewsPerAd)){
-                                    viewsPerAd = 0;
-                                }
-                         
-                                let adsPerImage = publisher.adsperimage
-                                let imgPerPage = imagesWithAds[Object.keys(imgsGrouped)[i]]
-                                let totImgs = imgsGrouped[Object.keys(imgsGrouped)[i]]
-
-                                let siteURL = Object.keys(imgsGrouped)[i]
-
-                                if(siteURL && !siteURL.includes('/')){
-                                    siteURL += '/'
-                                }
-
-                                if(siteURL && siteURL.includes('www.')){
-                                    siteURL = siteURL.replace('www.', '')
-                                }
-
-                                table[i] = {
-                                    url : siteURL,
-                                    clicksPerImg: clicksPerImg,
-                                    viewsPerImg : viewsPerImg,
-                                    clicksPerAd: clicksPerAd,
-                                    viewsPerAd : viewsPerAd,
-                                    ctr: ctr,
-                                    images: imgsGrouped[Object.keys(imgsGrouped)[i]],
-                                    ads: adsGrouped[Object.keys(imgsGrouped)[i]],
-                                    clicks: clicksGrouped[Object.keys(imgsGrouped)[i]],
-                                    views: viewsGrouped[Object.keys(imgsGrouped)[i]],
-                                    adsNum: adsPerImage,
-                                    imgNum: imgPerPage || 0,
-                                    totImgs: totImgs
-                                }
-                            }
-                            
-                            if(table.length == 0){
-                                table.push({"url":"/","clicksPerImg":0,"viewsPerImg":0,"clicksPerAd":0,"viewsPerAd":0,"ctr":0,"images":0,"ads":0,"clicks":0,"views":0,"adsNum":0,"imgNum":0,"totImgs":0})
-                            }
-                            
-                            let rewards = {};
-                            const init = new Date(req.query.init).toISOString();
-                            const fin = new Date(req.query.fin).toISOString();
-                            
-                            try{                              
-                                rewards = await cache.getAsync(`${init}_${fin}_${publisher.publisherId}`)
-                                        
-                                if(rewards){
-                                    rewards = JSON.parse(rewards)
+                           getClientSessionDataByPublisherId(publisher.id, async function(err, rows){
+                                if(err) {
+                                    res.status(500).json(err);
                                 } else {
-                                    rewards = await reportAff.report(init, fin, publisher.publisherId)
+                                    for(let i = 0; i < Object.keys(imgsGrouped).length; i++){
+                                        if(!clicksGrouped[Object.keys(imgsGrouped)[i]]){
+                                            clicksGrouped[Object.keys(imgsGrouped)[i]] = 0
+                                        }
+                                        if(!viewsGrouped[Object.keys(imgsGrouped)[i]]){
+                                            viewsGrouped[Object.keys(imgsGrouped)[i]] = 0
+                                        }
+                                        if(adsGrouped[Object.keys(imgsGrouped)[i]] == undefined || adsGrouped[Object.keys(imgsGrouped)[i]] == null){
+                                            adsGrouped[Object.keys(imgsGrouped)[i]] = 0;
+                                        }
+                                        let ctr = Math.round(((Math.round((clicksGrouped[Object.keys(imgsGrouped)[i]] / imgsGrouped[Object.keys(imgsGrouped)[i]]) * 100) / 100) / (Math.round((viewsGrouped[Object.keys(imgsGrouped)[i]] / imgsGrouped[Object.keys(imgsGrouped)[i]]) * 100) / 100)) * 100) / 100;
+                                        if(Number.isNaN(ctr)){
+                                            ctr = 0;
+                                        }
+                                        let clicksPerImg = Math.round((clicksGrouped[Object.keys(imgsGrouped)[i]] / imgsGrouped[Object.keys(imgsGrouped)[i]]) * 100) / 100;
+                                        if(Number.isNaN(clicksPerImg)){
+                                            clicksPerImg = 0;
+                                        }
+                                        let viewsPerImg = Math.round((viewsGrouped[Object.keys(imgsGrouped)[i]] / imgsGrouped[Object.keys(imgsGrouped)[i]]) * 100) / 100;
+                                        if(Number.isNaN(viewsPerImg)){
+                                            viewsPerImg = 0;
+                                        }
+                                        let clicksPerAd = Math.round((clicksGrouped[Object.keys(imgsGrouped)[i]] / adsGrouped[Object.keys(imgsGrouped)[i]]) * 100) / 100;
+                                        if(Number.isNaN(clicksPerAd)){
+                                            clicksPerAd = 0;
+                                        }
+                                        let viewsPerAd = Math.round((viewsGrouped[Object.keys(imgsGrouped)[i]] / adsGrouped[Object.keys(imgsGrouped)[i]]) * 100) / 100;
+                                        if(Number.isNaN(viewsPerAd)){
+                                            viewsPerAd = 0;
+                                        }
+                                 
+                                        let adsPerImage = publisher.adsperimage
+                                        let imgPerPage = imagesWithAds[Object.keys(imgsGrouped)[i]]
+                                        let totImgs = imgsGrouped[Object.keys(imgsGrouped)[i]]
+        
+                                        let siteURL = Object.keys(imgsGrouped)[i]
+        
+                                        if(siteURL && !siteURL.includes('/')){
+                                            siteURL += '/'
+                                        }
+        
+                                        if(siteURL && siteURL.includes('www.')){
+                                            siteURL = siteURL.replace('www.', '')
+                                        }
 
-                                    if(rewards){
-                                        cache.setAsync(`${init}_${fin}_${publisher.publisherId}`, JSON.stringify(rewards)).then()
+                                        let userDuration = getUserDuration(rows, null, siteURL)
+        
+                                        table[i] = {
+                                            url : siteURL,
+                                            clicksPerImg: clicksPerImg,
+                                            viewsPerImg : viewsPerImg,
+                                            clicksPerAd: clicksPerAd,
+                                            viewsPerAd : viewsPerAd,
+                                            ctr: ctr,
+                                            images: imgsGrouped[Object.keys(imgsGrouped)[i]],
+                                            ads: adsGrouped[Object.keys(imgsGrouped)[i]],
+                                            clicks: clicksGrouped[Object.keys(imgsGrouped)[i]],
+                                            views: viewsGrouped[Object.keys(imgsGrouped)[i]],
+                                            adsperimage: adsPerImage,
+                                            imgNum: imgPerPage || 0,
+                                            totImgs: totImgs,
+                                            usercount: userDuration ? userDuration.usercount : 0, 
+                                            duration: userDuration ? Math.round((userDuration.duration/60.0)*100)/100 : 0.0
+                                        }
                                     }
+                                    
+                                    if(table.length == 0){
+                                        table.push({"url":"/","clicksPerImg":0,"viewsPerImg":0,"clicksPerAd":0,"viewsPerAd":0,"ctr":0,"images":0,"ads":0,"clicks":0,"views":0,"adsNum":0,"imgNum":0,"totImgs":0})
+                                    }
+                                    
+                                    let rewards = {};
+                                    const init = new Date(req.query.init).toISOString();
+                                    const fin = new Date(req.query.fin).toISOString();
+                                    
+                                    try{                              
+                                        rewards = await cache.getAsync(`${init}_${fin}_${publisher.publisherId}`)
+                                                
+                                        if(rewards){
+                                            rewards = JSON.parse(rewards)
+                                        } else {
+                                            rewards = await reportAff.report(init, fin, publisher.publisherId)
+        
+                                            if(rewards){
+                                                cache.setAsync(`${init}_${fin}_${publisher.publisherId}`, JSON.stringify(rewards)).then()
+                                            }
+                                        }
+                                    } catch(err){
+                                        rewards['totalReward'] = 0
+                                        rewards['totalConversionsCount'] = 0
+                                    }
+        
+                                    res.status(200).json({success: true, table: table, rewards: rewards});
                                 }
-                            } catch(err){
-                                rewards['totalReward'] = 0
-                                rewards['totalConversionsCount'] = 0
-                            }
-
-                            res.status(200).json({success: true, table: table, rewards: rewards});
+                            })                           
+                            
                         }
                     })
                 }
@@ -562,7 +579,7 @@ exports.getStatsImg = Controller(async(req, res) => {
                                     ctr = 0
                                 }
                                 imgs.push({img: rows[i].img, title: rows[i].img.split('/')[rows[i].img.split('/').length - 1], 
-                                clicks : click, views: view, ctr: ctr, ads: adsTotal, usercount: rows[i].usercount, duration: rows[i].duration})
+                                clicks : click, views: view, ctr: ctr, ads: adsTotal, usercount: rows[i].usercount, duration: Math.round((rows[i].duration/60.0)*100)/100 })
                     
                             }
                             res.status(200).json({success: true, table: imgs});
@@ -651,6 +668,17 @@ function getImgsList(site, publisherId, callback){
     group by imguser.img`, callback)
 }
 
+function getClientSessionDataByPublisherId(publisherId, callback){   
+    return db.query( `SELECT clientId, sum(duration) as duration, site FROM ${conf.get('database')}.clientsession
+    where publId = '${publisherId}'
+    group by clientId, site`, callback)
+}
+
+function getAllClientSessionData(callback){   
+    return db.query( `SELECT clientId, publId, sum(duration) as duration FROM ${conf.get('database')}.clientsession
+    group by clientId, publId`, callback)
+}
+
 function getClicksAndViewsPerImg(site, callback){
     site = encodeURI(site)
     return db.query(`SELECT img, COUNT( CASE WHEN type = '2' THEN 1 END ) AS clicks, COUNT( CASE WHEN type = '1' THEN 1 END ) AS views FROM ${conf.get('database')}.impressions where url = 'https://${site}' OR url = 'https://www.${site}' OR url = 'http://${site}' OR url = 'http://www.${site}' group by img;`,callback)
@@ -678,4 +706,38 @@ function getPublisher(site) {
     return publishers.findOne({
       where: { name: site }
     });
+}
+
+function getUserDuration(rows, publisherId, siteURL){
+    const userDuration = { usercount: 0, duration: 0.0 }
+    
+    if(rows && rows.length >0 ){
+        for(let row of rows){
+            if(publisherId){
+                if(row.publId == publisherId){
+                    userDuration.usercount += 1
+                    userDuration.duration += row.duration
+                }
+            }
+
+            if(siteURL){
+                let strippedSiteURL = row.site
+
+                if(strippedSiteURL.includes('//')){
+                    strippedSiteURL = strippedSiteURL.split('//')[1]
+                }
+
+                if(strippedSiteURL.includes('www.')){
+                    strippedSiteURL = strippedSiteURL.split('www.')[1]
+                }
+
+                if(strippedSiteURL == siteURL){
+                    userDuration.usercount += 1
+                    userDuration.duration += row.duration
+                }
+            }
+        }
+    }
+
+    return userDuration
 }
