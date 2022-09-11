@@ -880,7 +880,7 @@ function getCategoryWiseData(publisherId, callback){
   and clip.idItem = adpg.id
   and imps.idItem = clip.idItem
   group by clip.idItem, clip.clientId) ctg
-  group by ctg.product_main_category_name, ctg.idItem`, callback)
+  group by ctg.product_main_category_name, ctg.clientId, ctg.idItem`, callback)
 }
 
 function getClicksAndViewsPerImg(site, callback) {
