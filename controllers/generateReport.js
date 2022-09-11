@@ -58,7 +58,7 @@ exports.generateReport = Controller(async (req, res) => {
               if(req.query.option === 'categories'){
                 await getStatsCategories(req)
                   .then((categories) => {
-                    responseData.stats.statsUrl.table[i].categories = categories
+                    responseData.stats.statsUrl.table[0].categories = categories
                   })
                   .catch((err) => {
                     console.log(err)
