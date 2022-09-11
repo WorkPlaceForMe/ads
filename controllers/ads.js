@@ -67,9 +67,18 @@ exports.getAds = Controller(async (req, res) => {
     let cachedImg = await cache.getAsync(`${checker}_${url}`)  
     
     if (cachedImg && cachedImg !== '{}' && cachedImg !== '[]'){
-      addImagePublisherMetadata(url, site, checker, uid, userId, sessionId).then().catch(err => {
-        console.error(err, 'Error occurred in client publisher data saving')
-      })
+      const adsInfo = JSON.parse(cachedImg)
+
+      if(adsInfo && adsInfo.length > 0 ) {
+        adsInfo.forEach(element => {
+          if(element.adsinfo && element.adsinfo.length > 0) {
+            const idItem = element.adsinfo[0].id
+            addImagePublisherMetadata(url, site, checker, idItem, uid, userId, sessionId).then().catch(err => {
+              console.error(err, 'Error occurred in client publisher data saving')
+            })
+          }
+        })
+      }
 
       return res.status(200).send({
           results: JSON.parse(cachedImg)
@@ -90,8 +99,7 @@ exports.getAds = Controller(async (req, res) => {
               password: password
           },
           data: formData
-      }
-       
+      }       
 
       let publisher = await cache.getAsync(`${checker}-publisher`)
 
@@ -111,7 +119,7 @@ exports.getAds = Controller(async (req, res) => {
       let resultsVista
       
       if (response.data) {
-          resultsVista = response.data.results
+        resultsVista = response.data.results
       }
       
       const resultsAffiliate = await filler(resultsVista, serv, img_width, img_height, site, url, uid, shuffleArray(objetos), mobile)
@@ -127,10 +135,17 @@ exports.getAds = Controller(async (req, res) => {
       const sendingResults = await convert(flat)      
       
       cache.setAsync(`${checker}_${url}`, JSON.stringify(sendingResults))
-         
-      addImagePublisherMetadata(url, site, checker, uid, userId, sessionId).then().catch(err => {
-        console.error(err, 'Error occurred in client publisher data saving')
-      })  
+
+      if(sendingResults && sendingResults.length > 0 ) {
+        sendingResults.forEach(element => {
+          if(element.adsinfo && element.adsinfo.length > 0) {
+            const idItem = element.adsinfo[0].id
+            addImagePublisherMetadata(url, site, checker, idItem, uid, userId, sessionId).then().catch(err => {
+              console.error(err, 'Error occurred in client publisher data saving')
+            })
+          }
+        })
+      } 
     
       res.status(200).send({
         results: sendingResults
@@ -166,12 +181,13 @@ const getPublisher = (site) => {
   })
 }
 
-function createClientImgPublData(clientId, sessionId, imageId, imgUrl, publisherId) {
+function createClientImgPublData(clientId, sessionId, imageId, imgUrl, idItem, publisherId) {
   return clientImgPubl.create({
         clientId: clientId,
         sessionId: sessionId,
         imgId: imageId,
         imgUrl: imgUrl,
+        idItem: idItem,
         publId: publisherId
   })
 }
@@ -336,6 +352,9 @@ const clothing_Filler = (
               date: dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss'),
               url: url,
               uid: uid,
+              product_site_url: result[int]['Product_URL_Web_encoded'],
+              product_image_url: result[int]['Image_URL'],
+              product_main_category_name: result[int]['Main_Category_Name']
             },
             serv: serv,
             size: { w: img_width, h: img_height },
@@ -362,6 +381,9 @@ const clothing_Filler = (
               date: dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss'),
               url: url,
               uid: uid,
+              product_site_url: result[int]['Product_URL_Web_encoded'],
+              product_image_url: result[int]['Image_URL'],
+              product_main_category_name: result[int]['Main_Category_Name']
             },
             serv: serv,
             size: { w: img_width, h: img_height },
@@ -388,6 +410,9 @@ const clothing_Filler = (
               date: dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss'),
               url: url,
               uid: uid,
+              product_site_url: result[int]['Product_URL_Web_encoded'],
+              product_image_url: result[int]['Image_URL'],
+              product_main_category_name: result[int]['Main_Category_Name']
             },
             serv: serv,
             size: { w: img_width, h: img_height },
@@ -412,6 +437,9 @@ const clothing_Filler = (
               date: dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss'),
               url: url,
               uid: uid,
+              product_site_url: result[int]['Product_URL_Web_encoded'],
+              product_image_url: result[int]['Image_URL'],
+              product_main_category_name: result[int]['Main_Category_Name']
             },
             serv: serv,
             size: { w: img_width, h: img_height },
@@ -444,6 +472,9 @@ const clothing_Filler = (
               date: dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss'),
               url: url,
               uid: uid,
+              product_site_url: result[int]['Product_URL_Web_encoded'],
+              product_image_url: result[int]['Image_URL'],
+              product_main_category_name: result[int]['Main_Category_Name']
             },
             serv: serv,
             size: { w: img_width, h: img_height },
@@ -472,6 +503,9 @@ const clothing_Filler = (
               date: dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss'),
               url: url,
               uid: uid,
+              product_site_url: prendras[int]['Product_URL_Web_encoded'],
+              product_image_url: prendras[int]['Image_URL'],
+              product_main_category_name: prendras[int]['Main_Category_Name']
             },
             serv: serv,
             size: { w: img_width, h: img_height },
@@ -495,6 +529,9 @@ const clothing_Filler = (
               date: dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss'),
               url: url,
               uid: uid,
+              product_site_url: prendras[int]['Product_URL_Web_encoded'],
+              product_image_url: prendras[int]['Image_URL'],
+              product_main_category_name: prendras[int]['Main_Category_Name']
             },
             serv: serv,
             size: { w: img_width, h: img_height },
@@ -528,6 +565,9 @@ const clothing_Filler = (
               date: dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss'),
               url: url,
               uid: uid,
+              product_site_url: result[int]['Product_URL_Web_encoded'],
+              product_image_url: result[int]['Image_URL'],
+              product_main_category_name: result[int]['Main_Category_Name']
             },
             serv: serv,
             size: { w: img_width, h: img_height },
@@ -554,6 +594,9 @@ const clothing_Filler = (
               date: dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss'),
               url: url,
               uid: uid,
+              product_site_url: result[int]['Product_URL_Web_encoded'],
+              product_image_url: result[int]['Image_URL'],
+              product_main_category_name: result[int]['Main_Category_Name']
             },
             serv: serv,
             size: { w: img_width, h: img_height },
@@ -597,6 +640,9 @@ const object_Filler = (
         date: dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss'),
         url: url,
         uid: uid,
+        product_site_url: result[int]['Product_URL_Web_encoded'],
+        product_image_url: result[int]['Image_URL'],
+        product_main_category_name: result[int]['Main_Category_Name']
       },
       serv: serv,
       size: { w: img_width, h: img_height },
@@ -640,6 +686,9 @@ const sport_makeup_Filler = (
             date: dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss'),
             url: url,
             uid: uid,
+            product_site_url: result[int]['Product_URL_Web_encoded'],
+            product_image_url: result[int]['Image_URL'],
+            product_main_category_name: result[int]['Main_Category_Name']
           },
           serv: serv,
           size: { w: img_width, h: img_height },
@@ -669,6 +718,9 @@ const sport_makeup_Filler = (
             date: dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss'),
             url: url,
             uid: uid,
+            product_site_url: result[int]['Product_URL_Web_encoded'],
+            product_image_url: result[int]['Image_URL'],
+            product_main_category_name: result[int]['Main_Category_Name']
           },
           serv: serv,
           size: { w: img_width, h: img_height },
@@ -697,6 +749,9 @@ const sport_makeup_Filler = (
             date: dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss'),
             url: url,
             uid: uid,
+            product_site_url: result[int]['Product_URL_Web_encoded'],
+            product_image_url: result[int]['Image_URL'],
+            product_main_category_name: result[int]['Main_Category_Name']
           },
           serv: serv,
           size: { w: img_width, h: img_height },
@@ -724,6 +779,9 @@ const sport_makeup_Filler = (
             date: dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss'),
             url: url,
             uid: uid,
+            product_site_url: result[int]['Product_URL_Web_encoded'],
+            product_image_url: result[int]['Image_URL'],
+            product_main_category_name: result[int]['Main_Category_Name']
           },
           serv: serv,
           size: { w: img_width, h: img_height },
@@ -775,7 +833,7 @@ const flatten = (ary) => {
   }, [])
 }
 
-const addImagePublisherMetadata = (imageURL, page, site, uid, userId, sessionId) => {
+const addImagePublisherMetadata = (imageURL, page, site, idItem, uid, userId, sessionId) => {
   
   return new Promise(async (resolve, reject) => {
    
@@ -796,7 +854,7 @@ const addImagePublisherMetadata = (imageURL, page, site, uid, userId, sessionId)
       }
 
       if(img && publisher && userId && sessionId){
-        await createClientImgPublData(userId, sessionId, img.id, img.img, publisher.id)
+        await createClientImgPublData(userId, sessionId, img.id, img.img, idItem, publisher.id)
       }
       
       resolve('success')

@@ -34,6 +34,10 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.STRING(600),
         allowNull: true
       },
+      idItem :{
+        type: Sequelize.BIGINT(11),
+        allowNull: true
+      },
       publId: {
         type: Sequelize.STRING(45),
         allowNull: true,

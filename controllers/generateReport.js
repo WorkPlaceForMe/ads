@@ -44,14 +44,27 @@ exports.generateReport = Controller(async (req, res) => {
                 req.query.imgs = req.query.imgs.replace('www.', '')
               }
 
-              await getStatsImg(req)
-                .then((images) => {
-                  responseData.stats.statsUrl.table[i].images = images
-                })
-                .catch((err) => {
-                  console.log(err)
-                  res.status(500).json(err)
-                })
+              if(req.query.option === 'images'){
+                await getStatsImg(req)
+                  .then((images) => {
+                    responseData.stats.statsUrl.table[i].images = images
+                  })
+                  .catch((err) => {
+                    console.log(err)
+                    res.status(500).json(err)
+                  })
+              }
+
+              if(req.query.option === 'categories'){
+                await getStatsCategories(req)
+                  .then((categories) => {
+                    responseData.stats.statsUrl.table[i].categories = categories
+                  })
+                  .catch((err) => {
+                    console.log(err)
+                    res.status(500).json(err)
+                  })
+              }
             }
 
             let reportName = ''
@@ -62,7 +75,7 @@ exports.generateReport = Controller(async (req, res) => {
               reportName = 'Web Page Wise Report'
 
               for (const webpage of webpageRes) {
-              delete webpage['images']
+                delete webpage['images']
                 webpage.totalReward = statsUrl.rewards.totalReward
                 webpage.totalConversionsCount = statsUrl.rewards.totalConversionsCount
 
@@ -79,6 +92,13 @@ exports.generateReport = Controller(async (req, res) => {
                 for (const image of webpage.images) {
                   image['webPageBelongsTo'] = webpage.url
                   reportData.push(image)
+                }
+              }
+            } else if (req.query.option === 'categories') {
+              reportName = 'Category Wise Report'
+              for (const webpage of webpageRes) {
+                for (const category of webpage.categories) {
+                  reportData.push(category)
                 }
               }
             } else {
@@ -603,6 +623,82 @@ const getStatsUrl = (req) => {
   })
 }
 
+const getStatsCategories = (req) => {
+  return new Promise(async (resolve, reject) => {
+    let urlQuery = req.query.imgs
+    
+    let categories = new Set(),
+      clicks = {},
+      views = {},
+      ads = {},
+      usercount = {},
+      duration = {}
+
+    let site = urlQuery
+    let publisher = ''
+    
+    if (site.includes('www.')) {
+      site = site.split('w.')[1]
+    }
+
+    if (site.includes('//')) {
+      site = site.split('//')[1]
+    }
+
+    if (site.includes('/')) {
+      site = site.split('/')[0]
+    }
+
+    if(site){
+        publisher = await cache.getAsync(`${site}-publisher`);
+
+        if(publisher){
+            publisher = JSON.parse(publisher);
+        } else {
+            publisher = await getPublisher(site);
+            cache.setAsync(`${site}-publisher`, JSON.stringify(publisher)).then();
+        } 
+    }
+
+    getCategoryWiseData(publisher.id, function (err, rows) {
+      if (err) {
+        return reject(err)
+      } else {
+        const categoriesData = []
+
+        for (const stat of rows) {
+          let cat = stat['product_main_category_name']
+          categories.add(cat)
+          clicks[cat] = !clicks[cat] ? stat.clicks : (clicks[cat] + stat.clicks)
+          views[cat] = !views[cat] ? stat.views : (views[cat] + stat.views)
+          ads[cat] = !ads[cat] ? 1 : (ads[cat] + 1)
+
+          if(!usercount[cat]){
+            usercount[cat] = new Set()
+          }
+          usercount[cat] = usercount[cat].add(stat.clientId)
+          duration[cat] = !duration[cat] ? stat.duration : (duration[cat] + stat.duration)
+        }
+
+        categories.forEach(category => {
+          categoriesData.push({
+            category: category,
+            clicks: clicks[category],
+            views: views[category],
+            ads: ads[category],
+            viewsPerAd: ads[category] == 0 ? 0.00 : Math.round((views[category]/ads[category])*100)/100,
+            clicksPerAd: ads[category] == 0 ? 0.00 : Math.round((clicks[category]/ads[category])*100)/100,
+            usercount: usercount[category].size,
+            duration: Math.round((duration[category]/60.0)*100)/100                   
+          })
+        })
+        
+        resolve(categoriesData)
+      }
+    })
+  })
+}
+
 const getStatsImg = (req) => {
   return new Promise(async (resolve, reject) => {
     let urlQuery = req.query.imgs
@@ -774,6 +870,19 @@ function getClientSessionDataByPublisherId(publisherId, callback){
   group by clientId, site`, callback)
 }
 
+function getCategoryWiseData(publisherId, callback){   
+  return db.query( `SELECT ctg.product_main_category_name, ctg.clientId, ctg.idItem, sum(ctg.clicks) as clicks, sum(ctg.views) as views, sum(ctg.duration) as duration
+  FROM 
+  (SELECT adpg.product_main_category_name, clip.idItem, clip.clientId, imps.clicks, imps.views, sum(clip.duration) as duration FROM ${conf.get('database')}.clientimgpubl clip, ${conf.get('database')}.adspages adpg, 
+  (SELECT idItem, COUNT( CASE WHEN type = '2' THEN 1 END ) AS clicks, COUNT( CASE WHEN type = '1' THEN 1 END ) 
+  AS views FROM ${conf.get('database')}.impressions imp group by imp.idItem) imps
+  where clip.publId = '${publisherId}'
+  and clip.idItem = adpg.id
+  and imps.idItem = clip.idItem
+  group by clip.idItem, clip.clientId) ctg
+  group by ctg.product_main_category_name, ctg.idItem`, callback)
+}
+
 function getClicksAndViewsPerImg(site, callback) {
   return db.query(
     `SELECT img, COUNT( CASE WHEN type = '2' THEN 1 END ) AS clicks, COUNT( CASE WHEN type = '1' THEN 1 END ) AS views FROM ${conf.get(
@@ -817,7 +926,13 @@ function getExcelColumnNames(columnKeys) {
   const columnNames = []
 
   columnKeys.forEach(columnKey => {
-    columnNames.push(excelColumnNames[columnKey])
+    const excelColumnName = excelColumnNames[columnKey]
+
+    if(excelColumnName){
+      columnNames.push(excelColumnName)
+    } else {
+      columnNames.push(columnKey)
+    }    
   })
 
   return columnNames
@@ -841,5 +956,6 @@ const excelColumnNames = {
   duration: 'Total View Duration(In Min)',
   img: 'Image URL',
   title: 'Image Name',
-  webPageBelongsTo: 'Web Page URL'
+  webPageBelongsTo: 'Web Page URL',
+  category: 'Product Category'
 }

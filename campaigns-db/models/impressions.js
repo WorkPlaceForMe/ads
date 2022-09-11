@@ -24,7 +24,7 @@ module.exports = (sequelize, Sequelize) => {
         img :{
             type: Sequelize.STRING(600),
             allowNull: true
-        },
+        }
     });
   
     return impressions;

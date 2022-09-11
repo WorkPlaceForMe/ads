@@ -9,6 +9,18 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.STRING(200),
             allowNull: true,
         },
+        product_site_url: {
+            type: Sequelize.TEXT,
+            allowNull: true
+        },
+        product_image_url: {
+            type: Sequelize.STRING(1234),
+            allowNull: true
+        },
+        product_main_category_name: {
+            type: Sequelize.STRING,
+            allowNull: true
+        },
         site: {
             type: Sequelize.STRING(600),
             allowNull: true,

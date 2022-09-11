@@ -47,7 +47,7 @@ $(document).on('mousedown', 'a.but1', function (e) {
 			time: new Date(),
 			url: window.location.href,
 			type: 1,
-			idItem: $(this).closest('.ad-image-div').find('a').attr('id'),
+			idItem: getIdItem(this),
 			img: getImageURL(this),
 			userId: userId,
 			sessionId: sessionId,
@@ -73,7 +73,7 @@ $(document).on('mousedown', 'a.but2', function (e) {
 			time: new Date(),
 			url: window.location.href,
 			type: 2,
-			idItem: $(this).closest('.ad-image-div').find('a').attr('id'),
+			idItem: getIdItem(this),
 			img: getImageURL(this),
 			userId: userId,
 			sessionId: sessionId,
@@ -227,7 +227,7 @@ $(document).on('click', '.closeBut', function () {
 						time: new Date(),
 						url: window.location.href,
 						type: 1,
-						idItem: $(this).closest('.ad-image-div').find('a').attr('id'),
+						idItem: getIdItem(this),
 						img: getImageURL(this),
 						userId: userId,
 						sessionId: sessionId,
@@ -601,4 +601,26 @@ function getImageURL(element){
 	}
 
 	return imageURL
+}
+
+function getIdItem(element){
+	let idItem = $(element).closest('a.but1').attr('id')
+
+	if($(element).is('a.but')){
+		idItem = $(element).closest('a.but1').attr('id')
+	}
+
+	if($(element).is('a.but1')){
+		idItem = $(element).attr('id')
+	}
+
+	if($(element).is('a.but2')){
+		idItem = $(element).closest('div.wrapper').prev('a.but1').attr('id')
+	}
+
+	if(!idItem){
+		idItem = $(element).closest('.ad-image-div').find('a').attr('id')
+	}
+
+	return idItem
 }

@@ -33,7 +33,7 @@ exports.postData = Controller(async(req, res) => {
         }  
 
         if(img && publisher){
-          await updateDurationInImgPublData(data.userId, data.sessionId, img.img, publisher.id);
+          updateDurationInImgPublData(data.userId, data.sessionId, img.img, data.idItem, publisher.id).then().catch(err => console.log(err))
         }
         res.status(200).json({success: true});
     }catch(err){
@@ -63,7 +63,7 @@ function getPublisher(site) {
     });
 }
 
-function updateDurationInImgPublData(clientId, sessionId, imgUrl, publisherId) {
+function updateDurationInImgPublData(clientId, sessionId, imgUrl, idItem, publisherId) {
   return db.clientImgPubl.update(
     {
       duration: db.sequelize.fn(
@@ -71,14 +71,15 @@ function updateDurationInImgPublData(clientId, sessionId, imgUrl, publisherId) {
         db.sequelize.literal("second"),
         db.sequelize.col('createdAt'),
         db.sequelize.literal('CURRENT_TIMESTAMP')
-    )     
+      )
     },
     {
       where: {
         clientId: clientId,
         sessionId: sessionId,
         imgUrl: imgUrl,
-        publId: publisherId
+        publId: publisherId,
+        idItem: idItem
       },
     }
   );

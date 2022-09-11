@@ -2,9 +2,9 @@
         <nb-card-body>
             <button style = "width: 130px"  #popover (click) = "showRangeSelector()" [nbPopover]="rangeSelector" nbPopoverTrigger="noop" nbPopoverPlacement="bottom" size="small" nbButton>{{currentSelection}} <nb-icon icon="calendar"></nb-icon></button>
             <div class="dropdown-divider"></div>
-            <label class="label">Website</label>
+            <label class="label">Publisher</label>
             <div class="form-group">
-                <nb-select fullWidth [(ngModel)]='site' (ngModelChange)='siteChoosen($event)' placeholder="Choose website" [status]="colors.sites">
+                <nb-select fullWidth [(ngModel)]='site' (ngModelChange)='siteChoosen($event)' placeholder="Choose publisher" [status]="colors.sites">
                     <nb-option value="" disabled>Choose:</nb-option>
                     <nb-option *ngFor='let site of sites' [value]=site.id>{{site.name}}</nb-option>
                 </nb-select>
@@ -14,8 +14,9 @@
             </div>
             <nb-select fullWidth placeholder="Choose an option" [(ngModel)]='option'  [status]="colors.option">
                 <nb-option value="" disabled>Choose:</nb-option>
-                <nb-option value="images">Images</nb-option>
-                <nb-option value="webpages">Website</nb-option>
+                <nb-option value="webpages">WebpageWise</nb-option>
+                <nb-option value="images">ImageWise</nb-option>
+                <nb-option value="categories">CategoryWise</nb-option>                   
             </nb-select>
         </nb-card-body>
         <button class="center btn-block" status="success" nbButton  (click)="generate()" *ngIf="loading == false">Generate Report</button>

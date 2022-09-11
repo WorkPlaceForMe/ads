@@ -694,7 +694,7 @@ function getAdsList(img,site,callback){
 
 function getAdsClicksAndViews(img,site,callback){
     site = encodeURI(site)
-    return db.query(`SELECT idItem,img, COUNT( CASE WHEN type = '2' THEN 1 END ) AS clicks, COUNT( CASE WHEN type = '1' THEN 1 END ) AS views FROM ${conf.get('database')}.impressions where ( url = 'https://${site}' OR url = 'https://www.${site}' OR url = 'http://${site}' OR url = 'http://www.${site}' ) and img= '${img}' group by idItem;`,callback)
+    return db.query(`SELECT idItem, img, COUNT( CASE WHEN type = '2' THEN 1 END ) AS clicks, COUNT( CASE WHEN type = '1' THEN 1 END ) AS views FROM ${conf.get('database')}.impressions where ( url = 'https://${site}' OR url = 'https://www.${site}' OR url = 'http://${site}' OR url = 'http://www.${site}' ) and img= '${img}' group by idItem;`,callback)
 }
 
 const getPublsh = async function(){
