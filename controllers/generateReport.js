@@ -683,9 +683,9 @@ const getStatsCategories = (req) => {
         categories.forEach(category => {
           categoriesData.push({
             category: category,
+            ads: ads[category],
             clicks: clicks[category],
             views: views[category],
-            ads: ads[category],
             viewsPerAd: ads[category] == 0 ? 0.00 : Math.round((views[category]/ads[category])*100)/100,
             clicksPerAd: ads[category] == 0 ? 0.00 : Math.round((clicks[category]/ads[category])*100)/100,
             usercount: usercount[category].size,
