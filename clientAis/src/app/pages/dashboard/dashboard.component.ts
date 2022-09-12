@@ -1,4 +1,3 @@
-import { DatePipe } from '@angular/common';
 import { Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -6,7 +5,6 @@ import { NbCalendarRange, NbDateService, NbPopoverDirective, NbWindowService } f
 import { LocalDataSource, ViewCell } from 'ng2-smart-table';
 import { FacesService } from '../../services/faces.service';
 import { AddComponent } from '../add/add.component';
-import { NumsComponent } from '../nums/nums.component';
 import { ReportComponent } from '../report/report.component';
 import { SliderComponent } from '../slider/slider.component';
 
@@ -71,32 +69,50 @@ export class DashboardComponent implements OnInit {
         edit: true,
         delete: true,
       }
-    }else{
+    } else{
       this.settings['actions'] = false
+    }
+
+    if(path === 'site/image/ad'){
+      this.stage = 'ad'
+      
+      this.face.getStatsAd(params.img, params.site).subscribe(
+        res => {
+          this.source = res['table'];
+        },
+        err => {
+          console.error(err);
+          this.source = undefined;
+        }
+      )
     }
 
     if(path === 'site/image'){
       this.stage = 'image'
+      
       this.face.getStatsImg(params.img).subscribe(
-      res => {
-        this.source = res['table'];
-      },
-      err => {
-        console.error(err);
-        this.source = undefined;
-      },
-    );
+        res => {
+          this.source = res['table'];
+        },
+        err => {
+          console.error(err);
+          this.source = undefined;
+        },
+      )
     }
+    
     this.checkSite()
   }
 
   checkSite(){
     const path = this.activatedRoute.snapshot.routeConfig.path;
+    
     if(path === 'site'){
       this.stage = 'site'
       this.settings.columns.url.title = 'Webpage'
       this.initSite()
     }
+    
     if(path === 'dashboard'){
       this.siteName = 'Publisher'
       this.initDash()
@@ -151,15 +167,15 @@ export class DashboardComponent implements OnInit {
     const params = this.activatedRoute.snapshot.queryParams;
       this.settings.columns.url.title = 'Webpage'
       this.face.getStatsUrl(params.url,this.range).subscribe(
-      res => {
-        this.rewards = res['rewards']
-        this.settings = Object.assign({},this.settings)
-        this.source = res['table'];
-      },
-      err => {
-        console.error(err);
-        this.source = undefined;
-      },
+        res => {
+          this.rewards = res['rewards']
+          this.settings = Object.assign({},this.settings)
+          this.source = res['table'];
+        },
+        err => {
+          console.error(err);
+          this.source = undefined;
+        }
     );
   }
 
@@ -191,7 +207,6 @@ export class DashboardComponent implements OnInit {
 
   goReport(){
     this.windowService.open(ReportComponent, { title: `Report Generation`});
-    // this.router.navigateByUrl(`/pages/report`)
   }
 
   setDate(event){
@@ -307,7 +322,6 @@ export class DashboardComponent implements OnInit {
 
   settings = {
     mode: 'external',
-    // actions: false,
       add: {
           addButtonContent: '<i class="nb-plus"></i>',
           createButtonContent: '<i class="nb-checkmark"></i>',
@@ -357,7 +371,7 @@ export class DashboardComponent implements OnInit {
         filter: false,
       },
       ctr: {
-        title: 'CTR',
+        title: 'Average Clicks Per View',
         type: 'string',
         filter: false,
       },
@@ -384,7 +398,7 @@ export class DashboardComponent implements OnInit {
     },
   };
 
-    settings2 = {
+  settings2 = {
     mode: 'external',
     actions: false,
     edit: {
@@ -403,12 +417,7 @@ export class DashboardComponent implements OnInit {
           title: 'Image Icon',
           type: 'custom',
           filter: false,
-          renderComponent: IconComponent,
-          onComponentInitFunction(instance) {
-            instance.save.subscribe(row => {
-              alert(`${row.name} saved!`)
-            });
-          }
+          renderComponent: IconComponent
         },
       title: {
         title: 'Image Title',
@@ -431,7 +440,7 @@ export class DashboardComponent implements OnInit {
         filter: false,
       },
       ctr: {
-        title: 'CTR',
+        title: 'Average Clicks Per View',
         type: 'string',
         filter: false,
       },
@@ -461,60 +470,39 @@ export class DashboardComponent implements OnInit {
       display: true,
       perPage: 10,
     },
-    noDataMessage: 'No data found',
+    noDataMessage: 'Loading...',
     columns: {
       img: {
           title: 'Ad Icon',
           type: 'custom',
           filter: false,
-          renderComponent: IconComponent,
-          onComponentInitFunction(instance) {
-            instance.save.subscribe(row => {
-              alert(`${row.name} saved!`)
-            });
-          }
+          renderComponent: IconComponent
         },
-      title: {
-        title: 'Ad Name',
-        type: 'string',
-        filter: false,
-      },
-      affiliate: {
-        title: 'Affiliate Url',
-        type: 'custom',
-        filter: false,
-        renderComponent: UrlComponent,
-        onComponentInitFunction(instance) {
-          instance.save.subscribe(row => {
-            alert(`${row.name} saved!`)
-          });
+        views: {
+          title: 'Total Icon Impression',
+          type: 'string',
+          filter: false,
+        },
+        clicks: {
+          title: 'Total Ad Clicks',
+          type: 'string',
+          filter: false,
+        },
+        ctr: {
+          title: 'Average Clicks Per View',
+          type: 'string',
+          filter: false,
+        },
+        usercount: {
+          title: 'Unique Visitors Count',
+          type: 'string',
+          filter: false,
+        },
+        duration: {
+          title: 'Total View Duration(In Min)',
+          type: 'string',
+          filter: false,
         }
-      },
-      views: {
-        title: 'Impressions',
-        type: 'string',
-        filter: false,
-      },
-      clicks: {
-        title: 'Clicks',
-        type: 'string',
-        filter: false,
-      },
-      ctr: {
-        title: 'CTR',
-        type: 'string',
-        filter: false,
-      },
-      usercount: {
-        title: 'Unique Visitors Count',
-        type: 'string',
-        filter: false,
-      },
-      duration: {
-        title: 'Total View Duration(In Min)',
-        type: 'string',
-        filter: false,
-      }
     },
   };
 }
@@ -541,6 +529,7 @@ export class ButtonViewComponent implements ViewCell, OnInit {
 
   path: string;
   params: string;
+  
   ngOnInit() {
     this.path = this.activatedRoute.snapshot.routeConfig.path;
     this.params = this.activatedRoute.snapshot.queryParams.url;
@@ -551,6 +540,7 @@ export class ButtonViewComponent implements ViewCell, OnInit {
     if(this.path == 'dashboard'){
       this.router.navigateByUrl(`/pages/site?url=${this.rowData.url}`)
     }
+    
     if(this.path == 'site'){
       this.router.navigateByUrl(`/pages/site/image?img=${this.rowData.url}`)
     }
@@ -560,7 +550,9 @@ export class ButtonViewComponent implements ViewCell, OnInit {
 @Component({
   selector: 'button-view',
   template: `
-  <button class='btn btn-link play-btn' style='cursor: default'><img [src]="rowData.img" width='60' height='60'></button>
+      <button class='btn btn-link play-btn' (click)='onClick()'>
+        <img [src]="rowData.img" width='60' height='60'>
+      </button>
   `,
 })
 export class IconComponent implements ViewCell, OnInit {
@@ -576,31 +568,22 @@ export class IconComponent implements ViewCell, OnInit {
   @Output() save: EventEmitter<any> = new EventEmitter();
   path: string;
   params: string;
+  
   ngOnInit() {
     this.path = this.activatedRoute.snapshot.routeConfig.path;
     this.params = this.activatedRoute.snapshot.queryParams.img;
   }
-}
-
-@Component({
-  selector: 'button-view',
-  template: `
-  <button class='btn btn-link play-btn' (click)='onClick()'>Url Link</button>
-  `,
-})
-export class UrlComponent implements ViewCell, OnInit {
-
-  constructor(
-    ) {
-  }
-
-  @Input() value: string | number;
-  @Input() rowData: any;
-  @Output() save: EventEmitter<any> = new EventEmitter();
-  ngOnInit() {
-  }
 
   onClick() {
-    window.open(this.rowData.affiliate , '_blank');
+    if(this.path == 'site/image'){
+      this.router.navigateByUrl(`/pages/site/image/ad?img=${encodeURIComponent(this.rowData.img)}&site=${this.params}`)
+    }
+    
+    if(this.path == 'site/image/ad'){
+
+      if(this.rowData.adURL){
+        window.open(this.rowData.adURL , '_blank')
+      }
+    }
   }
 }

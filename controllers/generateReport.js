@@ -331,14 +331,14 @@ const getStats = (req) => {
 
                     stats = {
                       url: siteURL,
-                      ads: adsGrouped[Object.keys(imgsGrouped)[i]],
-                      clicks: clicksGrouped[Object.keys(imgsGrouped)[i]],
+                      ads: adsGrouped[Object.keys(imgsGrouped)[i]],                     
                       views: viewsGrouped[Object.keys(imgsGrouped)[i]],
+                      clicks: clicksGrouped[Object.keys(imgsGrouped)[i]],
+                      ctr: ctr,
                       clicksPerImg: clicksPerImg,
                       viewsPerImg: viewsPerImg,
                       clicksPerAd: clicksPerAd,
-                      viewsPerAd: viewsPerAd,
-                      ctr: ctr,
+                      viewsPerAd: viewsPerAd,                     
                       images: imgsGrouped[Object.keys(imgsGrouped)[i]],
                       enabled: publisher.enabled,
                       id: publisher.id,
@@ -567,13 +567,13 @@ const getStatsUrl = (req) => {
                     table[i] = {
                       url: siteURL,
                       ads: adsGrouped[Object.keys(imgsGrouped)[i]],
-                      clicks: clicksGrouped[Object.keys(imgsGrouped)[i]],
                       views: viewsGrouped[Object.keys(imgsGrouped)[i]],
+                      clicks: clicksGrouped[Object.keys(imgsGrouped)[i]],
+                      ctr: ctr,                   
                       clicksPerImg: clicksPerImg,
                       viewsPerImg: viewsPerImg,
                       clicksPerAd: clicksPerAd,
-                      viewsPerAd: viewsPerAd,
-                      ctr: ctr,
+                      viewsPerAd: viewsPerAd,                     
                       images: imgsGrouped[Object.keys(imgsGrouped)[i]],
                       adsperimage: adsPerImage,
                       imgNum: imgPerPage,
@@ -667,6 +667,7 @@ const getStatsCategories = (req) => {
           if(!usercount[cat]){
             usercount[cat] = new Set()
           }
+          
           usercount[cat] = usercount[cat].add(stat.clientId)
           duration[cat] = !duration[cat] ? stat.duration : (duration[cat] + stat.duration)
         }
@@ -675,8 +676,9 @@ const getStatsCategories = (req) => {
           categoriesData.push({
             category: category,
             ads: ads[category],
-            clicks: clicks[category],
             views: views[category],
+            clicks: clicks[category],           
+            ctr: views[category] == 0 ? 0.00 : Math.round((clicks[category] / views[category]) *100)/100,
             viewsPerAd: ads[category] == 0 ? 0.00 : Math.round((views[category]/ads[category])*100)/100,
             clicksPerAd: ads[category] == 0 ? 0.00 : Math.round((clicks[category]/ads[category])*100)/100,
             usercount: usercount[category].size,
@@ -847,31 +849,38 @@ function getClicksAndViews(callback) {
 }
 
 function getImgsList(site, publisherId, callback){   
-  return db.query( `SELECT imguser.img, case when sum(duration) > 0 then count(*) else 0 END as usercount, sum(imguser.duration) as duration from
-  (SELECT ipg.img, sum(duration) as duration FROM ${conf.get('database')}.imgspages ipg,  ${conf.get('database')}.clientimgpubl cipl  
-  where publId = '${publisherId}' and cipl.imgUrl = ipg.img
-  and ipg.site = 'https://${site}' OR ipg.site = 'https://www.${site}' OR ipg.site = 'http://${site}' OR ipg.site = 'http://www.${site}'
-  group by cipl.clientId, ipg.img) imguser
-  group by imguser.img`, callback)
+  return db.query(`SELECT imgcpluser.img, case when sum(imgcpluser.duration) > 0 then count(*) else 0 END as usercount, sum(imgcpluser.duration) as duration from
+    (SELECT imguser.img, sum(imguser.duration) as duration from
+    (SELECT cipl.clientId, ipg.img, max(cipl.duration) as duration FROM ${conf.get('database')}.imgspages ipg,  ${conf.get('database')}.clientimgpubl cipl  
+    where publId = '${publisherId}' and cipl.imgUrl = ipg.img
+    and (ipg.site = '${site}' or ipg.site = 'https://${site}' OR ipg.site = 'https://www.${site}' OR ipg.site = 'http://${site}' OR ipg.site = 'http://www.${site}')
+    group by cipl.clientId, cipl.sessionId, ipg.img) imguser
+    group by imguser.clientId, imguser.img) imgcpluser
+    group by imgcpluser.img`, callback)
 }
 
 function getClientSessionDataByPublisherId(publisherId, callback){   
-  return db.query( `SELECT clientId, sum(duration) as duration, site FROM ${conf.get('database')}.clientsession
+  return db.query(`SELECT clientId, sum(duration) as duration, site FROM ${conf.get('database')}.clientsession
   where publId = '${publisherId}'
   group by clientId, site`, callback)
 }
 
 function getCategoryWiseData(publisherId, callback){   
-  return db.query( `SELECT ctg.product_main_category_name, ctg.clientId, ctg.idItem, sum(ctg.clicks) as clicks, sum(ctg.views) as views, sum(ctg.duration) as duration
-  FROM 
-  (SELECT adpg.product_main_category_name, clip.idItem, clip.clientId, imps.clicks, imps.views, sum(clip.duration) as duration FROM ${conf.get('database')}.clientimgpubl clip, ${conf.get('database')}.adspages adpg, 
+  return db.query(`SELECT ctgcipl.product_main_category_name, ctgcipl.clientId, ctgcipl.idItem, sum(ctgcipl.clicks) as clicks, sum(ctgcipl.views) as views, sum(ctgcipl.duration) as duration
+  FROM
+  (SELECT ctg.product_main_category_name, ctg.idItem, ctg.clientId, ctg.clicks, ctg.views, sum(ctg.duration) as duration
+  FROM
+  (SELECT adpg.product_main_category_name, clip.idItem, clip.clientId, COALESCE(imps.clicks, 0) as clicks, COALESCE(imps.views, 0) as views, max(clip.duration) as duration FROM ${conf.get('database')}.clientimgpubl clip
+  inner join ${conf.get('database')}.adspages adpg
+  ON clip.idItem = adpg.id
+  left join
   (SELECT idItem, COUNT( CASE WHEN type = '2' THEN 1 END ) AS clicks, COUNT( CASE WHEN type = '1' THEN 1 END ) 
   AS views FROM ${conf.get('database')}.impressions imp group by imp.idItem) imps
+  ON imps.idItem = clip.idItem
   where clip.publId = '${publisherId}'
-  and clip.idItem = adpg.id
-  and imps.idItem = clip.idItem
-  group by clip.idItem, clip.clientId) ctg
-  group by ctg.product_main_category_name, ctg.clientId, ctg.idItem`, callback)
+  group by clip.idItem, clip.clientId, clip.sessionId, imps.clicks, imps.views) ctg
+  group by ctg.idItem, ctg.clientId, ctg.clicks, ctg.views) ctgcipl
+  group by ctgcipl.product_main_category_name, ctgcipl.clientId, ctgcipl.idItem`, callback)
 }
 
 function getClicksAndViewsPerImg(site, callback) {
@@ -935,7 +944,7 @@ const excelColumnNames = {
   clicks: 'Total Ad Clicks',  
   clicksPerAd: 'Average Clicks Per Ad',
   clicksPerImg: 'Average Clicks Per Image',
-  ctr: 'CTR',
+  ctr: 'Average Clicks Per View',
   imgNum: 'Total Images with Ads',
   totalConversionsCount: 'Total Ad Conversion Count',
   totalReward:  'Total Rewards',

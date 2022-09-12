@@ -19,8 +19,8 @@ export class FacesService {
   getStatsImg(site){
     return this.http.get(`${this.API_URI}/stats/url/img?imgs=${site}`);
   }
-  getStatsAd(img,site){
-    return this.http.get(`${this.API_URI}/stats/url/img/ad?ad=${img}&url=${site}`);
+  getStatsAd(img, site){
+    return this.http.get(`${this.API_URI}/stats/url/img/ad?img=${img}&site=${site}`);
   }
   disableEnable(id,status){
     return this.http.get(`${this.API_URI}/modify/status/${id}/${status}`);

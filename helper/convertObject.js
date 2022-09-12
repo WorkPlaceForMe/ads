@@ -7,7 +7,11 @@ exports.convert = async (arr) => {
     }
     let arrResult = [];
     for(const obj of arr){
-        const ad = await addAd(obj.add.id, obj.add.site, obj.add['product_site_url'], obj.add['product_image_url'], obj.add['product_main_category_name'], obj.add.date, obj.add.url, obj.add.uid)
+        let ad = await getAd(obj.add.id, obj.add.site, obj.add.url)
+        
+        if(!ad){
+            ad = await addAd(obj.add.id, obj.add.site, obj.add['product_site_url'], obj.add['product_image_url'], obj.add['product_main_category_name'], obj.add.date, obj.add.url, obj.add.uid)
+        }
     
         if(!obj.vista.boundingBox){
             obj.vista.boundingBox = {
@@ -89,4 +93,10 @@ async function addAd(name, site, product_site_url, product_image_url, product_ma
         imgName :imgName,
         idGeneration :idGeneration,
     })
+}
+
+async function getAd(idItem, site, imgName) {
+    return adsPage.findOne({
+        where: { idItem: idItem, site: site, imgName: imgName }
+      })
 }

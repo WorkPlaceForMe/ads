@@ -239,7 +239,7 @@ export class DashboardComponent implements OnInit {
         filter: false,
       },
       ctr: {
-        title: 'CTR',
+        title: 'Average Clicks Per View',
         type: 'string',
         filter: false,
       },
@@ -303,7 +303,7 @@ export class DashboardComponent implements OnInit {
         filter: false,
       },
       ctr: {
-        title: 'CTR',
+        title: 'Average Clicks Per View',
         type: 'string',
         filter: false,
       },
@@ -373,7 +373,7 @@ export class DashboardComponent implements OnInit {
         filter: false,
       },
       ctr: {
-        title: 'CTR',
+        title: 'Average Clicks Per View',
         type: 'string',
         filter: false,
       },
