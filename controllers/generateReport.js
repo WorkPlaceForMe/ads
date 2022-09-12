@@ -45,25 +45,13 @@ exports.generateReport = Controller(async (req, res) => {
               }
 
               if(req.query.option === 'images'){
-                await getStatsImg(req)
-                  .then((images) => {
-                    responseData.stats.statsUrl.table[i].images = images
-                  })
-                  .catch((err) => {
-                    console.log(err)
-                    res.status(500).json(err)
-                  })
+                responseData.stats.statsUrl.table[i].images = await getStatsImg(req)
               }
 
               if(req.query.option === 'categories'){
-                await getStatsCategories(req)
-                  .then((categories) => {
-                    responseData.stats.statsUrl.table[i].categories = categories
-                  })
-                  .catch((err) => {
-                    console.log(err)
-                    res.status(500).json(err)
-                  })
+                responseData.stats.statsUrl.table[i].categories = await getStatsCategories(req)                  
+                
+                break
               }
             }
 
@@ -96,12 +84,13 @@ exports.generateReport = Controller(async (req, res) => {
               }
             } else if (req.query.option === 'categories') {
               reportName = 'Category Wise Report'
+              
               for (const webpage of webpageRes) {
-                for (const category of webpage.categories) {
-                  reportData.push(category)
+                if(webpage.categories && webpage.categories.length > 0) {
+                  for (const category of webpage.categories) {
+                    reportData.push(category)
+                  }
                 }
-                
-                break
               }
             } else {
               return res.status(400).json({
@@ -342,15 +331,15 @@ const getStats = (req) => {
 
                     stats = {
                       url: siteURL,
+                      ads: adsGrouped[Object.keys(imgsGrouped)[i]],
+                      clicks: clicksGrouped[Object.keys(imgsGrouped)[i]],
+                      views: viewsGrouped[Object.keys(imgsGrouped)[i]],
                       clicksPerImg: clicksPerImg,
                       viewsPerImg: viewsPerImg,
                       clicksPerAd: clicksPerAd,
                       viewsPerAd: viewsPerAd,
                       ctr: ctr,
                       images: imgsGrouped[Object.keys(imgsGrouped)[i]],
-                      ads: adsGrouped[Object.keys(imgsGrouped)[i]],
-                      clicks: clicksGrouped[Object.keys(imgsGrouped)[i]],
-                      views: viewsGrouped[Object.keys(imgsGrouped)[i]],
                       enabled: publisher.enabled,
                       id: publisher.id,
                       rewards: rewards['totalReward'],
@@ -577,15 +566,15 @@ const getStatsUrl = (req) => {
 
                     table[i] = {
                       url: siteURL,
+                      ads: adsGrouped[Object.keys(imgsGrouped)[i]],
+                      clicks: clicksGrouped[Object.keys(imgsGrouped)[i]],
+                      views: viewsGrouped[Object.keys(imgsGrouped)[i]],
                       clicksPerImg: clicksPerImg,
                       viewsPerImg: viewsPerImg,
                       clicksPerAd: clicksPerAd,
                       viewsPerAd: viewsPerAd,
                       ctr: ctr,
                       images: imgsGrouped[Object.keys(imgsGrouped)[i]],
-                      ads: adsGrouped[Object.keys(imgsGrouped)[i]],
-                      clicks: clicksGrouped[Object.keys(imgsGrouped)[i]],
-                      views: viewsGrouped[Object.keys(imgsGrouped)[i]],
                       adsperimage: adsPerImage,
                       imgNum: imgPerPage,
                       usercount: userDuration ? userDuration.usercount : 0, 
@@ -807,10 +796,10 @@ const getStatsImg = (req) => {
                     title: rows[i].img.split('/')[
                       rows[i].img.split('/').length - 1
                     ],
+                    ads: adsTotal,
                     clicks: click,
                     views: view,
-                    ctr: ctr,
-                    ads: adsTotal,
+                    ctr: ctr,                   
                     usercount: rows[i].usercount,
                     duration: Math.round((rows[i].duration/60.0)*100)/100                   
                   })

@@ -223,6 +223,11 @@ export class DashboardComponent implements OnInit {
             });
           }
         },
+      ads: {
+        title: 'Total Number of Ads',
+        type: 'string',
+        filter: false,
+      },
       views: {
         title: 'Total Icon Impression',
         type: 'string',
@@ -247,12 +252,7 @@ export class DashboardComponent implements OnInit {
         title: 'Max Ads Per Image',
         type: 'string',
         filter: false,
-      },
-      ads: {
-        title: 'Total Number of Ads',
-        type: 'string',
-        filter: false,
-      },
+      }
     },
   };
 
@@ -286,7 +286,12 @@ export class DashboardComponent implements OnInit {
         title: 'Image Title',
         type: 'string',
         filter: false,
-      },      
+      },
+      ads: {
+        title: 'Total Number of Ads',
+        type: 'string',
+        filter: false,
+      },     
       views: {
         title: 'Image Icon Impressions',
         type: 'string',
@@ -299,11 +304,6 @@ export class DashboardComponent implements OnInit {
       },
       ctr: {
         title: 'CTR',
-        type: 'string',
-        filter: false,
-      },
-      ads: {
-        title: 'Total Number of Ads',
         type: 'string',
         filter: false,
       },
