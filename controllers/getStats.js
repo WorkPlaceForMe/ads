@@ -604,6 +604,10 @@ exports.getStatsAd = Controller(async(req, res) => {
     duration = {},
     ads = []
 
+    if(site.endsWith('/')){
+        site = site.substring(0, site.length - 1)
+    }
+
     // This code is written to parse image url which contains additional '&' in its url
     for( const additionalProperty in req.query ){
         if(img && additionalProperty != 'img' && additionalProperty != 'site'){
