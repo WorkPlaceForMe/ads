@@ -9,13 +9,22 @@ exports.postData = Controller(async(req, res) => {
     const data = req.body
     const nD = dateFormat(data.time, "yyyy-mm-dd HH:MM:ss");
     let site = data.site.split('/')[2];
-    
-    if (site.includes('www.')) {
+
+    if (site) {
+      site = decodeURIComponent(site)
+
+      if (site.includes('www.')) {
         site = site.split('w.')[1]
-    }
+      }
+    }  
     
     if(data.url){
+      data.url = decodeURIComponent(data.url)
       data.url = getStrippedURL(data.url)
+    }
+
+    if(data.img){
+      data.img = decodeURIComponent(data.img)
     }
 
     try{

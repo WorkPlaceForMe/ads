@@ -16,7 +16,7 @@ exports.getStats = Controller(async(req, res) => {
     clicksGrouped = {},
     viewsGrouped = {},
     imgsGrouped = {}
-    getAdsPerPage(function(err,rows){
+    getAdsPerPage(function(err, rows){
         if(err){
             res.status(500).json(err);
             }
@@ -30,7 +30,7 @@ exports.getStats = Controller(async(req, res) => {
                     ads[stat.site] = (!ads[stat.site] ? 0 : ads[stat.site]) + stat.count
                 }
             }
-            getImgPerPage(function(err,rows){
+            getImgPerPage(function(err, rows){
                 if(err){
                     res.status(500).json(err);
                     }
@@ -125,23 +125,23 @@ exports.getStats = Controller(async(req, res) => {
                                         adsGrouped[Object.keys(imgsGrouped)[i]] = 0;
                                     }
                                     let ctr = Math.round(((Math.round((clicksGrouped[Object.keys(imgsGrouped)[i]] / imgsGrouped[Object.keys(imgsGrouped)[i]]) * 100) / 100) / (Math.round((viewsGrouped[Object.keys(imgsGrouped)[i]] / imgsGrouped[Object.keys(imgsGrouped)[i]]) * 100) / 100)) * 100) / 100;
-                                    if(Number.isNaN(ctr)){
+                                    if(!Number.isFinite(ctr)){
                                         ctr = 0;
                                     }
                                     let clicksPerImg = Math.round((clicksGrouped[Object.keys(imgsGrouped)[i]] / imgsGrouped[Object.keys(imgsGrouped)[i]]) * 100) / 100;
-                                    if(Number.isNaN(clicksPerImg)){
+                                    if(!Number.isFinite(clicksPerImg)){
                                         clicksPerImg = 0;
                                     }
                                     let viewsPerImg = Math.round((viewsGrouped[Object.keys(imgsGrouped)[i]] / imgsGrouped[Object.keys(imgsGrouped)[i]]) * 100) / 100;
-                                    if(Number.isNaN(viewsPerImg)){
+                                    if(!Number.isFinite(viewsPerImg)){
                                         viewsPerImg = 0;
                                     }
                                     let clicksPerAd = Math.round((clicksGrouped[Object.keys(imgsGrouped)[i]] / adsGrouped[Object.keys(imgsGrouped)[i]]) * 100) / 100;
-                                    if(Number.isNaN(clicksPerAd)){
+                                    if(!Number.isFinite(clicksPerAd)){
                                         clicksPerAd = 0;
                                     }
                                     let viewsPerAd = Math.round((viewsGrouped[Object.keys(imgsGrouped)[i]] / adsGrouped[Object.keys(imgsGrouped)[i]]) * 100) / 100;
-                                    if(Number.isNaN(viewsPerAd)){
+                                    if(!Number.isFinite(viewsPerAd)){
                                         viewsPerAd = 0;
                                     }
 
@@ -236,7 +236,7 @@ exports.getStatsUrl = Controller(async(req, res) => {
     clicksGrouped = {},
     viewsGrouped = {},
     imgsGrouped = {}
-    getAdsPerPage(async function(err,rows){
+    getAdsPerPage(async function(err, rows){
         if(err){
             res.status(500).json(err);
             }
@@ -380,23 +380,23 @@ exports.getStatsUrl = Controller(async(req, res) => {
                                             adsGrouped[Object.keys(imgsGrouped)[i]] = 0;
                                         }
                                         let ctr = Math.round(((Math.round((clicksGrouped[Object.keys(imgsGrouped)[i]] / imgsGrouped[Object.keys(imgsGrouped)[i]]) * 100) / 100) / (Math.round((viewsGrouped[Object.keys(imgsGrouped)[i]] / imgsGrouped[Object.keys(imgsGrouped)[i]]) * 100) / 100)) * 100) / 100;
-                                        if(Number.isNaN(ctr)){
+                                        if(!Number.isFinite(ctr)){
                                             ctr = 0;
                                         }
                                         let clicksPerImg = Math.round((clicksGrouped[Object.keys(imgsGrouped)[i]] / imgsGrouped[Object.keys(imgsGrouped)[i]]) * 100) / 100;
-                                        if(Number.isNaN(clicksPerImg)){
+                                        if(!Number.isFinite(clicksPerImg)){
                                             clicksPerImg = 0;
                                         }
                                         let viewsPerImg = Math.round((viewsGrouped[Object.keys(imgsGrouped)[i]] / imgsGrouped[Object.keys(imgsGrouped)[i]]) * 100) / 100;
-                                        if(Number.isNaN(viewsPerImg)){
+                                        if(!Number.isFinite(viewsPerImg)){
                                             viewsPerImg = 0;
                                         }
                                         let clicksPerAd = Math.round((clicksGrouped[Object.keys(imgsGrouped)[i]] / adsGrouped[Object.keys(imgsGrouped)[i]]) * 100) / 100;
-                                        if(Number.isNaN(clicksPerAd)){
+                                        if(!Number.isFinite(clicksPerAd)){
                                             clicksPerAd = 0;
                                         }
                                         let viewsPerAd = Math.round((viewsGrouped[Object.keys(imgsGrouped)[i]] / adsGrouped[Object.keys(imgsGrouped)[i]]) * 100) / 100;
-                                        if(Number.isNaN(viewsPerAd)){
+                                        if(!Number.isFinite(viewsPerAd)){
                                             viewsPerAd = 0;
                                         }
                                  
@@ -414,7 +414,7 @@ exports.getStatsUrl = Controller(async(req, res) => {
                                             siteURL = siteURL.replace('www.', '')
                                         }
 
-                                        let userDuration = getUserDuration(rows, null, siteURL)
+                                        let userDuration = getUserDuration(rows, null, Object.keys(imgsGrouped)[i])
         
                                         table[i] = {
                                             url : siteURL,
@@ -508,14 +508,6 @@ exports.getStatsImg = Controller(async(req, res) => {
                 if(stat.img){
                     let name = decodeURI(stat.img)
 
-                    if(name.includes('//')){
-                        name = name.split('//')[1]
-                    }
-
-                    if(name.startsWith('www.')){
-                        name = name.replace('www.', '')
-                    }                   
-
                     if(name){
                         clicks[name] = (clicks[name]  || 0) + stat.clicks
                         views[name] = (views[name]  || 0) + stat.views
@@ -523,7 +515,8 @@ exports.getStatsImg = Controller(async(req, res) => {
                 }
                 
             }
-            getAdsListPerImg(urlQuery, function(err,rows){
+            
+            getAdsListPerImg(publisher.id, function(err, rows){
                 if(err){
                     res.status(500).json(err);
                     }
@@ -533,18 +526,10 @@ exports.getStatsImg = Controller(async(req, res) => {
                         let img = decodeURI(rows[i].imgName)
 
                         if(img){
-                            if(img.includes('//')){
-                                img = img.split('//')[1]
-                            }
-
-                            if(img && img.startsWith('www.')){
-                                img = img.replace('www.', '')
-                            }
-
                             ads[img] = (ads[img]  || 0) + 1
                         }
                     }
-                    getImgsList(urlQuery, publisher.id, function(err, rows){
+                    getImgsList(urlQuery, function(err, rows){
                         if(err){
                             res.status(500).json(err);
                             }
@@ -552,14 +537,6 @@ exports.getStatsImg = Controller(async(req, res) => {
                             let imgs = []
                             for(let i = 0; i<rows.length; i++){
                                 let img = decodeURI(rows[i].img)
-
-                                if(img.includes('//')){
-                                   img = img.split('//')[1]
-                                }
-
-                                if(img && img.startsWith('www.')){
-                                    img = img.replace('www.', '')
-                                }
 
                                 let adsTotal = ads[img]
                                 if(!adsTotal){
@@ -576,7 +553,7 @@ exports.getStatsImg = Controller(async(req, res) => {
                                     view = 0
                                 }
                                 let ctr = Math.round((click / view) * 100) / 100
-                                if(Number.isNaN(ctr)){
+                                if(!Number.isFinite(ctr)){
                                     ctr = 0
                                 }
                                 imgs.push({img: rows[i].img, title: rows[i].img.split('/')[rows[i].img.split('/').length - 1], 
@@ -622,8 +599,8 @@ exports.getStatsAd = Controller(async(req, res) => {
             for (const stat of rows) {
                 let id = stat.id
                 adIds.add(stat.id)
-                clicks[id] = !clicks[id] ? stat.clicks : (clicks[id] + stat.clicks)
-                views[id] = !views[id] ? stat.views : (views[id] + stat.views)
+                clicks[id] = stat.clicks
+                views[id] = stat.views
                 adIcons[id] = stat['product_image_url']
                 adURL[id] = stat['product_site_url']
       
@@ -642,7 +619,7 @@ exports.getStatsAd = Controller(async(req, res) => {
                     adURL: adURL[adId],
                     views: views[adId],
                     clicks: clicks[adId],           
-                    ctr: views[adId] == 0 ? 0.00 : Math.round((clicks[adId] / views[adId]) *100)/100,
+                    ctr: views[adId] == 0 ? 0.00 : Math.round((clicks[adId] / views[adId])*100)/100,
                     usercount: views[adId] == 0 ? 0 : usercount[adId].size,
                     duration: Math.round((duration[adId]/60.0)*100)/100                   
                 })
@@ -671,22 +648,24 @@ function getAdsPerPage(callback){
 }
 
 function getImgPerPage(callback){
-    return db.query(`SELECT idGeneration as uid, count(*) as count, (select site from ${conf.get('database')}.imgspages where idGeneration = uid limit 1) as site from ${conf.get('database')}.imgspages group by idGeneration order by idGeneration asc;`,callback)
+    return db.query(`SELECT count(*) as count, site 
+    from ${conf.get('database')}.imgspages group by site`, callback)
 }
 
 function getClicksAndViews(callback){
     return db.query(`SELECT url, COUNT( CASE WHEN type = '2' THEN 1 END ) AS clicks, COUNT( CASE WHEN type = '1' THEN 1 END ) AS views FROM ${conf.get('database')}.impressions group by url;`,callback)
 }
 
-function getImgsList(site, publisherId, callback){   
-    return db.query(`SELECT imgcpluser.img, case when sum(imgcpluser.duration) > 0 then count(*) else 0 END as usercount, sum(imgcpluser.duration) as duration from
-    (SELECT imguser.img, sum(imguser.duration) as duration from
-    (SELECT cipl.clientId, ipg.img, max(cipl.duration) as duration FROM ${conf.get('database')}.imgspages ipg,  ${conf.get('database')}.clientimgpubl cipl  
-    where publId = '${publisherId}' and cipl.imgUrl = ipg.img
-    and (ipg.site = '${site}' or ipg.site = 'https://${site}' OR ipg.site = 'https://www.${site}' OR ipg.site = 'http://${site}' OR ipg.site = 'http://www.${site}')
-    group by cipl.clientId, cipl.sessionId, ipg.img) imguser
-    group by imguser.clientId, imguser.img) imgcpluser
-    group by imgcpluser.img`, callback)
+function getImgsList(site, callback){   
+    return db.query(`SELECT imgcpluser.imgUrl as img, case when sum(imgcpluser.duration) > 0 then count(*) else 0 END as usercount, sum(imgcpluser.duration) as duration from
+    (SELECT imguser.clientId, imguser.imgUrl, sum(imguser.duration) as duration from
+    (SELECT cipl.clientId, cipl.sessionId, cipl.imgUrl, max(cipl.duration) as duration 
+    FROM ${conf.get('database')}.clientimgpubl cipl  
+    where imgId in(SELECT id from ${conf.get('database')}.imgspages ipg where
+    (ipg.site = '${site}' or ipg.site = 'https://${site}' OR ipg.site = 'https://www.${site}' OR ipg.site = 'http://${site}' OR ipg.site = 'http://www.${site}'))
+    group by cipl.clientId, cipl.sessionId, cipl.imgUrl) imguser
+    group by imguser.clientId, imguser.imgUrl) imgcpluser
+    group by imgcpluser.imgUrl`, callback)
 }
 
 function getClientSessionDataByPublisherId(publisherId, callback){   
@@ -705,22 +684,30 @@ function getClicksAndViewsPerImg(site, callback){
     return db.query(`SELECT img, COUNT( CASE WHEN type = '2' THEN 1 END ) AS clicks, COUNT( CASE WHEN type = '1' THEN 1 END ) AS views FROM ${conf.get('database')}.impressions where url = 'https://${site}' OR url = 'https://www.${site}' OR url = 'http://${site}' OR url = 'http://www.${site}' group by img;`,callback)
 }
 
-function getAdsListPerImg(site, callback){
-    return db.query(`SELECT imgName, idGeneration FROM ${conf.get('database')}.adspages where site = 'https://${site}' OR site = 'https://www.${site}' OR site = 'http://${site}' OR site = 'http://www.${site}' order by idGeneration desc;`,callback)
+function getAdsListPerImg(publisherId, callback){
+    return db.query(`SELECT distinct imgUrl as imgName, idItem FROM ${conf.get('database')}.clientimgpubl where publId = '${publisherId}'`,callback)
 }
 
 function getAdsList(img, site, callback){
-    return db.query(`SELECT clps.id, clps.product_image_url, clps.product_site_url, clps.clientId, COALESCE(imps.clicks, 0) as clicks, COALESCE(imps.views, 0) as views, clps.duration FROM
-    (SELECT adpg.id, adpg.product_image_url, adpg.product_site_url, clip.clientId, sum(clip.duration) as duration FROM ${conf.get('database')}.clientimgpubl clip,
-    ${conf.get('database')}.adspages adpg
-    where clip.idItem = adpg.id
-    and adpg.imgName = '${img}'
-    and (adpg.site = '${site}' or adpg.site = 'https://${site}' or adpg.site = 'https://www.${site}' or adpg.site = 'http://${site}' or adpg.site = 'http://www.${site}')
-    group by clip.idItem, clip.clientId) clps
-    left join (SELECT idItem, COUNT( CASE WHEN type = '2' THEN 1 END ) AS clicks, COUNT( CASE WHEN type = '1' THEN 1 END ) 
-    AS views FROM ${conf.get('database')}.impressions imp group by imp.idItem) imps
-    ON clps.id = imps.idItem
-    group by clps.clientId, clps.id, clps.product_image_url, clps.product_site_url, imps.clicks, imps.views`, callback)
+    return db.query(`SELECT clps.id, clps.product_image_url, clps.product_site_url, clps.clientId, 
+    COALESCE(imps.clicks, 0) as clicks, COALESCE(imps.views, 0) as views, clps.duration FROM
+        (SELECT adpg.id, adpg.product_image_url, adpg.product_site_url, 
+        clip.clientId, sum(clip.duration) as duration FROM ${conf.get('database')}.clientimgpubl clip,
+        ${conf.get('database')}.adspages adpg
+        where clip.imgId in(SELECT id from ${conf.get('database')}.imgspages ipg where
+        (ipg.site = '${site}' or ipg.site = 'https://${site}' OR ipg.site = 'https://www.${site}' 
+        OR ipg.site = 'http://${site}' OR ipg.site = 'http://www.${site}')
+        and ipg.img = '${img}')
+        and clip.idItem = adpg.id
+        group by clip.idItem, clip.clientId) clps
+        left join (SELECT imp.idItem, imp.img, imp.url, COUNT( CASE WHEN type = '2' THEN 1 END ) AS clicks, COUNT( CASE WHEN type = '1' THEN 1 END ) 
+        AS views FROM ${conf.get('database')}.impressions imp group by imp.idItem, imp.img, imp.url) imps
+        ON clps.id = imps.idItem
+        and imps.img = '${img}'
+        and (imps.url = '${site}' or imps.url = 'https://${site}' OR imps.url = 'https://www.${site}' 
+        OR imps.url = 'http://${site}' OR imps.url = 'http://www.${site}')     
+        group by clps.clientId, clps.id, clps.product_image_url, clps.product_site_url, imps.clicks, imps.views
+    `, callback)
 }
 
 function getAdsClicksAndViews(img,site,callback){

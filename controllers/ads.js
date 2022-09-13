@@ -53,8 +53,6 @@ exports.getAds = Controller(async (req, res) => {
   if (checker.includes('www.')) {
       checker = checker.split('w.')[1]
   }
-  
-  let extension = site.split(checker)
 
   const aut = await auth(checker, site.split('/')[0])
   
