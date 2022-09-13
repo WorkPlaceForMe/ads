@@ -599,7 +599,7 @@ exports.getStatsAd = Controller(async(req, res) => {
     views = {},
     adIcons = [],
     adURL = []
-    adIds = [],
+    adIds = new Set(),
     usercount = {},
     duration = {},
     ads = []
@@ -621,7 +621,7 @@ exports.getStatsAd = Controller(async(req, res) => {
         } else {
             for (const stat of rows) {
                 let id = stat.id
-                adIds.push(stat.id)
+                adIds.add(stat.id)
                 clicks[id] = !clicks[id] ? stat.clicks : (clicks[id] + stat.clicks)
                 views[id] = !views[id] ? stat.views : (views[id] + stat.views)
                 adIcons[id] = stat['product_image_url']
