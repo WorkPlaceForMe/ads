@@ -37,4 +37,100 @@ db.client = require('./models/client')(sequelize, Sequelize)
 db.clientImgPubl = require('./models/clientImgPubl')(sequelize, Sequelize)
 db.clientSession = require('./models/clientSession')(sequelize, Sequelize)
 
+db.client.belongsToMany(db.publishers, {
+  through: {
+    model: 'clientimgpubl',
+    unique: false
+  },
+  foreignKey: 'clientId',
+  otherKey: 'publId',
+  constrains: false,
+  onDelete: 'CASCADE'
+})
+
+db.publishers.belongsToMany(db.client, {
+  through: {
+    model: 'clientimgpubl',
+    unique: false
+  },
+  foreignKey: 'id',
+  otherKey: 'clientId',
+  constrains: false,
+  onDelete: 'CASCADE'
+})
+
+db.client.belongsToMany(db.imgsPage, {
+  through: {
+    model: 'clientimgpubl',
+    unique: false
+  },
+  foreignKey: 'clientId',
+  otherKey: 'imgId',
+  constrains: false,
+  onDelete: 'CASCADE'
+})
+
+db.imgsPage.belongsToMany(db.client, {
+  through: {
+    model: 'clientimgpubl',
+    unique: false
+  },
+  foreignKey: 'id',
+  otherKey: 'clientId',
+  constrains: false,
+  onDelete: 'CASCADE'
+})
+
+db.publishers.belongsToMany(db.imgsPage, {
+  through: {
+    model: 'clientimgpubl',
+    unique: false
+  },
+  foreignKey: 'id',
+  otherKey: 'imgId',
+  constrains: false,
+  onDelete: 'CASCADE'
+})
+
+db.imgsPage.belongsToMany(db.publishers, {
+  through: {
+    model: 'clientimgpubl',
+    unique: false
+  },
+  foreignKey: 'id',
+  otherKey: 'publId',
+  constrains: false,
+  onDelete: 'CASCADE'
+})
+
+db.clientSession.belongsTo(db.client, {
+  foreignKey: { name: 'clientId', allowNull: true },
+  onDelete: 'CASCADE',
+})
+
+db.clientSession.belongsTo(db.publishers, {
+  foreignKey: { name: 'publId', allowNull: true },
+  onDelete: 'CASCADE',
+})
+
+db.clientImgPubl.belongsTo(db.client, {
+  foreignKey: { name: 'clientId', allowNull: true },
+  onDelete: 'CASCADE',
+})
+
+db.clientImgPubl.belongsTo(db.clientSession, {
+  foreignKey: { name: 'sessionId', allowNull: true },
+  onDelete: 'CASCADE',
+})
+
+db.clientImgPubl.belongsTo(db.imgsPage, {
+  foreignKey: { name: 'imgId', allowNull: true },
+  onDelete: 'CASCADE',
+})
+
+db.clientImgPubl.belongsTo(db.publishers, {
+  foreignKey: { name: 'publId', allowNull: true },
+  onDelete: 'CASCADE',
+})
+
 module.exports = db

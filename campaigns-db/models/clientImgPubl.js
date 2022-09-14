@@ -9,6 +9,7 @@ module.exports = (sequelize, Sequelize) => {
       clientId: {
         type: Sequelize.STRING(100),
         allowNull: true,
+        onDelete: 'CASCADE',
         references: {
           model: 'client',
           key: 'id'
@@ -17,6 +18,7 @@ module.exports = (sequelize, Sequelize) => {
       sessionId: {
         type: Sequelize.STRING(100),
         allowNull: true,
+        onDelete: 'CASCADE',
         references: {
           model: 'clientsession',
           key: 'id'
@@ -25,6 +27,7 @@ module.exports = (sequelize, Sequelize) => {
       imgId: {
         type: Sequelize.INTEGER,
         allowNull: true,
+        onDelete: 'CASCADE',
         references: {
           model: 'imgspages',
           key: 'id'
@@ -41,6 +44,7 @@ module.exports = (sequelize, Sequelize) => {
       publId: {
         type: Sequelize.STRING(45),
         allowNull: true,
+        onDelete: 'CASCADE',
         references: {
           model: 'publishers',
           key: 'id'

@@ -137,10 +137,19 @@ exports.del = Controller(async(req, res) => {
                         'X-Accesstrade-User-Type': 'publisher'
                     }
             })
+            
             await delSite(data)
+            
+            cache.del(`downloading-${publ.dataValues.publisherId}`)
+            cache.del(`saving-productAndClothsData-${publ.dataValues.publisherId}`)
+            cache.del(`productAndClothsData-${publ.dataValues.publisherId}`) 
+            deleteRedisData(publ.dataValues.name).then(() => {                 
+                console.log(`All redis cache data deleted for publisher ${publ.dataValues.name}`)
+              }).catch(error => {
+                console.error(error, `Error deleting redis cachec data for publisher ${publ.dataValues.name}`)
+              })
             res.status(200).json({success: true});
         }catch(err){
-            await delSite(data)
             res.status(500).json({success: false, mess: err})
         }
     }catch(err){

@@ -1,4 +1,4 @@
-import { Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NbCalendarRange, NbDateService, NbPopoverDirective, NbWindowService } from '@nebular/theme';
@@ -313,8 +313,8 @@ export class DashboardComponent implements OnInit {
       this.face.delSite(event.data.id).subscribe(
         res => this.initDash(),
         err => {
-          this.initDash()
-          console.error(err)
+          window.alert('There is some error in deleting publisher')
+          this.initDash()         
         }
       )
     }
@@ -575,7 +575,7 @@ export class IconComponent implements ViewCell, OnInit {
   }
 
   onClick() {
-    if(this.path == 'site/image'){
+    if(this.path == 'site/image'){      
       this.router.navigateByUrl(`/pages/site/image/ad?img=${encodeURIComponent(this.rowData.img)}&site=${this.params}`)
     }
     

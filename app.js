@@ -192,6 +192,8 @@ app.use('/not-found', express.static('./views/error.html'))
 
 app.use('/system', express.static(path.join(__dirname, 'public')))
 
+app.use('/system/2', express.static(path.join(__dirname, 'public')))
+
 app.use('/management', express.static(conf.get('dashboardAis')))
 
 app.use('/client', express.static(conf.get('dashboardClient')))

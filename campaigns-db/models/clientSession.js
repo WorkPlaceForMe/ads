@@ -8,6 +8,7 @@ module.exports = (sequelize, Sequelize) => {
       clientId: {
         type: Sequelize.STRING(100),
         allowNull: false,
+        onDelete: 'CASCADE',
         references: {
           model: 'client',
           key: 'id'
@@ -16,6 +17,7 @@ module.exports = (sequelize, Sequelize) => {
       publId: {
         type: Sequelize.STRING(45),
         allowNull: false,
+        onDelete: 'CASCADE',
         references: {
           model: 'publishers',
           key: 'id'

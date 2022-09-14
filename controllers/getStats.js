@@ -175,7 +175,7 @@ exports.getStats = Controller(async(req, res) => {
                                             rewards['totalReward'] = 0
                                             rewards['totalConversionsCount'] = 0
                                         }
-                                    }catch(err){
+                                    } catch(err){
                                         rewards['totalReward'] = 0;
                                         rewards['totalConversionsCount'] = 0
                                     }
@@ -608,7 +608,10 @@ exports.getStatsAd = Controller(async(req, res) => {
                   usercount[id] = new Set()
                 }
                 
-                usercount[id] = usercount[id].add(stat.clientId)
+                if(stat.duration > 0) {
+                    usercount[id] = usercount[id].add(stat.clientId)
+                }
+
                 duration[id] = !duration[id] ? stat.duration : (duration[id] + stat.duration)
             }
       
@@ -657,15 +660,19 @@ function getClicksAndViews(callback){
 }
 
 function getImgsList(site, callback){   
-    return db.query(`SELECT imgcpluser.imgUrl as img, case when sum(imgcpluser.duration) > 0 then count(*) else 0 END as usercount, sum(imgcpluser.duration) as duration from
-    (SELECT imguser.clientId, imguser.imgUrl, sum(imguser.duration) as duration from
-    (SELECT cipl.clientId, cipl.sessionId, cipl.imgUrl, max(cipl.duration) as duration 
-    FROM ${conf.get('database')}.clientimgpubl cipl  
-    where imgId in(SELECT id from ${conf.get('database')}.imgspages ipg where
-    (ipg.site = '${site}' or ipg.site = 'https://${site}' OR ipg.site = 'https://www.${site}' OR ipg.site = 'http://${site}' OR ipg.site = 'http://www.${site}'))
-    group by cipl.clientId, cipl.sessionId, cipl.imgUrl) imguser
-    group by imguser.clientId, imguser.imgUrl) imgcpluser
-    group by imgcpluser.imgUrl`, callback)
+    return db.query(`SELECT imgcipluser.imgUrl as img, sum(imgcipluser.usercount) as usercount, sum(imgcipluser.duration) as duration from
+    (SELECT imgcpluser.imgUrl, case when sum(imgcpluser.duration) > 0 
+    then count(*) else 0 END as usercount, sum(imgcpluser.duration) as duration from
+        (SELECT imguser.clientId, imguser.imgUrl, sum(imguser.duration) as duration from
+        (SELECT cipl.clientId, cipl.sessionId, cipl.imgUrl, max(cipl.duration) as duration 
+        FROM ${conf.get('database')}.clientimgpubl cipl  
+        where imgId in(SELECT id from ${conf.get('database')}.imgspages ipg where
+        (ipg.site = '${site}' or ipg.site = 'https://${site}' 
+        OR ipg.site = 'https://www.${site}' OR ipg.site = 'http://${site}' OR ipg.site = 'http://www.${site}'))
+        group by cipl.clientId, cipl.sessionId, cipl.imgUrl) imguser
+        group by imguser.clientId, imguser.imgUrl) imgcpluser
+        group by imgcpluser.imgUrl, imgcpluser.clientId) imgcipluser
+        group by imgcipluser.imgUrl`, callback)
 }
 
 function getClientSessionDataByPublisherId(publisherId, callback){   
