@@ -12,7 +12,8 @@
         <form [formGroup]="registerForm" (ngSubmit)='onSubmit()'>
             <div class="form-group">
               <label for="nickname" class="label">Publisher Nick Name</label>
-              <input type="text" class="form-control" formControlName="nickname" [ngClass]="{ 'is-invalid': submitted && f.nickname.errors }" nbInput fullWidth id="nickname" autofocus placeholder="Website Nick Name" [status]='values.nickname' />
+              <input *ngIf="!edit" type="text" class="form-control" formControlName="nickname" [ngClass]="{ 'is-invalid': submitted && f.nickname.errors }" nbInput fullWidth id="nickname" autofocus placeholder="Website Nick Name" [status]='values.nickname' />
+              <input *ngIf="edit" type="text" class="form-control" formControlName="nickname" [ngClass]="{ 'is-invalid': submitted && f.nickname.errors }" nbInput fullWidth id="nickname" autofocus placeholder="Website Nick Name" [status]='values.nickname' [value]='values.nickname'/>
               <div *ngIf="submitted && f.nickname.errors" class="invalid-feedback">
                 <div *ngIf="f.nickname.errors.required">Nick Name is required</div>
                 <div *ngIf="f.nickname.errors.pattern">Nick Name can not contain numbers or special characters.</div>
@@ -28,7 +29,8 @@
             </div>
             <div class="form-group">
               <label for="name" class="label">Publisher Website</label>
-              <input type="text" class="form-control" formControlName="name" [ngClass]="{ 'is-invalid': submitted && f.name.errors }" nbInput fullWidth id="name" autofocus placeholder="Website Name" [status]='values.name' />
+              <input *ngIf="edit" type="text" class="form-control" formControlName="name" [ngClass]="{ 'is-invalid': submitted && f.name.errors }" nbInput fullWidth id="name" autofocus placeholder="Website Name" [status]='values.name' disabled="disabled" [value]='values.name' />
+              <input *ngIf="!edit" type="text" class="form-control" formControlName="name" [ngClass]="{ 'is-invalid': submitted && f.name.errors }" nbInput fullWidth id="name" autofocus placeholder="Website Name" [status]='values.name' />
               <div *ngIf="submitted && f.name.errors" class="invalid-feedback">
                 <div *ngIf="f.name.errors.cantMatch">Publisher has been registered, try another one</div>
                 <div *ngIf="f.name.errors.required">Publisher Website is required</div>

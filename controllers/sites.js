@@ -9,6 +9,7 @@ const jwt = require('jsonwebtoken')
 const cache = require('../helper/cacheManager')
 const { deleteRedisData } = require('../helper/util')
 const website = require('../helper/website')
+const readCsv = require('./readCsv')
 
 exports.register = Controller(async(req, res) => {
     const locId = uuidv4();
@@ -36,17 +37,24 @@ exports.register = Controller(async(req, res) => {
             publisherId = await website.createWebsite(data.name, null)
         }
 
-        console.log(`Adding site ${data.name}} to system`)
+        console.log(`Adding site ${data.name} to system`)
         if(publisherId){
             await createPublisher(locId, data.name, data.nickname, publisherId, data.adsperimage)
+            readCsv.readCsv(publisherId).then(() => {
+                console.log(`Data populated for new publisher with publisher id: ${publisherId}`)
+            }).catch(error => {
+                console.log(`Error in populating data in new publisher with publisher id: ${publisherId}`)
+                console.log(error)
+            })
+            
             return res.status(200).json({success: true});
         } else {
-            console.log(`Cannot add site ${data.name}} to system`)
+            console.log(`Cannot add site ${data.name} to system`)
             return res.status(500).json({success: false, mess: `Cannot add site ${data.name}} to system`})
         }
        
     } catch(err){
-        console.log(`Cannot add site ${site} to system`)
+        console.log(`Cannot add site ${data.name} to system`)
         return res.status(500).json({success: false, mess: 'Unknow error occurred, please contact site Administrator'})
     }
 
@@ -68,13 +76,14 @@ exports.update = Controller(async(req, res) => {
         })
 
         oldAdsPerImage = oldPublisher.adsperimage
+        let oldNickname = oldPublisher.nickname
 
         const newPublisher = await updatePublisher(data)
+        await cache.setAsync(`${data.name}-publisher`, JSON.stringify(newPublisher))
 
-        if(newPublisher && oldAdsPerImage > 0 & newPublisher.dataValues.adsperimage != oldAdsPerImage){
+        if(newPublisher && oldAdsPerImage > 0 && newPublisher.dataValues.adsperimage != oldAdsPerImage){
             deleteRedisData(newPublisher.dataValues.name).then(() => {                 
                 console.log(`All redis cache data deleted for publisher ${newPublisher.dataValues.name}`)
-                cache.setAsync(`${data.name}-publisher`, JSON.stringify(newPublisher)).then()
               }).catch(error => {
                 console.error(error, `Error deleting redis cachec data for publisher ${newPublisher.dataValues.name}`)
               })
