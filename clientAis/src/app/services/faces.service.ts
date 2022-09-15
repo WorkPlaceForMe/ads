@@ -55,6 +55,9 @@ export class FacesService {
   delSite(id){
     return this.http.delete(`${this.API_URI}/del/${id}`);
   }
+  reloadSite(id){
+    return this.http.post(`${this.API_URI}/reload/${id}`, null);
+  }
   getServer(){
     return this.http.get(`${this.API_URI}/server`);
   }

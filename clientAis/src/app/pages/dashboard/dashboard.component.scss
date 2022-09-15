@@ -2,6 +2,17 @@
   text-align: center;
 }
 
-:host ng2-smart-table tbody > tr > td{
+:host ng2-smart-table tbody > tr > td {
   text-align: center;
+}
+
+:host ::ng-deep .ng2-smart-actions  {
+    display: flex;
+    width: 100%;
+}
+
+::ng-deep {
+  ng2-st-tbody-edit-delete, ng2-st-tbody-custom {
+    padding-top: 50px;
+  }
 }

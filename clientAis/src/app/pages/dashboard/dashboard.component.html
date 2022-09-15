@@ -14,7 +14,7 @@
             </div>
           </nb-card-header>
           <nb-card-body style="padding: 0px">
-            <ng2-smart-table [settings]="settings" [source]="source" *ngIf='stage == undefined || stage == "site"' (create)='create()' (edit)='edit($event)' (delete)='delete($event)'>
+            <ng2-smart-table [settings]="settings" [source]="source" *ngIf='stage == undefined || stage == "site"' (create)='create()' (edit)='edit($event)' (custom)='reload($event)' (delete)='delete($event)'>
             </ng2-smart-table>
             <ng2-smart-table [settings]="settings2" [source]="source" *ngIf='stage == "image"'>
             </ng2-smart-table>
@@ -38,9 +38,7 @@
       </div>
     </div>
   </div>
-
 </div>
-
 
     <ng-template #rangeSelector>
       <nb-card>

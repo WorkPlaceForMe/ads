@@ -1,6 +1,6 @@
 const db = require('../helper/dbconnection')
 
- const auth = async function(site,term){
+ const auth = async function(site){
     const data = await enabled(site)
     let resp = {}
     if(data.length != 0){

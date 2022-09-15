@@ -16,18 +16,20 @@ export class SliderComponent implements ViewCell, OnInit {
 
   @Input() value: string | number;
   @Input() rowData: any;
-  @Output() save: EventEmitter<any> = new EventEmitter();
+  @Output() save: EventEmitter<any> = new EventEmitter()
+  checked: boolean
 
   ngOnInit() {
+    this.checked = (this.rowData.enabled == 'true')
   }
 
   change(){
-    this.face.disableEnable(this.rowData.id,this.rowData.enabled).subscribe(
+    this.face.disableEnable(this.rowData.id, this.checked).subscribe(
       res => {
       },
       err => {
-        console.error(err);
-      },
+        console.error(err)
+      }
     );
   }
 

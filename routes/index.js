@@ -24,8 +24,6 @@ router.get('/api/stats/url/img/ad', controllers.getStatsAd)
 
 router.get('/api/log/:id', controllers.auth)
 
-// router.get('/api/aff', controllers.getQuickLink)
-
 router.get('/test', controllers.getUserDetails)
 
 router.get('/api/iframe', controllers.iframe)
@@ -45,6 +43,8 @@ router.get('/api/site/:id', controllers.get)
 router.put('/api/update', [verify.checkDuplicatePublEdit], controllers.update)
 
 router.delete('/api/del/:id', controllers.del)
+
+router.post('/api/reload/:id', controllers.reloadPublisher)
 
 router.get('/api/sites', controllers.getAll)
 

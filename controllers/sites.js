@@ -1,13 +1,13 @@
 const Controller = require('../helper/controller')
-const db1 = require('../campaigns-db/database')
-const publishers = db1.publishers
+const db = require('../campaigns-db/database')
+const publishers = db.publishers
 const { v4: uuidv4 } = require('uuid')
 const conf = require('../middleware/prop')
 const axios = require('axios')
 const aff = require('../helper/affiliate')
 const jwt = require('jsonwebtoken')
 const cache = require('../helper/cacheManager')
-const { deleteRedisData } = require('../helper/util')
+const { deleteRedisData, reloadPublisher } = require('../helper/util')
 const website = require('../helper/website')
 const readCsv = require('./readCsv')
 
@@ -38,7 +38,8 @@ exports.register = Controller(async(req, res) => {
         }
 
         console.log(`Adding site ${data.name} to system`)
-        if(publisherId){
+        
+        if(publisherId) {
             await createPublisher(locId, data.name, data.nickname, publisherId, data.adsperimage)
             readCsv.readCsv(publisherId).then(() => {
                 console.log(`Data populated for new publisher with publisher id: ${publisherId}`)
@@ -51,13 +52,11 @@ exports.register = Controller(async(req, res) => {
         } else {
             console.log(`Cannot add site ${data.name} to system`)
             return res.status(500).json({success: false, mess: `Cannot add site ${data.name}} to system`})
-        }
-       
+        }       
     } catch(err){
         console.log(`Cannot add site ${data.name} to system`)
         return res.status(500).json({success: false, mess: 'Unknow error occurred, please contact site Administrator'})
     }
-
 })
 
 exports.update = Controller(async(req, res) => {
@@ -76,10 +75,9 @@ exports.update = Controller(async(req, res) => {
         })
 
         oldAdsPerImage = oldPublisher.adsperimage
-        let oldNickname = oldPublisher.nickname
 
         const newPublisher = await updatePublisher(data)
-        await cache.setAsync(`${data.name}-publisher`, JSON.stringify(newPublisher))
+        cache.setAsync(`${data.name}-publisher`, JSON.stringify(newPublisher))
 
         if(newPublisher && oldAdsPerImage > 0 && newPublisher.dataValues.adsperimage != oldAdsPerImage){
             deleteRedisData(newPublisher.dataValues.name).then(() => {                 
@@ -90,16 +88,15 @@ exports.update = Controller(async(req, res) => {
         }
 
         return res.status(200).json({success: true});
-    }catch(err){
-        return res.status(500).json({success: false, mess: 'Unknow error occurred, please contact site Administrator'})
+    } catch(err){
+        return res.status(500).json({success: false, mess: 'Unknow error occurred in website deletion, please contact site Administrator'})
     }
 })
 
 exports.get = Controller(async(req, res) => {
     const publ = await publishers.findOne({
-        where: { id: req.params.id },
+        where: { id: req.params.id }
     })
-
 
     const minPossibleAdsCount = conf.get('min_possible_ads_count') || 1
     const maxPossibleAdsCount = conf.get('max_possible_ads_count') || 4
@@ -109,7 +106,33 @@ exports.get = Controller(async(req, res) => {
 
 exports.getAll = Controller(async(req, res) => {
     const publ = await publishers.findAll()
+    
     res.status(200).json({success: true, publ: publ});
+})
+
+exports.reloadPublisher = Controller(async(req, res) => {
+  
+    try{
+        const publisher = await publishers.findOne({
+            where: { id: req.params.id }
+        })
+
+        const publisherUpdateInProgress = await cache.getAsync(`downloading-${publisher.dataValues.publisherId}`)
+    
+        if (publisherUpdateInProgress && publisherUpdateInProgress == 'true') {
+            return res.status(500).json({success: false, mess: 'Website is reloading products, cannot be reloaded for now, please wait'})
+        }
+
+        if(!publisher){
+            return res.status(500).json({success: false, mess: 'Could not reload as website does not exist'})
+        }
+        
+        reloadPublisher(publisher)
+
+        return res.status(200).json({success: true});
+    } catch(err){
+        return res.status(500).json({success: false, mess: 'Unknow error occurred in website product reload, please contact site Administrator'})
+    }
 })
 
 exports.getServer = Controller(async(req, res) => {
@@ -122,47 +145,58 @@ exports.getServer = Controller(async(req, res) => {
 
 exports.del = Controller(async(req, res) => {
     const data = req.params.id
-    const credentials = await aff.getAff()
-
-    const token = jwt.sign(
-        { sub: credentials.userUid},
-        credentials.secretKey,
-        {
-        algorithm: "HS256"
-        }
-    )
-    try{
+    const credentials = await aff.getAff()    
+    
+    try{        
         const publ = await publishers.findOne({
             where: { id: req.params.id },
         })
+
+        const publisherUpdateInProgress = await cache.getAsync(`downloading-${publ.dataValues.publisherId}`)
+    
+        if (publisherUpdateInProgress && publisherUpdateInProgress == 'true') {
+            return res.status(500).json({success: false, mess: 'Website is reloading products, cannot be deleted for now, please wait'})
+        }
+
         const affiliateEndpointCampaings = `${conf.get('accesstrade_endpoint')}/v1/publishers/me/sites/${publ.dataValues.publisherId}`
         
         try{
             console.log(`Calling url: ${affiliateEndpointCampaings}`)
-            await axios.delete(affiliateEndpointCampaings
-                ,{
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'X-Accesstrade-User-Type': 'publisher'
-                    }
-            })
             
             await delSite(data)
+
+            const productClothPromises = [];
+
+            productClothPromises.push(db.clothing.destroy({
+              where: { Page_ID: publ.dataValues.publisherId }
+            }))
             
-            cache.del(`downloading-${publ.dataValues.publisherId}`)
-            cache.del(`saving-productAndClothsData-${publ.dataValues.publisherId}`)
-            cache.del(`productAndClothsData-${publ.dataValues.publisherId}`) 
-            deleteRedisData(publ.dataValues.name).then(() => {                 
-                console.log(`All redis cache data deleted for publisher ${publ.dataValues.name}`)
-              }).catch(error => {
-                console.error(error, `Error deleting redis cachec data for publisher ${publ.dataValues.name}`)
-              })
+            productClothPromises.push(db.products.destroy({
+              where: { Page_ID: publ.dataValues.publisherId }
+            }))
+            
+            Promise.all(productClothPromises).then(() => {            
+                cache.del(`downloading-${publ.dataValues.publisherId}`)
+                cache.del(`saving-productAndClothsData-${publ.dataValues.publisherId}`)
+                cache.del(`productAndClothsData-${publ.dataValues.publisherId}`) 
+                
+                deleteRedisData(publ.dataValues.name).then(() => {                 
+                    console.log(`All redis cache data deleted for publisher ${publ.dataValues.name}`)
+                }).catch(error => {
+                    console.error(error, `Error deleting redis cachec data for publisher ${publ.dataValues.name}`)
+                })
+            }).then(() => {                 
+                console.log(`All product data deleted for publisher ${publ.dataValues.name}`)
+            }).catch(error => {
+                console.error(error, `Error in deleting product for publisher ${publ.dataValues.name}`)
+            })
+
             res.status(200).json({success: true});
-        }catch(err){
-            res.status(500).json({success: false, mess: err})
+        } catch(err){
+            res.status(500).json({success: false})
         }
-    }catch(err){
-        res.status(500).json({success: false, mess: err})
+    } catch(err){
+        res.status(500).json({success: false})
     }
 })
 
@@ -174,7 +208,7 @@ const createPublisher = async function(id, site, nickname, publisherId, adsperim
         publisherId: publisherId,
         adsperimage: adsperimage,
         enabled: 'true'
-        })
+    })
 }
 
 async function updatePublisher(body) {
@@ -192,4 +226,3 @@ const delSite = async function(id){
       where: { id: id }
     })
 }
-

@@ -89,7 +89,7 @@ function updateDurationInImgPublData(clientId, sessionId, imgUrl, idItem, publis
         imgUrl: imgUrl,
         publId: publisherId,
         idItem: idItem
-      },
+      }
     }
   );
 }

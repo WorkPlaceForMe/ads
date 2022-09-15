@@ -54,7 +54,7 @@ exports.getAds = Controller(async (req, res) => {
       checker = checker.split('w.')[1]
   }
 
-  const aut = await auth(checker, site.split('/')[0])
+  const aut = await auth(checker)
   
   if(aut['enabled'] == false) {
     console.log("Cancelling")

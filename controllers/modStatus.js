@@ -1,18 +1,30 @@
 const Controller = require('../helper/controller')
-const db = require('../helper/dbconnection')
+const db = require('../campaigns-db/database')
+const cache = require('../helper/cacheManager')
 
 exports.modify = Controller(async(req, res) => {
 
-    modify(req.params.id, req.params.value , function(err,rows){
-        if(err){
-            res.status(500).json(err);
+    try {
+        db.publishers.update(
+            {
+                enabled: req.params.value
+            },
+            {
+            where: {
+                id: req.params.id
             }
-        else{
-            res.status(200).json(rows);
+        }).then(async (ids) => {               
+            if(ids && ids[0]) {
+                const publisher = await db.publishers.findOne({
+                    where: { id: req.params.id }
+                })
+                
+                cache.setAsync(`${publisher.name}-publisher`, JSON.stringify(publisher))
             }
-    })
-})
+        })  
 
-function modify(id,value,callback){
-    return db.query(`UPDATE publishers set enabled = '${value}' where id ='${id}'`,callback)
-}
+        res.status(200).json({success: true})    
+    } catch(err) {
+        res.status(500).json({success: false, mess: err})
+    }
+})

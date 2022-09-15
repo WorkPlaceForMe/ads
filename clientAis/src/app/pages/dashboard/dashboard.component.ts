@@ -68,6 +68,12 @@ export class DashboardComponent implements OnInit {
         add: true,
         edit: true,
         delete: true,
+        custom: [
+          {
+            name: 'reload',
+            title: '<i class="nb-play"></i>'
+          }
+        ]
       }
     } else{
       this.settings['actions'] = false
@@ -139,7 +145,7 @@ export class DashboardComponent implements OnInit {
             filter: false,
           }
           this.settings['columns']['id'] = {
-            title: 'Secret Code',
+            title: 'Publisher Id',
             type: 'string',
             filter: false,
           }
@@ -149,8 +155,8 @@ export class DashboardComponent implements OnInit {
             filter: false,
             renderComponent: SliderComponent,
             onComponentInitFunction:(instance) => {
-              instance.save.subscribe((row: string)  => {
-              });
+                instance.save.subscribe((row: string)  => {
+              })
             }
           }
           this.settings = Object.assign({},this.settings)
@@ -311,9 +317,35 @@ export class DashboardComponent implements OnInit {
   delete(event){
     if(confirm('Do you want to delete this website?')){
       this.face.delSite(event.data.id).subscribe(
-        res => this.initDash(),
+        res => {
+          alert('Website deleted successfully')
+          this.initDash()
+        },
         err => {
-          window.alert('There is some error in deleting publisher')
+          if(err.error.mess){
+            alert(err.error.mess)
+          } else {
+            alert('There is some error in deleting the website')
+          }
+          this.initDash()         
+        }
+      )
+    }
+  }
+
+  reload(event){
+    if(confirm('The site will be reloaded with products. Do you want to reload this website?')){
+      this.face.reloadSite(event.data.id).subscribe(
+        res => {
+          alert('Website is scheduled for product reloading, it may take 10-15 mins for complete product reloading')
+          this.initDash()
+        },
+        err => {
+          if(err.error.mess){
+            alert(err.error.mess)
+          } else {
+            alert('There is some error in reloading the website')
+          }
           this.initDash()         
         }
       )
@@ -326,21 +358,21 @@ export class DashboardComponent implements OnInit {
           addButtonContent: '<i class="nb-plus"></i>',
           createButtonContent: '<i class="nb-checkmark"></i>',
           cancelButtonContent: '<i class="nb-close"></i>',
-          confirmCreate: true,
+          confirmCreate: true
         },
       edit: {
         editButtonContent: '<i class="nb-edit"></i>',
         saveButtonContent: '<i class="nb-checkmark"></i>',
         cancelButtonContent: '<i class="nb-close"></i>',
-        confirmSave: true,
+        confirmSave: true
       },
       delete: {
         deleteButtonContent: '<i class="nb-trash"></i>',
-        confirmDelete: true,
+        confirmDelete: true
       },
     pager: {
       display: true,
-      perPage: 10,
+      perPage: 10
     },
     noDataMessage: 'Loading...',
     columns: {
@@ -358,42 +390,42 @@ export class DashboardComponent implements OnInit {
       ads: {
         title: 'Total Number of Ads',
         type: 'string',
-        filter: false,
+        filter: false
       },
       views: {
         title: 'Total Icon Impression',
         type: 'string',
-        filter: false,
+        filter: false
       },
       clicks: {
         title: 'Total Ad Clicks',
         type: 'string',
-        filter: false,
+        filter: false
       },
       ctr: {
         title: 'Average Clicks Per View',
         type: 'string',
-        filter: false,
+        filter: false
       },
         images: {
         title: 'Total Number of Images',
         type: 'string',
-        filter: false,
+        filter: false
       },
       adsperimage: {
         title: 'Max Ads Per Image',
         type: 'string',
-        filter: false,
+        filter: false
       },
       usercount: {
         title: 'Unique Visitors Count',
         type: 'string',
-        filter: false,
+        filter: false
       },
       duration: {
         title: 'Total View Duration(In Min)',
         type: 'string',
-        filter: false,
+        filter: false
       }
     },
   };
