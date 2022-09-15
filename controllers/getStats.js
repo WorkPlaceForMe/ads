@@ -699,7 +699,8 @@ function getAdsList(img, site, callback){
     return db.query(`SELECT clps.id, clps.product_image_url, clps.product_site_url, clps.clientId, 
     COALESCE(imps.clicks, 0) as clicks, COALESCE(imps.views, 0) as views, clps.duration FROM
         (SELECT adpg.id, adpg.product_image_url, adpg.product_site_url, 
-        clip.clientId, sum(clip.duration) as duration FROM ${conf.get('database')}.clientimgpubl clip,
+        clip.clientId, sum(clip.duration) as duration FROM (SELECT climgpl.clientId, climgpl.sessionId, climgpl.idItem, climgpl.imgId, max(climgpl.duration) as duration from ${conf.get('database')}.clientimgpubl climgpl 
+        group by climgpl.clientId, climgpl.sessionId, climgpl.idItem, climgpl.imgId) clip,
         ${conf.get('database')}.adspages adpg
         where clip.imgId in(SELECT id from ${conf.get('database')}.imgspages ipg where
         (ipg.site = '${site}' or ipg.site = 'https://${site}' OR ipg.site = 'https://www.${site}' 
