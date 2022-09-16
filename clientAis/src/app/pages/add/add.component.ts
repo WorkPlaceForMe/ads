@@ -93,12 +93,19 @@ export class AddComponent implements OnInit {
     res => {
       this.onChange()
       this.windowRef.close();
+      alert('Website is created, product loading may take 10-15 mins to complete')
     },
     err => {
       this.is_saving = false
       if (err.error.repeated === 'name'){
           this.values.name = 'danger';
           this.registerForm.controls['name'].setErrors({cantMatch: true});
+      }
+
+      if(err.error.mess){
+        alert(err.error.mess)
+      } else {
+        alert('There is some error in creating the website')
       }
       
       this.is_saving = false

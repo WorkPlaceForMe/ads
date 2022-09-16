@@ -84,11 +84,17 @@ export class DashboardComponent implements OnInit {
       
       this.face.getStatsAd(params.img, params.site).subscribe(
         res => {
-          this.source = res['table'];
+          this.source = res['table']
+
+          if(!this.source || this.source.length == 0) {
+            this.settings3['noDataMessage'] = 'No Data Found'
+          }
         },
         err => {
           console.error(err);
-          this.source = undefined;
+          this.source = undefined
+
+          this.settings3['noDataMessage'] = 'No Data Found'
         }
       )
     }
@@ -99,10 +105,16 @@ export class DashboardComponent implements OnInit {
       this.face.getStatsImg(params.img).subscribe(
         res => {
           this.source = res['table'];
+
+          if(!this.source || this.source.length == 0) {
+            this.settings2['noDataMessage'] = 'No Data Found'
+          }
         },
         err => {
           console.error(err);
-          this.source = undefined;
+          this.source = undefined
+         
+          this.settings2['noDataMessage'] = 'No Data Found'
         },
       )
     }
@@ -160,11 +172,17 @@ export class DashboardComponent implements OnInit {
             }
           }
           this.settings = Object.assign({},this.settings)
-          this.source = res['table'];
+          this.source = res['table']
+
+          if(!this.source || this.source.length == 0) {
+            this.settings['noDataMessage'] = 'No Data Found'
+          }
         },
         err => {
           console.error(err);
           this.source = undefined;
+
+          this.settings['noDataMessage'] = 'No Data Found'
         },
       );
   }
@@ -177,10 +195,16 @@ export class DashboardComponent implements OnInit {
           this.rewards = res['rewards']
           this.settings = Object.assign({},this.settings)
           this.source = res['table'];
+
+          if(!this.source || this.source.length == 0) {
+            this.settings['noDataMessage'] = 'No Data Found'
+          }
         },
         err => {
           console.error(err);
-          this.source = undefined;
+          this.source = undefined
+        
+          this.settings['noDataMessage'] = 'No Data Found'
         }
     );
   }
