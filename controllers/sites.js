@@ -3,11 +3,9 @@ const db = require('../campaigns-db/database')
 const publishers = db.publishers
 const { v4: uuidv4 } = require('uuid')
 const conf = require('../middleware/prop')
-const axios = require('axios')
 const aff = require('../helper/affiliate')
-const jwt = require('jsonwebtoken')
 const cache = require('../helper/cacheManager')
-const { deleteRedisData, reloadPublisher } = require('../helper/util')
+const { deleteRedisData, reloadPublisher, getHostname } = require('../helper/util')
 const website = require('../helper/website')
 const readCsv = require('./readCsv')
 
@@ -33,14 +31,16 @@ exports.register = Controller(async(req, res) => {
         }
 
         if(!publisherId){
-            console.log(`${data.name}} does not exist at Accesstrade, creating a new site there`) 
+            console.log(`${data.name} does not exist at Accesstrade, creating a new site there`) 
             publisherId = await website.createWebsite(data.name, null)
         }
 
         console.log(`Adding site ${data.name} to system`)
         
         if(publisherId) {
-            await createPublisher(locId, data.name, data.nickname, publisherId, data.adsperimage)
+            const newPublisher = await createPublisher(locId, data.name, getHostname(data.name), data.nickname, publisherId, data.adsperimage)
+            cache.setAsync(`${newPublisher.dataValues.hostname}-publisher`, JSON.stringify(newPublisher))
+
             readCsv.readCsv(publisherId).then(() => {
                 console.log(`Data populated for new publisher with publisher id: ${publisherId}`)
             }).catch(error => {
@@ -77,13 +77,13 @@ exports.update = Controller(async(req, res) => {
         oldAdsPerImage = oldPublisher.adsperimage
 
         const newPublisher = await updatePublisher(data)
-        cache.setAsync(`${data.name}-publisher`, JSON.stringify(newPublisher))
+        cache.setAsync(`${newPublisher.dataValues.hostname}-publisher`, JSON.stringify(newPublisher))
 
         if(newPublisher && oldAdsPerImage > 0 && newPublisher.dataValues.adsperimage != oldAdsPerImage){
-            deleteRedisData(newPublisher.dataValues.name).then(() => {                 
-                console.log(`All redis cache data deleted for publisher ${newPublisher.dataValues.name}`)
+            deleteRedisData(newPublisher.dataValues.hostname).then(() => {                 
+                console.log(`All redis cache data deleted for publisher ${newPublisher.dataValues.hostname}`)
               }).catch(error => {
-                console.error(error, `Error deleting redis cachec data for publisher ${newPublisher.dataValues.name}`)
+                console.error(error, `Error deleting redis cachec data for publisher ${newPublisher.dataValues.hostname}`)
               })
         }
 
@@ -180,15 +180,15 @@ exports.del = Controller(async(req, res) => {
                 cache.del(`saving-productAndClothsData-${publ.dataValues.publisherId}`)
                 cache.del(`productAndClothsData-${publ.dataValues.publisherId}`) 
                 
-                deleteRedisData(publ.dataValues.name).then(() => {                 
-                    console.log(`All redis cache data deleted for publisher ${publ.dataValues.name}`)
+                deleteRedisData(publ.dataValues.hostname).then(() => {                 
+                    console.log(`All redis cache data deleted for publisher ${publ.dataValues.hostname}`)
                 }).catch(error => {
-                    console.error(error, `Error deleting redis cachec data for publisher ${publ.dataValues.name}`)
+                    console.error(error, `Error deleting redis cachec data for publisher ${publ.dataValues.hostname}`)
                 })
             }).then(() => {                 
-                console.log(`All product data deleted for publisher ${publ.dataValues.name}`)
+                console.log(`All product data deleted for publisher ${publ.dataValues.hostname}`)
             }).catch(error => {
-                console.error(error, `Error in deleting product for publisher ${publ.dataValues.name}`)
+                console.error(error, `Error in deleting product for publisher ${publ.dataValues.hostname}`)
             })
 
             res.status(200).json({success: true});
@@ -200,10 +200,11 @@ exports.del = Controller(async(req, res) => {
     }
 })
 
-const createPublisher = async function(id, site, nickname, publisherId, adsperimage){
+const createPublisher = async function(id, site, hostname, nickname, publisherId, adsperimage){
     return publishers.create({
         id: id,
         name: site,
+        hostname: hostname,
         nickname: nickname,
         publisherId: publisherId,
         adsperimage: adsperimage,

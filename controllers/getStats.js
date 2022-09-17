@@ -5,6 +5,7 @@ const cache = require('../helper/cacheManager')
 const conf = require('../middleware/prop')
 const db1 = require('../campaigns-db/database')
 const publishers = db1.publishers
+const { getHostname } = require('../helper/util')
 
 exports.getStats = Controller(async(req, res) => {
     let ads = {},
@@ -145,13 +146,13 @@ exports.getStats = Controller(async(req, res) => {
                                         viewsPerAd = 0;
                                     }
 
-                                    let publisher = await cache.getAsync(`${Object.keys(imgsGrouped)[i]}-publisher`);
+                                    let publisher = await cache.getAsync(`${getHostname(Object.keys(imgsGrouped)[i])}-publisher`);
 
                                     if(publisher){
                                         publisher = JSON.parse(publisher);
                                     } else {
-                                        publisher = await getPublisher(Object.keys(imgsGrouped)[i]);
-                                        cache.setAsync(`${Object.keys(imgsGrouped)[i]}-publisher`, JSON.stringify(publisher)).then();
+                                        publisher = await getPublisherByHostname(Object.keys(imgsGrouped)[i]);
+                                        cache.setAsync(`${getHostname(Object.keys(imgsGrouped)[i])}-publisher`, JSON.stringify(publisher)).then();
                                     } 
 
                                     const init = new Date(req.query.init).toISOString()
@@ -356,13 +357,13 @@ exports.getStatsUrl = Controller(async(req, res) => {
                             }
                           
                             let table = []
-                            let publisher = await cache.getAsync(`${req.query.url}-publisher`)
+                            let publisher = await cache.getAsync(`${getHostname(req.query.url)}-publisher`)
 
                             if(publisher){
                                 publisher = JSON.parse(publisher)
                             } else {
-                                publisher = await getPublisher(req.query.url)
-                                cache.setAsync(`${req.query.url}-publisher`, JSON.stringify(publisher)).then()
+                                publisher = await getPublisherByHostname(req.query.url)
+                                cache.setAsync(`${getHostname(req.query.url)}-publisher`, JSON.stringify(publisher)).then()
                             } 
                             
                            getClientSessionDataByPublisherId(publisher.id, async function(err, rows){
@@ -487,19 +488,19 @@ exports.getStatsImg = Controller(async(req, res) => {
     let publisher = ''
 
     if(site){
-        publisher = await cache.getAsync(`${site}-publisher`);
+        publisher = await cache.getAsync(`${getHostname(site)}-publisher`);
 
         if(publisher){
             publisher = JSON.parse(publisher);
         } else {
-            publisher = await getPublisher(site);
-            cache.setAsync(`${site}-publisher`, JSON.stringify(publisher)).then();
+            publisher = await getPublisherByHostname(site);
+            cache.setAsync(`${getHostname(site)}-publisher`, JSON.stringify(publisher)).then();
         } 
     }
 
     let clicks = {},
     views = {}
-    getClicksAndViewsPerImg(urlQuery,function(err,rows){
+    getClicksAndViewsPerImg(urlQuery,function(err, rows){
         if(err){
             res.status(500).json(err);
             }
@@ -728,9 +729,9 @@ const getPublsh = async function(){
     return publ
 }
 
-function getPublisher(site) {
+function getPublisherByHostname(hostname) {
     return publishers.findOne({
-      where: { name: site }
+      where: { hostname: hostname }
     });
 }
 

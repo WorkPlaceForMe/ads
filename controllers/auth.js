@@ -4,17 +4,18 @@ const website = require('../helper/website')
 const { v4: uuidv4 } = require('uuid')
 const seq = require('../campaigns-db/database')
 const conf = require('../middleware/prop')
+const { getHostname } = require('../helper/util')
 
 exports.auth = Controller(async(req, res) => {
 
-    check(req.params.id, function(err,rows){
+    check(req.params.id, function(err, rows){
         if(err){
             res.status(500).json(err)
             }
         else{
             if(rows.length == 0){
                 return res.status(401).json({success: false, type: 'notFound', message: 'Secret Code not valid'})
-            }else{
+            } else{
                 const site = rows[0].name
                 res.status(200).json({success: true, site: site})
             }
@@ -32,11 +33,7 @@ exports.iframe = Controller(async(req, res) => {
 exports.check = Controller(async(req, res) => {   
     const userId = await getClientId(req.query.userId)
     const sessionId = req.query.sessionId
-    let site = req.query.site.split('/')[2]
-    
-    if(site.includes('www.')){
-        site = site.split('w.')[1]
-    }
+    let hostname = getHostname(req.query.site)
     
     let page = req.query.site
 
@@ -44,7 +41,7 @@ exports.check = Controller(async(req, res) => {
         page = page.substring(0, page.length -1)
     }
     
-    checkSite(site, async function(err,rows){
+    checkSite(hostname, async function(err, rows){
         try {
             let data = null
         
@@ -54,22 +51,24 @@ exports.check = Controller(async(req, res) => {
                 if(rows.length == 0){
                     const locId = uuidv4();
                     let publisherId = ''
-                    console.log(`Trying to register a new site ${site}`) 
+                    console.log(`Trying to register a new site ${hostname}`) 
                     const websiteResponse = await website.getWebsites()                                   
 
                     if(websiteResponse){
-                        const currentSite = websiteResponse.filter( item => item.name == site)
+                        const currentSite = websiteResponse.filter( item => item.name == hostname)
                         publisherId = currentSite[0] ? currentSite[0].id : ''
                     }
 
                     if(!publisherId){
-                        console.log(`${site} does not exist at Accesstrade, creating a new site there`) 
-                        publisherId = await website.createWebsite(site, req.query.site.split('/')[0])
+                        console.log(`${hostname} does not exist at Accesstrade, creating a new site there`) 
+                        publisherId = await website.createWebsite(hostname, req.query.site.split('/')[0])
                     }
 
-                    console.log(`Adding site ${site} to system`)
+                    console.log(`Adding site ${hostname} to system`)
                     const minPossibleAdsCount = conf.get('min_possible_ads_count') || 1
-                    const publisherData = await addPublisher(locId, site, publisherId, minPossibleAdsCount)
+                    const publisherData = await addPublisher(locId, hostname, publisherId, minPossibleAdsCount)
+                    
+                    cache.setAsync(`${publisherData.hostname}-publisher`, JSON.stringify(publisherData))
 
                     if(sessionId) {
                         const clientSession = await getClientSessionBySessionId(sessionId)
@@ -80,6 +79,11 @@ exports.check = Controller(async(req, res) => {
                     }
                     return res.status(200).json({success: true, message: 'Site registered'})
                 } else {
+
+                    if(rows[0].enabled != 'true'){
+                        return res.status(200).json({success: false, site: hostname, message: 'Site Disabled'})
+                    }
+                }
                     if(sessionId) {
                         const clientSession = await getClientSessionBySessionId(sessionId)
 
@@ -91,6 +95,7 @@ exports.check = Controller(async(req, res) => {
                     const site = rows[0].name
                     let extension = req.query.site.split(site)
                     let imgs
+                    
                     if(rows[0].pages != null){
                         if(JSON.parse(rows[0].pages)[1][extension[1]] != null){
                             imgs = JSON.parse(rows[0].pages)[1][extension[1]]
@@ -101,22 +106,22 @@ exports.check = Controller(async(req, res) => {
                         imgs = -1
                     }
                     
-                    res.status(200).json({success: true, site: site, message: 'Site already registered', imgs: imgs})
-                }
+                    return res.status(200).json({success: true, site: hostname, message: 'Site already registered', imgs: imgs})
             }
         } catch(err){
-            console.log(`Error in registering site ${site}`)
+            console.log(`Error in registering site ${hostname}`)
             console.log(err)
+            res.status(200).json({success: false, site: hostname, message: 'Error occurred'})
         }
     })    
 })
 
-function check(id,callback){
+function check(id, callback){
     return db.query(`SELECT * from publishers where id ='${id}'`, callback)
 }
 
-function checkSite(site,callback){
-    return db.query(`SELECT * from publishers where name ='${site}'`, callback)
+function checkSite(hostname, callback){
+    return db.query(`SELECT * from publishers where hostname ='${hostname}'`, callback)
 }
 
 function createClientId(clientId) {
@@ -139,11 +144,12 @@ function addPublisher(id, site, idAffiliate, minPossibleAdsCount){
     return seq.publishers.create({
         id: id,
         name: site,
+        hostname: site,
         nickname: site,
         enabled: 'true',
         publisherId: idAffiliate,
         adsperimage: minPossibleAdsCount
-        })
+    })
 }
 
 async function getClientId(userId){

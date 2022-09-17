@@ -8,7 +8,7 @@ const convert = require('../helper/convertObject').convert
 const dateFormat = require('dateformat')
 const auth = require('../helper/auth')
 const cache = require('../helper/cacheManager')
-const { getStrippedURL, shuffleArray } = require('../helper/util')
+const { getStrippedURL, shuffleArray, getHostname } = require('../helper/util')
 const { productAliases } = require('../helper/productAliases')
 const db1 = require('../campaigns-db/database')
 const imgsPage = db1.imgsPage
@@ -41,7 +41,6 @@ exports.getAds = Controller(async (req, res) => {
   let { img_width, img_height, url, site, uid, serv, mobile, userId, sessionId } = req.query
 
   if(site){
-    site = decodeURIComponent(site)
     site = getStrippedURL(site)
   }
 
@@ -49,12 +48,9 @@ exports.getAds = Controller(async (req, res) => {
     url = decodeURIComponent(url)
   }
 
-  let checker = site.split('/')[2];
-  if (checker.includes('www.')) {
-      checker = checker.split('w.')[1]
-  }
+  let hostname = getHostname(site)
 
-  const aut = await auth(checker)
+  const aut = await auth(hostname)
   
   if(aut['enabled'] == false) {
     console.log("Cancelling")
@@ -62,7 +58,7 @@ exports.getAds = Controller(async (req, res) => {
   }
 
   try {
-    let cachedImg = await cache.getAsync(`${checker}_${url}`)  
+    let cachedImg = await cache.getAsync(`${hostname}_${url}`)  
     
     if (cachedImg && cachedImg !== '{}' && cachedImg !== '[]'){
       const adsInfo = JSON.parse(cachedImg)
@@ -71,7 +67,7 @@ exports.getAds = Controller(async (req, res) => {
         adsInfo.forEach(element => {
           if(element.adsinfo && element.adsinfo.length > 0) {
             const idItem = element.adsinfo[0].id
-            addImagePublisherMetadata(url, site, checker, idItem, uid, userId, sessionId).then().catch(err => {
+            addImagePublisherMetadata(url, site, hostname, idItem, uid, userId, sessionId).then().catch(err => {
               console.error(err, 'Error occurred in client publisher data saving')
             })
           }
@@ -99,13 +95,13 @@ exports.getAds = Controller(async (req, res) => {
           data: formData
       }       
 
-      let publisher = await cache.getAsync(`${checker}-publisher`)
+      let publisher = await cache.getAsync(`${hostname}-publisher`)
 
       if(publisher){
         publisher = JSON.parse(publisher)
       } else {
-        publisher = await getPublisher(checker)
-        cache.setAsync(`${checker}-publisher`, JSON.stringify(publisher)).then()
+        publisher = await getPublisherByHostname(hostname)
+        cache.setAsync(`${hostname}-publisher`, JSON.stringify(publisher)).then()
       }
 
       let limit = publisher ? publisher.adsperimage : 1
@@ -132,13 +128,13 @@ exports.getAds = Controller(async (req, res) => {
       
       const sendingResults = await convert(flat)      
       
-      cache.setAsync(`${checker}_${url}`, JSON.stringify(sendingResults))
+      cache.setAsync(`${hostname}_${url}`, JSON.stringify(sendingResults))
 
       if(sendingResults && sendingResults.length > 0 ) {
         sendingResults.forEach(element => {
           if(element.adsinfo && element.adsinfo.length > 0) {
             const idItem = element.adsinfo[0].id
-            addImagePublisherMetadata(url, site, checker, idItem, uid, userId, sessionId).then().catch(err => {
+            addImagePublisherMetadata(url, site, hostname, idItem, uid, userId, sessionId).then().catch(err => {
               console.error(err, 'Error occurred in client publisher data saving')
             })
           }
@@ -152,7 +148,7 @@ exports.getAds = Controller(async (req, res) => {
   } catch (err) {
       console.log('Error in processing')
       console.log(err)
-      cache.setAsync(`${checker}_${url}`, JSON.stringify({}));
+      cache.setAsync(`${hostname}_${url}`, JSON.stringify({}));
       return res.status(500).json({ success: false, message: "Vista Image failled", error: err, img: url })
     }
 })
@@ -173,9 +169,9 @@ const getImg = (url, site) => {
   })
 }
 
-const getPublisher = (site) => {
+const getPublisherByHostname = (hostname) => {
   return publishers.findOne({
-    where: { name: site }
+    where: { hostname: hostname }
   })
 }
 
@@ -831,18 +827,18 @@ const flatten = (ary) => {
   }, [])
 }
 
-const addImagePublisherMetadata = (imageURL, page, site, idItem, uid, userId, sessionId) => {
+const addImagePublisherMetadata = (imageURL, page, hostname, idItem, uid, userId, sessionId) => {
   
   return new Promise(async (resolve, reject) => {
    
     try {
-      let publisher = await cache.getAsync(`${site}-publisher`)
+      let publisher = await cache.getAsync(`${hostname}-publisher`)
 
       if(publisher){
         publisher = JSON.parse(publisher)
       } else {
-        publisher = await getPublisher(checker)
-        cache.setAsync(`${site}-publisher`, JSON.stringify(publisher)).then()
+        publisher = await getPublisherByHostname(hostname)
+        cache.setAsync(`${hostname}-publisher`, JSON.stringify(publisher)).then()
       }
 
       let img = await getImg(imageURL, page)
@@ -857,7 +853,7 @@ const addImagePublisherMetadata = (imageURL, page, site, idItem, uid, userId, se
       
       resolve('success')
     } catch(err) {
-        console.log(`Adding image publisher metadata failed for site ${site}`)
+        console.log(`Adding image publisher metadata failed for site ${hostname}`)
         console.log(err)
         reject(err)
     }

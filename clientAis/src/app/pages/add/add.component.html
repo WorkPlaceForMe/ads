@@ -5,8 +5,12 @@
         <span *ngIf="error" class="invalid-feedback" [ngStyle]="{'display': 'block', 'padding-bottom': '10px'}">{{error}}</span>
         
         <div *ngIf="!edit">
-            <p>To add a new site please add this snippet into the head of the website that is being added:</p>
-            <p>{{snippet}}</p>
+            <p><b>If the website already registered with Accesstrade please put the same registered website name in website field</b></p>
+            <br />
+            <p><b>If the website does not exist in Accesstrade it will be registered in Accesstrade too</b></p>
+            <br />
+            <p><b>To add a new site please add this snippet into the head of the website that is being added:</b></p>
+            <p><b>{{snippet}}</b></p>
         </div>
 
         <form [formGroup]="registerForm" (ngSubmit)='onSubmit()'>
@@ -34,9 +38,9 @@
               <div *ngIf="submitted && f.name.errors" class="invalid-feedback">
                 <div *ngIf="f.name.errors.cantMatch">Publisher has been registered, try another one</div>
                 <div *ngIf="f.name.errors.required">Publisher Website is required</div>
+                <div *ngIf="f.name.errors.pattern">Enter valid website name</div>
               </div>
             </div>
-
 
     <button [status]="'success'" nbButton class="btn-block" *ngIf="!is_saving">Save</button>
     <button [status]="'success'" nbButton class="btn-block" *ngIf="is_saving" [nbSpinner]="is_saving" nbSpinnerSize="medium" nbSpinnerStatus="primary">&nbsp;</button>
@@ -44,5 +48,4 @@
       </nb-card-body>
       </nb-card>
   </div>
-
 </div>

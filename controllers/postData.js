@@ -1,7 +1,7 @@
 const Controller = require('../helper/controller')
 const dateFormat = require('dateformat');
 const db = require('../campaigns-db/database')
-const { getStrippedURL } = require('../helper/util')
+const { getStrippedURL, getHostname } = require('../helper/util')
 const cache = require('../helper/cacheManager')
 
 exports.postData = Controller(async(req, res) => {
@@ -14,7 +14,7 @@ exports.postData = Controller(async(req, res) => {
       site = decodeURIComponent(site)
 
       if (site.includes('www.')) {
-        site = site.split('w.')[1]
+        site = site.split('www.')[1]
       }
     }  
     
@@ -32,13 +32,13 @@ exports.postData = Controller(async(req, res) => {
 
         let img = await getImg(data.img, data.url);
 
-        let publisher = await cache.getAsync(`${site}-publisher`);
+        let publisher = await cache.getAsync(`${getHostname(site)}-publisher`);
 
         if(publisher){
           publisher = JSON.parse(publisher);
         } else {
-          publisher = await getPublisher(site);
-          cache.setAsync(`${site}-publisher`, JSON.stringify(publisher)).then();
+          publisher = await getPublisherByHostname(getHostname(site));
+          cache.setAsync(`${getHostname(site)}-publisher`, JSON.stringify(publisher)).then();
         }  
 
         if(img && publisher){
@@ -66,9 +66,9 @@ function getImg(url, site){
   })
 }
   
-function getPublisher(site) {
+function getPublisherByHostname(hostname) {
     return db.publishers.findOne({
-      where: { name: site }
+      where: { hostname: hostname }
     });
 }
 

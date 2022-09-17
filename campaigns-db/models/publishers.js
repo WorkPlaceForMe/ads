@@ -2,7 +2,7 @@ module.exports = (sequelize, Sequelize) => {
     const publishers = sequelize.define("publishers", {
         id: {
             type: Sequelize.STRING(40),
-            primaryKey: true,
+            primaryKey: true
         },
         name: {
             type: Sequelize.STRING(200),
@@ -10,7 +10,11 @@ module.exports = (sequelize, Sequelize) => {
         },
         nickname: {
             type: Sequelize.STRING(200),
-            allowNull: true,
+            allowNull: true
+        },
+        hostname: {
+            type: Sequelize.STRING(200),
+            allowNull: true
         },
         enabled: {
             type: Sequelize.STRING(45),
@@ -18,7 +22,7 @@ module.exports = (sequelize, Sequelize) => {
         },
         publisherId: {
             type: Sequelize.STRING(45),
-            allowNull: true,
+            allowNull: true
         },
         pages: {
             type: Sequelize.JSON,

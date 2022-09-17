@@ -7,6 +7,7 @@ const uuid = new Date().getTime()
 
 let sourceJS = new URL(document.currentScript.src)
 let serv = sourceJS.origin
+let siteEnabled = true
 
 let top1 = 0;
 let left1 = 0;
@@ -22,23 +23,24 @@ $(document).ready(function () {
 		dataType: 'json',
 		success: function (a) {
 			images = a.imgs
-		},
-		error: function (e) {console.error(e)}
-	})
-})
 
-$(document).ready(function () {	
-	setInterval(
-		() => $.ajax({
-			url: `${serv}/api/session`,
-			type: 'GET',
-			async: true,
-			data: `sessionId=${sessionId}`,
-			dataType: 'json',
-			success: function (a) {
-			},
-			error: function (e) {console.error(e)}
-		}), 5000)
+			setInterval(
+				() => $.ajax({
+					url: `${serv}/api/session`,
+					type: 'GET',
+					async: true,
+					data: `sessionId=${sessionId}`,
+					dataType: 'json',
+					success: function (a) {
+					},
+					error: function (e) {console.error(e)}
+				}), 5000)
+		},
+		error: function (e) {
+			siteEnabled = false
+			console.error(e)
+		}
+	})
 })
 
 $(document).on('mousedown', 'a.but1', function (e) {
@@ -475,24 +477,27 @@ $(document).on('click', '.closeBut', function () {
 							userId +
 							"&sessionId=" + sessionId,
 					num = num + 1
-					a.ajax({
-						url: v,
-						type: 'GET',
-						data: m,
-						dataType: 'json',
-						success: function (a) {
-							if ('false' == a.status) return c(l), b
-							var d = new Image();						
-							d.onload = function () {
-								h.ori_width = d.width;
-								h.ori_height = d.height;								
-								f(a.results, h, k);
-								e(h);
-							}
-							d.src = l;
-						},
-						error: function () {}
-					})
+
+					if(siteEnabled){
+						a.ajax({
+							url: v,
+							type: 'GET',
+							data: m,
+							dataType: 'json',
+							success: function (a) {
+								if ('false' == a.status) return c(l), b
+								var d = new Image();						
+								d.onload = function () {
+									h.ori_width = d.width;
+									h.ori_height = d.height;								
+									f(a.results, h, k);
+									e(h);
+								}
+								d.src = l;
+							},
+							error: function () {}
+						})
+					}
 				}else{
 					imgsTop++
 				}
@@ -554,7 +559,12 @@ $(document).on('click', '.closeBut', function () {
 		C = '240x95_as',
 		E = 0,
 		pe = window.location.href
+		
 		$(document).ready(function () {
+			if(!siteEnabled){
+				return false
+			}
+
 			var b = []
 			$('div, span').filter(function() {
 				return ($(this).css("backgroundImage") && $(this).css("backgroundImage") != 'none')
@@ -562,9 +572,11 @@ $(document).on('click', '.closeBut', function () {
 				let imageURL = $(this).css("backgroundImage").replace('url(','').replace(')','').replace(/\"/gi, "")
 				b.push(new a.GM.IMLayer(imageURL, a(this)[0], $(this).width(), $(this).height()))
 			})
+			
 			a('img').each(function() {
 				b.push(new a.GM.IMLayer($(this).prop('src'), a(this)[0]))
 			})
+			
 			b.forEach(function (item) {
 				item.imageProcess()
 			})

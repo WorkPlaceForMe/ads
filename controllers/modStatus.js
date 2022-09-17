@@ -19,7 +19,7 @@ exports.modify = Controller(async(req, res) => {
                     where: { id: req.params.id }
                 })
                 
-                cache.setAsync(`${publisher.name}-publisher`, JSON.stringify(publisher))
+                cache.setAsync(`${publisher.hostname}-publisher`, JSON.stringify(publisher))
             }
         })  
 

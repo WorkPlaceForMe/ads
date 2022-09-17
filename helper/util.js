@@ -5,8 +5,8 @@ const products = db.products
 const clothing = db.clothing
 const publishers = db.publishers
 
-exports.getStrippedURL = url => {
-    let newURL = url
+const getStrippedURL = exports.getStrippedURL = url => {
+    let newURL = decodeURIComponent(url)
 
     if(newURL.includes('?')){
       newURL = newURL.split('?').shift()
@@ -17,6 +17,24 @@ exports.getStrippedURL = url => {
     }
 
     return newURL
+}
+
+exports.getHostname = url => {
+  let newURL = getStrippedURL(url)
+
+  if (newURL.includes('://')) {
+    newURL = newURL.split('://')[1]
+  }
+  
+  if (newURL.includes('www.')) {
+    newURL = newURL.split('www.')[1]
+  }
+
+  if (newURL.includes('/')) {
+    newURL = newURL.split('/')[0]
+  }
+
+  return newURL
 }
 
 exports.shuffleArray = (arr) => {
@@ -89,14 +107,14 @@ exports.reloadPublisher = async (publisher) => {
           }).then(() => {
             console.log(`Publisher ${publisher.dataValues.name} updated with latest products and cloths`) 
 
-            deleteRedisData(publisher.dataValues.name).then(() => {                 
-              console.log(`All redis cache data deleted for publisher ${publisher.dataValues.name}`)
+            deleteRedisData(publisher.dataValues.hostname).then(() => {                 
+              console.log(`All redis cache data deleted for publisher ${publisher.dataValues.hostname}`)
             }).catch(error => {
-              console.error(error, `Error deleting redis cachec data for publisher ${publisher.dataValues.name}`)
+              console.error(error, `Error deleting redis cachec data for publisher ${publisher.dataValues.hostname}`)
             })
         })                  
       }).catch(error => {
-        console.log(`Error downloading and setting up csv data for publisher ${publisher.dataValues.name}`)
+        console.log(`Error downloading and setting up csv data for publisher ${publisher.dataValues.hostname}`)
         console.log(error)
         cache.setAsync(`downloading-${publisher.dataValues.publisherId}`, false)
       })
