@@ -51,7 +51,7 @@ exports.register = Controller(async(req, res) => {
             return res.status(200).json({success: true});
         } else {
             console.log(`Cannot add site ${data.name} to system`)
-            return res.status(500).json({success: false, mess: `Cannot add site ${data.name}} to system`})
+            return res.status(500).json({success: false, mess: `Cannot add site ${data.name} to system`})
         }       
     } catch(err){
         console.log(`Cannot add site ${data.name} to system`)
@@ -144,8 +144,7 @@ exports.getServer = Controller(async(req, res) => {
 })
 
 exports.del = Controller(async(req, res) => {
-    const data = req.params.id
-    const credentials = await aff.getAff()    
+    const data = req.params.id 
     
     try{        
         const publ = await publishers.findOne({
