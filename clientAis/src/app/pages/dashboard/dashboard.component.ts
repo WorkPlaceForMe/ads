@@ -339,7 +339,7 @@ export class DashboardComponent implements OnInit {
   }
 
   delete(event){
-    if(confirm('Do you want to delete this website?')){
+    if(confirm('All data of the website will be deleted from Adscope, howerver, the website will not be deleted from Accesstrade, Do you want to continue?')){
       this.face.delSite(event.data.id).subscribe(
         res => {
           alert('Website deleted successfully')
