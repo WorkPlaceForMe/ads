@@ -267,7 +267,7 @@ const getStats = (req) => {
                   if(publisher){
                       publisher = JSON.parse(publisher);
                   } else {
-                      publisher = await getPublisherByHostname(Object.keys(imgsGrouped)[i]);
+                      publisher = await getPublisherByHostname(getHostname(Object.keys(imgsGrouped)[i]));
                       cache.setAsync(`${getHostname(Object.keys(imgsGrouped)[i])}-publisher`, JSON.stringify(publisher)).then();
                   }
                   
@@ -441,7 +441,7 @@ const getStatsUrl = (req) => {
                 if(publisher){
                     publisher = JSON.parse(publisher)
                 } else {
-                    publisher = await getPublisherByHostname(req.query.url)
+                    publisher = await getPublisherByHostname(getHostname(req.query.url))
                     cache.setAsync(`${getHostname(req.query.url)}-publisher`, JSON.stringify(publisher)).then()
                 }
 

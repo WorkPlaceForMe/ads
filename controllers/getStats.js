@@ -151,7 +151,7 @@ exports.getStats = Controller(async(req, res) => {
                                     if(publisher){
                                         publisher = JSON.parse(publisher);
                                     } else {
-                                        publisher = await getPublisherByHostname(Object.keys(imgsGrouped)[i]);
+                                        publisher = await getPublisherByHostname(getHostname(Object.keys(imgsGrouped)[i]));
                                         cache.setAsync(`${getHostname(Object.keys(imgsGrouped)[i])}-publisher`, JSON.stringify(publisher)).then();
                                     } 
 
@@ -362,7 +362,7 @@ exports.getStatsUrl = Controller(async(req, res) => {
                             if(publisher){
                                 publisher = JSON.parse(publisher)
                             } else {
-                                publisher = await getPublisherByHostname(req.query.url)
+                                publisher = await getPublisherByHostname(getHostname(req.query.url))
                                 cache.setAsync(`${getHostname(req.query.url)}-publisher`, JSON.stringify(publisher)).then()
                             } 
                             
@@ -493,7 +493,7 @@ exports.getStatsImg = Controller(async(req, res) => {
         if(publisher){
             publisher = JSON.parse(publisher);
         } else {
-            publisher = await getPublisherByHostname(site);
+            publisher = await getPublisherByHostname(getHostname(site));
             cache.setAsync(`${getHostname(site)}-publisher`, JSON.stringify(publisher)).then();
         } 
     }

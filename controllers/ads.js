@@ -58,7 +58,7 @@ exports.getAds = Controller(async (req, res) => {
   }
 
   try {
-    let cachedImg = await cache.getAsync(`${hostname}_${url}`)  
+    let cachedImg = await cache.getAsync(`${site}_${url}`)  
     
     if (cachedImg && cachedImg !== '{}' && cachedImg !== '[]'){
       const adsInfo = JSON.parse(cachedImg)
@@ -128,7 +128,7 @@ exports.getAds = Controller(async (req, res) => {
       
       const sendingResults = await convert(flat)      
       
-      cache.setAsync(`${hostname}_${url}`, JSON.stringify(sendingResults))
+      cache.setAsync(`${site}_${url}`, JSON.stringify(sendingResults))
 
       if(sendingResults && sendingResults.length > 0 ) {
         sendingResults.forEach(element => {

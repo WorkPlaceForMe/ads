@@ -66,9 +66,7 @@ app.all(function (req, res, next) {
 })
 
 async function check() {
-    const publisherList = await publishers.findAll({
-    attributes: ['publisherId', 'name', 'updatedAt']
-  })
+    const publisherList = await publishers.findAll()
   
   if (publisherList) {
     for (const publisher of publisherList) {
