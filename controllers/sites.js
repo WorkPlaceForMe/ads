@@ -1,9 +1,12 @@
 const Controller = require('../helper/controller')
+const Sequelize = require('sequelize')
 const db = require('../campaigns-db/database')
 const publishers = db.publishers
+const adsPage = db.adsPage
+const imgsPage = db.imgsPage
+const impressions = db.impressions
 const { v4: uuidv4 } = require('uuid')
 const conf = require('../middleware/prop')
-const aff = require('../helper/affiliate')
 const cache = require('../helper/cacheManager')
 const { deleteRedisData, reloadPublisher, getHostname } = require('../helper/util')
 const website = require('../helper/website')
@@ -148,7 +151,7 @@ exports.del = Controller(async(req, res) => {
     
     try{        
         const publ = await publishers.findOne({
-            where: { id: req.params.id },
+            where: { id: req.params.id }
         })
 
         const publisherUpdateInProgress = await cache.getAsync(`downloading-${publ.dataValues.publisherId}`)
@@ -162,19 +165,22 @@ exports.del = Controller(async(req, res) => {
         try{
             console.log(`Calling url: ${affiliateEndpointCampaings}`)
             
-            await delSite(data)
+            const siteDeletePromises = [];
 
-            const productClothPromises = [];
+            siteDeletePromises.push(delSite(data))
 
-            productClothPromises.push(db.clothing.destroy({
+            siteDeletePromises.push(db.clothing.destroy({
               where: { Page_ID: publ.dataValues.publisherId }
             }))
             
-            productClothPromises.push(db.products.destroy({
+            siteDeletePromises.push(db.products.destroy({
               where: { Page_ID: publ.dataValues.publisherId }
             }))
             
-            Promise.all(productClothPromises).then(() => {            
+            Promise.all(siteDeletePromises).then(() => {
+                delAds(publ.dataValues.hostname) 
+                delImages(publ.dataValues.hostname)
+                delImpressions(publ.dataValues.hostname)        
                 cache.del(`downloading-${publ.dataValues.publisherId}`)
                 cache.del(`saving-productAndClothsData-${publ.dataValues.publisherId}`)
                 cache.del(`productAndClothsData-${publ.dataValues.publisherId}`) 
@@ -224,5 +230,35 @@ async function updatePublisher(body) {
 const delSite = async function(id){
     return publishers.destroy({
       where: { id: id }
+    })
+}
+
+const delAds = async function(site){
+    return adsPage.destroy({
+      where: {
+        site: {
+            [Sequelize.Op.like]: `%${site}%`
+          }
+        }
+    })
+}
+
+const delImages = async function(site){
+    return imgsPage.destroy({
+      where: {
+        site: {
+          [Sequelize.Op.like]: `%${site}%`,
+        }
+      }
+    })
+}
+
+const delImpressions = async function(site){
+    return impressions.destroy({
+      where: {
+        url: {
+          [Sequelize.Op.like]: `%${site}%`,
+        }
+      }
     })
 }
