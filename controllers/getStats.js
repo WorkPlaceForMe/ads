@@ -500,7 +500,7 @@ exports.getStatsImg = Controller(async(req, res) => {
 
     let clicks = {},
     views = {}
-    getClicksAndViewsPerImg(urlQuery,function(err, rows){
+    getClicksAndViewsPerImg(urlQuery, function(err, rows){
         if(err){
             res.status(500).json(err);
             }
@@ -517,7 +517,7 @@ exports.getStatsImg = Controller(async(req, res) => {
                 
             }
             
-            getAdsListPerImg(publisher.id, function(err, rows){
+            getAdsListPerImg(urlQuery, function(err, rows){
                 if(err){
                     res.status(500).json(err);
                     }
@@ -668,7 +668,7 @@ function getImgsList(site, callback){
         (SELECT cipl.clientId, cipl.sessionId, cipl.imgUrl, max(cipl.duration) as duration 
         FROM ${conf.get('database')}.clientimgpubl cipl  
         where imgId in(SELECT id from ${conf.get('database')}.imgspages ipg where
-        (ipg.site = '${site}' or ipg.site = 'https://${site}' 
+        (ipg.site = '${site}' OR ipg.site = 'https://${site}' 
         OR ipg.site = 'https://www.${site}' OR ipg.site = 'http://${site}' OR ipg.site = 'http://www.${site}'))
         group by cipl.clientId, cipl.sessionId, cipl.imgUrl) imguser
         group by imguser.clientId, imguser.imgUrl) imgcpluser
@@ -692,8 +692,11 @@ function getClicksAndViewsPerImg(site, callback){
     return db.query(`SELECT img, COUNT( CASE WHEN type = '2' THEN 1 END ) AS clicks, COUNT( CASE WHEN type = '1' THEN 1 END ) AS views FROM ${conf.get('database')}.impressions where url = 'https://${site}' OR url = 'https://www.${site}' OR url = 'http://${site}' OR url = 'http://www.${site}' group by img;`,callback)
 }
 
-function getAdsListPerImg(publisherId, callback){
-    return db.query(`SELECT distinct imgUrl as imgName, idItem FROM ${conf.get('database')}.clientimgpubl where publId = '${publisherId}'`,callback)
+function getAdsListPerImg(site, callback){
+    return db.query(`SELECT distinct imgUrl as imgName, idItem FROM ${conf.get('database')}.clientimgpubl where 
+    imgId in(
+        SELECT id from ${conf.get('database')}.imgspages where site = '${site}' OR site = 'https://${site}' OR site = 'https://www.${site}' 
+        OR site = 'http://${site}' OR site = 'http://www.${site}')`, callback)
 }
 
 function getAdsList(img, site, callback){
@@ -704,7 +707,7 @@ function getAdsList(img, site, callback){
         group by climgpl.clientId, climgpl.sessionId, climgpl.idItem, climgpl.imgId) clip,
         ${conf.get('database')}.adspages adpg
         where clip.imgId in(SELECT id from ${conf.get('database')}.imgspages ipg where
-        (ipg.site = '${site}' or ipg.site = 'https://${site}' OR ipg.site = 'https://www.${site}' 
+        (ipg.site = '${site}' OR ipg.site = 'https://${site}' OR ipg.site = 'https://www.${site}' 
         OR ipg.site = 'http://${site}' OR ipg.site = 'http://www.${site}')
         and ipg.img = '${img}')
         and clip.idItem = adpg.id
@@ -713,7 +716,7 @@ function getAdsList(img, site, callback){
         AS views FROM ${conf.get('database')}.impressions imp group by imp.idItem, imp.img, imp.url) imps
         ON clps.id = imps.idItem
         and imps.img = '${img}'
-        and (imps.url = '${site}' or imps.url = 'https://${site}' OR imps.url = 'https://www.${site}' 
+        and (imps.url = '${site}' OR imps.url = 'https://${site}' OR imps.url = 'https://www.${site}' 
         OR imps.url = 'http://${site}' OR imps.url = 'http://www.${site}')     
         group by clps.clientId, clps.id, clps.product_image_url, clps.product_site_url, imps.clicks, imps.views
     `, callback)

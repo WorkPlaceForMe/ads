@@ -683,7 +683,8 @@ const getStatsImg = (req) => {
           clicks[stat.img] = stat.clicks
           views[stat.img] = stat.views
         }
-        getAdsListPerImg(publisher.id, function (err, rows) {
+        
+        getAdsListPerImg(urlQuery, function (err, rows) {
           if (err) {
             return reject(err)
           } else {
@@ -721,6 +722,7 @@ const getStatsImg = (req) => {
                     ctr = 0
                   }
                   imgs.push({
+                    page: req.query.imgs,
                     img: rows[i].img,
                     title: rows[i].img.split('/')[
                       rows[i].img.split('/').length - 1
@@ -777,7 +779,7 @@ function getImgsList(site, callback){
       (SELECT cipl.clientId, cipl.sessionId, cipl.imgUrl, max(cipl.duration) as duration 
       FROM ${conf.get('database')}.clientimgpubl cipl  
       where imgId in(SELECT id from ${conf.get('database')}.imgspages ipg where
-      (ipg.site = '${site}' or ipg.site = 'https://${site}' 
+      (ipg.site = '${site}' OR ipg.site = 'https://${site}' 
       OR ipg.site = 'https://www.${site}' OR ipg.site = 'http://${site}' OR ipg.site = 'http://www.${site}'))
       group by cipl.clientId, cipl.sessionId, cipl.imgUrl) imguser
       group by imguser.clientId, imguser.imgUrl) imgcpluser
@@ -827,8 +829,11 @@ function getClicksAndViewsPerImg(site, callback) {
   )
 }
 
-function getAdsListPerImg(publisherId, callback) {
-  return db.query(`SELECT distinct imgUrl as imgName, idItem FROM ${conf.get('database')}.clientimgpubl where publId = '${publisherId}'`,callback)
+function getAdsListPerImg(site, callback){
+  return db.query(`SELECT distinct imgUrl as imgName, idItem FROM ${conf.get('database')}.clientimgpubl where 
+  imgId in(
+      SELECT id from ${conf.get('database')}.imgspages where site = '${site}' OR site = 'https://${site}' OR site = 'https://www.${site}' 
+      OR site = 'http://${site}' OR site = 'http://www.${site}')`, callback)
 }
 
 function getPublisherByHostname(hostname) {
@@ -869,6 +874,7 @@ function getExcelColumnNames(columnKeys) {
 }
 
 const excelColumnNames = {
+  page: 'Page URL',
   ads: 'Total Number of Ads',
   adsperimage: 'Max Ads Per Image',
   clicks: 'Total Ad Clicks',  
