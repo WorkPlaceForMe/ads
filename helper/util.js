@@ -88,7 +88,7 @@ exports.reloadPublisher = async (publisher) => {
     }))
     
     Promise.all(productClothPromises).then(() => {
-      console.log(`All products and cloths deleted for publisher: ${publisher.dataValues.name}`)
+      console.log(`All products and clothes deleted for publisher: ${publisher.dataValues.name}`)
 
       cache.del(`downloading-${publisher.dataValues.publisherId}`)
       cache.del(`saving-productAndClothsData-${publisher.dataValues.publisherId}`)
@@ -105,7 +105,7 @@ exports.reloadPublisher = async (publisher) => {
               publisherId: publisher.dataValues.publisherId
             }
           }).then(() => {
-            console.log(`Publisher ${publisher.dataValues.name} updated with latest products and cloths`) 
+            console.log(`Publisher ${publisher.dataValues.name} updated with latest products and clothes`) 
 
             deleteRedisData(publisher.dataValues.hostname).then(() => {                 
               console.log(`All redis cache data deleted for publisher ${publisher.dataValues.hostname}`)
