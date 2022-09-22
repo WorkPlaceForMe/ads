@@ -21,6 +21,10 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.STRING,
             allowNull: true
         },
+        vista_keywords: {
+            type: Sequelize.STRING,
+            allowNull: true
+        },
         site: {
             type: Sequelize.STRING(600),
             allowNull: true,

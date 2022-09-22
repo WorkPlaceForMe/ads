@@ -348,7 +348,8 @@ const clothing_Filler = (
               uid: uid,
               product_site_url: result[int]['Product_URL_Web_encoded'],
               product_image_url: result[int]['Image_URL'],
-              product_main_category_name: result[int]['Main_Category_Name']
+              product_main_category_name: result[int]['Main_Category_Name'],
+              vista_keywords: 'ExtraLongSleeves Upper,LongSleeves Upper'
             },
             serv: serv,
             size: { w: img_width, h: img_height },
@@ -377,7 +378,8 @@ const clothing_Filler = (
               uid: uid,
               product_site_url: result[int]['Product_URL_Web_encoded'],
               product_image_url: result[int]['Image_URL'],
-              product_main_category_name: result[int]['Main_Category_Name']
+              product_main_category_name: result[int]['Main_Category_Name'],
+              vista_keywords: 'Shirtcollar'
             },
             serv: serv,
             size: { w: img_width, h: img_height },
@@ -406,7 +408,8 @@ const clothing_Filler = (
               uid: uid,
               product_site_url: result[int]['Product_URL_Web_encoded'],
               product_image_url: result[int]['Image_URL'],
-              product_main_category_name: result[int]['Main_Category_Name']
+              product_main_category_name: result[int]['Main_Category_Name'],
+              vista_keywords: 'Poloshirtcollar'
             },
             serv: serv,
             size: { w: img_width, h: img_height },
@@ -433,7 +436,8 @@ const clothing_Filler = (
               uid: uid,
               product_site_url: result[int]['Product_URL_Web_encoded'],
               product_image_url: result[int]['Image_URL'],
-              product_main_category_name: result[int]['Main_Category_Name']
+              product_main_category_name: result[int]['Main_Category_Name'],
+              vista_keywords: 'T-shirts'
             },
             serv: serv,
             size: { w: img_width, h: img_height },
@@ -468,7 +472,8 @@ const clothing_Filler = (
               uid: uid,
               product_site_url: result[int]['Product_URL_Web_encoded'],
               product_image_url: result[int]['Image_URL'],
-              product_main_category_name: result[int]['Main_Category_Name']
+              product_main_category_name: result[int]['Main_Category_Name'],
+              vista_keywords: 'FullLength Lower,CroppedPant Lower,3/4Length Lower'
             },
             serv: serv,
             size: { w: img_width, h: img_height },
@@ -499,7 +504,8 @@ const clothing_Filler = (
               uid: uid,
               product_site_url: prendras[int]['Product_URL_Web_encoded'],
               product_image_url: prendras[int]['Image_URL'],
-              product_main_category_name: prendras[int]['Main_Category_Name']
+              product_main_category_name: prendras[int]['Main_Category_Name'],
+              vista_keywords: 'ExtraLongSleeves Upper,LongSleeves Upper'
             },
             serv: serv,
             size: { w: img_width, h: img_height },
@@ -525,7 +531,8 @@ const clothing_Filler = (
               uid: uid,
               product_site_url: prendras[int]['Product_URL_Web_encoded'],
               product_image_url: prendras[int]['Image_URL'],
-              product_main_category_name: prendras[int]['Main_Category_Name']
+              product_main_category_name: prendras[int]['Main_Category_Name'],
+              vista_keywords: 'Tops'
             },
             serv: serv,
             size: { w: img_width, h: img_height },
@@ -561,7 +568,8 @@ const clothing_Filler = (
               uid: uid,
               product_site_url: result[int]['Product_URL_Web_encoded'],
               product_image_url: result[int]['Image_URL'],
-              product_main_category_name: result[int]['Main_Category_Name']
+              product_main_category_name: result[int]['Main_Category_Name'],
+              vista_keywords: 'FullLength Lower,CroppedPant Lower,3/4Length Lower'
             },
             serv: serv,
             size: { w: img_width, h: img_height },
@@ -590,7 +598,8 @@ const clothing_Filler = (
               uid: uid,
               product_site_url: result[int]['Product_URL_Web_encoded'],
               product_image_url: result[int]['Image_URL'],
-              product_main_category_name: result[int]['Main_Category_Name']
+              product_main_category_name: result[int]['Main_Category_Name'],
+              vista_keywords: 'Pants,Leggings'
             },
             serv: serv,
             size: { w: img_width, h: img_height },
@@ -636,7 +645,8 @@ const object_Filler = (
         uid: uid,
         product_site_url: result[int]['Product_URL_Web_encoded'],
         product_image_url: result[int]['Image_URL'],
-        product_main_category_name: result[int]['Main_Category_Name']
+        product_main_category_name: result[int]['Main_Category_Name'],
+        vista_keywords: getVistaKeywords(obj.class)
       },
       serv: serv,
       size: { w: img_width, h: img_height },
@@ -682,7 +692,8 @@ const sport_makeup_Filler = (
             uid: uid,
             product_site_url: result[int]['Product_URL_Web_encoded'],
             product_image_url: result[int]['Image_URL'],
-            product_main_category_name: result[int]['Main_Category_Name']
+            product_main_category_name: result[int]['Main_Category_Name'],
+            vista_keywords: 'Beauty,Makeup'
           },
           serv: serv,
           size: { w: img_width, h: img_height },
@@ -714,7 +725,8 @@ const sport_makeup_Filler = (
             uid: uid,
             product_site_url: result[int]['Product_URL_Web_encoded'],
             product_image_url: result[int]['Image_URL'],
-            product_main_category_name: result[int]['Main_Category_Name']
+            product_main_category_name: result[int]['Main_Category_Name'],
+            vista_keywords: 'Sport'
           },
           serv: serv,
           size: { w: img_width, h: img_height },
@@ -745,7 +757,8 @@ const sport_makeup_Filler = (
             uid: uid,
             product_site_url: result[int]['Product_URL_Web_encoded'],
             product_image_url: result[int]['Image_URL'],
-            product_main_category_name: result[int]['Main_Category_Name']
+            product_main_category_name: result[int]['Main_Category_Name'],
+            vista_keywords: 'Lipstick,Hair,Perfume,Paintbrush'
           },
           serv: serv,
           size: { w: img_width, h: img_height },
@@ -775,7 +788,8 @@ const sport_makeup_Filler = (
             uid: uid,
             product_site_url: result[int]['Product_URL_Web_encoded'],
             product_image_url: result[int]['Image_URL'],
-            product_main_category_name: result[int]['Main_Category_Name']
+            product_main_category_name: result[int]['Main_Category_Name'],
+            vista_keywords: getVistaKeywords(obj.label)
           },
           serv: serv,
           size: { w: img_width, h: img_height },
@@ -880,6 +894,24 @@ const matchCategoryWithProductAliases = (category, productName) => {
   }
 
   return false
+}
+
+const getVistaKeywords = (productName) => {
+
+  if(productName){
+    productName = productName.replaceAll(' ', '_')
+    let aliases = productAliases[productName.toLowerCase()]
+
+    if(!aliases){
+      aliases = [productName.toLowerCase()]
+    }
+
+    if(aliases){
+      return aliases.join(',')
+    }
+  }
+
+  return null
 }
 
 const updateSessionData = (sessionId, duration) => {

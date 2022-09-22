@@ -10,7 +10,7 @@ exports.convert = async (arr) => {
         let ad = await getAd(obj.add.id, obj.add.site, obj.add.url)
         
         if(!ad){
-            ad = await addAd(obj.add.id, obj.add.site, obj.add['product_site_url'], obj.add['product_image_url'], obj.add['product_main_category_name'], obj.add.date, obj.add.url, obj.add.uid)
+            ad = await addAd(obj.add.id, obj.add.site, obj.add['product_site_url'], obj.add['product_image_url'], obj.add['product_main_category_name'], obj.add['vista_keywords'], obj.add.date, obj.add.url, obj.add.uid)
         }
     
         if(!obj.vista.boundingBox){
@@ -82,13 +82,14 @@ exports.convert = async (arr) => {
     return arrResult
 };
 
-async function addAd(name, site, product_site_url, product_image_url, product_main_category_name, time, imgName, idGeneration) {
+async function addAd(name, site, product_site_url, product_image_url, product_main_category_name, vista_keywords, time, imgName, idGeneration) {
     return adsPage.create({
         idItem: name,
         site: site,
         product_site_url: product_site_url,
         product_image_url: product_image_url,
         product_main_category_name: product_main_category_name,
+        vista_keywords: vista_keywords,
         time :time,
         imgName :imgName,
         idGeneration :idGeneration,
