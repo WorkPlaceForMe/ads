@@ -46,6 +46,8 @@ router.delete('/api/del/:id', controllers.del)
 
 router.post('/api/reload/:id', controllers.reloadPublisher)
 
+router.post('/api/pageUpdate', controllers.updatePage)
+
 router.get('/api/sites', controllers.getAll)
 
 router.get('/api/server', controllers.getServer)

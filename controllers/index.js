@@ -10,7 +10,7 @@ const { updateAds } = require('./updateAds')
 const { version } = require('./version')
 const { generateReport } = require('./generateReport')
 const { login } = require('./user')
-const { register, update, get, del, reloadPublisher, getServer, getAll } = require('./sites')
+const { register, update, get, del, reloadPublisher, getServer, getAll, updatePage } = require('./sites')
 
 module.exports = {
 	sessionData,
@@ -37,5 +37,6 @@ module.exports = {
 	getServer,
 	generateReport,
 	login,
-	getAll
+	getAll,
+	updatePage
 }

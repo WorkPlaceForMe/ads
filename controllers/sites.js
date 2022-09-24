@@ -8,7 +8,7 @@ const impressions = db.impressions
 const { v4: uuidv4 } = require('uuid')
 const conf = require('../middleware/prop')
 const cache = require('../helper/cacheManager')
-const { deleteRedisData, reloadPublisher, getHostname } = require('../helper/util')
+const { deleteRedisData, reloadPublisher, getHostname, updatePublisherWithPages } = require('../helper/util')
 const website = require('../helper/website')
 const readCsv = require('./readCsv')
 
@@ -85,14 +85,61 @@ exports.update = Controller(async(req, res) => {
         if(newPublisher && oldAdsPerImage > 0 && newPublisher.dataValues.adsperimage != oldAdsPerImage){
             deleteRedisData(newPublisher.dataValues.hostname).then(() => {                 
                 console.log(`All redis cache data deleted for publisher ${newPublisher.dataValues.hostname}`)
-              }).catch(error => {
-                console.error(error, `Error deleting redis cachec data for publisher ${newPublisher.dataValues.hostname}`)
-              })
+            }).catch(error => {
+                console.error(error, `Error deleting redis cache data for publisher ${newPublisher.dataValues.hostname}`)
+            })
         }
 
-        return res.status(200).json({success: true});
+        return res.status(200).json({success: true})
     } catch(err){
-        return res.status(500).json({success: false, mess: 'Unknow error occurred in website deletion, please contact site Administrator'})
+        return res.status(500).json({success: false, mess: 'Unknow error occurred in website updation, please contact site Administrator'})
+    }
+})
+
+exports.updatePage = Controller(async(req, res) => {
+    const minPossibleAdsCount = conf.get('min_possible_ads_count') || 1
+    const maxPossibleAdsCount = conf.get('max_possible_ads_count') || 4
+    const data = req.body
+    
+    try{
+        if(data.adsperimage < minPossibleAdsCount || data.adsperimage > maxPossibleAdsCount){
+            return res.status(500).json({success: false, mess: `Wrong max ads per image no specified, it should be between ${minPossibleAdsCount} to ${maxPossibleAdsCount}`})
+        }        
+
+        const publisher = await publishers.findOne({
+            where: { id: data.id }
+        })
+
+        let pageInfos = publisher.pages
+
+        if(pageInfos && pageInfos.length >= 1){
+            let adsPerImageData = pageInfos.filter(item => item.name == data.page)
+
+            if(adsPerImageData && adsPerImageData.length > 0){
+                let currentPageInfo = {name: page, adsperimage: data.adsperimage}
+                pageInfos = pageInfos.map(item => item.name !== data.page ? item : currentPageInfo)
+                updatePublisherWithPages(publisher.id, pageInfos)
+            } else {
+                pageInfos.push({name: page, adsperimage: data.adsperimage})
+                updatePublisherWithPages(publisher.id, pageInfos)
+            }
+        } else {
+            pageInfos = []
+            pageInfos.push({name: page, adsperimage: data.adsperimage})
+            updatePublisherWithPages(publisher.id, pageInfos)
+        }
+
+        if(publisher){
+            deleteRedisData(`${page}_`).then(() => {                 
+                console.log(`All redis cache data deleted for publisher ${publisher.dataValues.hostname} for page ${data.page}`)
+            }).catch(error => {
+                console.error(error, `Error deleting redis cache data for publisher${publisher.dataValues.hostname} for page ${data.page}`)
+            })
+        }
+
+        return res.status(200).json({success: true})
+    } catch(err){
+        return res.status(500).json({success: false, mess: 'Unknow error occurred in page update, please contact site Administrator'})
     }
 })
 

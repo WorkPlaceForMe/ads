@@ -119,4 +119,48 @@ exports.reloadPublisher = async (publisher) => {
         cache.setAsync(`downloading-${publisher.dataValues.publisherId}`, false)
       })
     })
-} 
+}
+
+exports.getAdsPerImage = (publisher, page) => {
+  if(page && page.includes('://')){
+    page = page.split('://')[1]
+  }
+
+  if(page && page.includes('www.')){
+    page = page.replace('www.', '')
+  }
+
+  let pageInfos = publisher.pages
+  let adsPerImage = publisher.adsperimage || 1
+
+  try {
+    if(pageInfos && pageInfos.length >= 1){
+      let adsPerImageData = pageInfos.filter(item => item.name == page)
+
+      if(adsPerImageData && adsPerImageData.length > 0){
+        adsPerImage = adsPerImageData[0].adsperimage
+      } else {
+        pageInfos.push({name: page, adsperimage: publisher.adsperimage})
+        updatePublisherWithPages(publisher.id, pageInfos)
+      }
+    } else {
+      pageInfos = []
+      pageInfos.push({name: page, adsperimage: publisher.adsperimage})
+      updatePublisherWithPages(publisher.id, pageInfos)
+    }
+  } catch(err) {
+    console.log(`Error in getting adsPerImage count for ${page}`)
+  }
+
+  return adsPerImage
+}
+
+const updatePublisherWithPages = exports.updatePublisherWithPages = (publisherId, pageInfos) => {
+  publishers.findOne({
+      where: { id: publisherId }
+  }).then((publisher) => {
+    publisher.update({pages: pageInfos}).then(async () => {
+      await cache.setAsync(`${publisher.hostname}-publisher`, JSON.stringify(publisher))
+    })
+  })
+}

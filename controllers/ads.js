@@ -8,7 +8,7 @@ const convert = require('../helper/convertObject').convert
 const dateFormat = require('dateformat')
 const auth = require('../helper/auth')
 const cache = require('../helper/cacheManager')
-const { getStrippedURL, shuffleArray, getHostname } = require('../helper/util')
+const { getStrippedURL, shuffleArray, getHostname, getAdsPerImage } = require('../helper/util')
 const { productAliases } = require('../helper/productAliases')
 const db1 = require('../campaigns-db/database')
 const imgsPage = db1.imgsPage
@@ -104,7 +104,7 @@ exports.getAds = Controller(async (req, res) => {
         cache.setAsync(`${hostname}-publisher`, JSON.stringify(publisher)).then()
       }
 
-      let limit = publisher ? publisher.adsperimage : 1
+      let limit = getAdsPerImage(publisher, site)
   
       console.log(`Sending request to Vista Server for image ${url}`)
       const response = await axios(request_config)

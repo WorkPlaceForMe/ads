@@ -431,13 +431,8 @@ export class DashboardComponent implements OnInit {
         type: 'string',
         filter: false
       },
-        images: {
+      images: {
         title: 'Total Number of Images',
-        type: 'string',
-        filter: false
-      },
-      adsperimage: {
-        title: 'Max Ads Per Image',
         type: 'string',
         filter: false
       },
@@ -448,6 +443,11 @@ export class DashboardComponent implements OnInit {
       },
       duration: {
         title: 'Total View Duration(In Min)',
+        type: 'string',
+        filter: false
+      },
+      adsperimage: {
+        title: 'Max Ads Per Image',
         type: 'string',
         filter: false
       }

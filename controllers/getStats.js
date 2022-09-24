@@ -5,7 +5,7 @@ const cache = require('../helper/cacheManager')
 const conf = require('../middleware/prop')
 const db1 = require('../campaigns-db/database')
 const publishers = db1.publishers
-const { getHostname } = require('../helper/util')
+const { getHostname, getAdsPerImage } = require('../helper/util')
 
 exports.getStats = Controller(async(req, res) => {
     let ads = {},
@@ -401,7 +401,7 @@ exports.getStatsUrl = Controller(async(req, res) => {
                                             viewsPerAd = 0;
                                         }
                                  
-                                        let adsPerImage = publisher.adsperimage
+                                        let adsPerImage = getAdsPerImage(publisher, Object.keys(imgsGrouped)[i])
                                         let imgPerPage = imagesWithAds[Object.keys(imgsGrouped)[i]]
                                         let totImgs = imgsGrouped[Object.keys(imgsGrouped)[i]]
         

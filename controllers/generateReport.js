@@ -6,7 +6,7 @@ const conf = require('../middleware/prop')
 const xlsx = require('node-xlsx').default
 var stream = require('stream')
 const db1 = require('../campaigns-db/database')
-const { getHostname } = require('../helper/util')
+const { getHostname, getAdsPerImage } = require('../helper/util')
 const publishers = db1.publishers
 
 exports.generateReport = Controller(async (req, res) => {
@@ -519,7 +519,7 @@ const getStatsUrl = (req) => {
                       req.query.url = req.query.url.replace('www.', '')
                     }
                   
-                    let adsPerImage = publisher.adsperimage
+                    let adsPerImage = getAdsPerImage(publisher, Object.keys(imgsGrouped)[i])
                     let imgPerPage = imgsGrouped[Object.keys(imgsGrouped)[i]]
 
                     let siteURL = Object.keys(imgsGrouped)[i]
