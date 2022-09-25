@@ -100,6 +100,18 @@ exports.updatePage = Controller(async(req, res) => {
     const minPossibleAdsCount = conf.get('min_possible_ads_count') || 1
     const maxPossibleAdsCount = conf.get('max_possible_ads_count') || 4
     const data = req.body
+
+    if(data.page && data.page.includes('://')){
+        data.page = data.page.split('://')[1]
+    }
+
+    if(data.page && data.page.includes('www.')){
+        data.page = data.page.replace('www.', '')
+    }
+
+    if(data.page && data.page.endsWith('/')){
+        data.page = data.page.substring(0, data.page.length - 1)
+    }
     
     try{
         if(data.adsperimage < minPossibleAdsCount || data.adsperimage > maxPossibleAdsCount){

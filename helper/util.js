@@ -121,13 +121,17 @@ exports.reloadPublisher = async (publisher) => {
     })
 }
 
-exports.getAdsPerImage = (publisher, page) => {
+exports.getAndSetAdsPerImage = (publisher, page) => {
   if(page && page.includes('://')){
     page = page.split('://')[1]
   }
 
   if(page && page.includes('www.')){
     page = page.replace('www.', '')
+  }
+
+  if(page && page.endsWith('/')){
+    page = page.substring(0, page.length - 1)
   }
 
   let pageInfos = publisher.pages
