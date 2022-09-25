@@ -30,8 +30,6 @@ router.get('/api/iframe', controllers.iframe)
 
 router.get('/api/check', controllers.check)
 
-router.post('/api/adsNum/:id', controllers.updateAds)
-
 router.get('/api/version', controllers.version)
 
 router.post('/api/login', controllers.login)
@@ -46,7 +44,7 @@ router.delete('/api/del/:id', controllers.del)
 
 router.post('/api/reload/:id', controllers.reloadPublisher)
 
-router.post('/api/pageUpdate', controllers.updatePage)
+router.post('/api/updatePage', controllers.updatePage)
 
 router.get('/api/sites', controllers.getAll)
 

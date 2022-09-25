@@ -6,7 +6,6 @@ const { readCsv } = require('./readCsv')
 const { getStats, getStatsUrl, getStatsImg, getStatsAd } = require('./getStats')
 const { modify } = require('./modStatus')
 const { auth, iframe, check } = require('./auth')
-const { updateAds } = require('./updateAds')
 const { version } = require('./version')
 const { generateReport } = require('./generateReport')
 const { login } = require('./user')
@@ -27,7 +26,6 @@ module.exports = {
 	auth,
 	iframe,
 	check,
-	updateAds,
 	version,
 	register,
 	update,

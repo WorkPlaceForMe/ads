@@ -370,6 +370,9 @@ exports.getStatsUrl = Controller(async(req, res) => {
                                 if(err) {
                                     res.status(500).json(err);
                                 } else {
+                                    const minPossibleAdsCount = conf.get('min_possible_ads_count') || 1
+                                    const maxPossibleAdsCount = conf.get('max_possible_ads_count') || 4
+
                                     for(let i = 0; i < Object.keys(imgsGrouped).length; i++){
                                         if(!clicksGrouped[Object.keys(imgsGrouped)[i]]){
                                             clicksGrouped[Object.keys(imgsGrouped)[i]] = 0
@@ -418,6 +421,7 @@ exports.getStatsUrl = Controller(async(req, res) => {
                                         let userDuration = getUserDuration(rows, null, Object.keys(imgsGrouped)[i])
         
                                         table[i] = {
+                                            publisherId: publisher.id,
                                             url : siteURL,
                                             ads: adsGrouped[Object.keys(imgsGrouped)[i]],
                                             views: viewsGrouped[Object.keys(imgsGrouped)[i]],
@@ -429,6 +433,8 @@ exports.getStatsUrl = Controller(async(req, res) => {
                                             viewsPerAd : viewsPerAd,                         
                                             images: imgsGrouped[Object.keys(imgsGrouped)[i]],                                            
                                             adsperimage: adsPerImage,
+                                            minPossibleAdsCount: minPossibleAdsCount,
+                                            maxPossibleAdsCount: maxPossibleAdsCount,
                                             imgNum: imgPerPage || 0,
                                             totImgs: totImgs,
                                             usercount: userDuration ? userDuration.usercount : 0, 

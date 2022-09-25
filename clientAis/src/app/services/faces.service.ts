@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { api } from '../models/API';
 import { environment } from '../../environments/environment';
 import { Observable } from 'rxjs';
 
@@ -34,17 +33,17 @@ export class FacesService {
   disableEnable(id,status){
     return this.http.get(`${this.API_URI}/modify/status/${id}/${status}`);
   }
-  updatePages(body,id){
-    return this.http.post(`${this.API_URI}/adsNum/${id}`,body);
-  }
   getVersion(){
     return this.http.get(`${this.API_URI}/version`);
   }
   saveSite(body){
-    return this.http.post(`${this.API_URI}/register/`,body);
+    return this.http.post(`${this.API_URI}/register/`, body);
   }
   updateSite(body){
-    return this.http.put(`${this.API_URI}/update/`,body);
+    return this.http.put(`${this.API_URI}/update/`, body);
+  }
+  updatePage(body){
+    return this.http.post(`${this.API_URI}/updatePage/`, body);
   }
   getSite(id){
     return this.http.get(`${this.API_URI}/site/${id}`);

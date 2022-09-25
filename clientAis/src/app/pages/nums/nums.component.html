@@ -1,2 +1,1 @@
-<input type="number" [(ngModel)]='rowData.adsNum' *ngIf='value == "adsNum"' disabled style="background-color: transparent">
-<input type="number" [(ngModel)]='rowData.imgNum' *ngIf='value == "imgNum"' disabled style="background-color: transparent">
+<input type="number" min={{minPossibleAdsCount}} max={{maxPossibleAdsCount}} [(ngModel)]='rowData.adsperimage' *ngIf='value == "adsperimage"' style="background-color: transparent" (change)="updatePage()">

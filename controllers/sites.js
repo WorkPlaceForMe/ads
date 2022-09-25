@@ -107,7 +107,7 @@ exports.updatePage = Controller(async(req, res) => {
         }        
 
         const publisher = await publishers.findOne({
-            where: { id: data.id }
+            where: { id: data.publisherId }
         })
 
         let pageInfos = publisher.pages
@@ -116,21 +116,25 @@ exports.updatePage = Controller(async(req, res) => {
             let adsPerImageData = pageInfos.filter(item => item.name == data.page)
 
             if(adsPerImageData && adsPerImageData.length > 0){
-                let currentPageInfo = {name: page, adsperimage: data.adsperimage}
+                if(data.adsperimage ==  adsPerImageData[0].adsperimage){
+                    return res.status(200).json({success: true, mess: 'Max Ads Per Image no has not changed, doing nothing'})
+                }
+
+                let currentPageInfo = {name: data.page, adsperimage: data.adsperimage}
                 pageInfos = pageInfos.map(item => item.name !== data.page ? item : currentPageInfo)
                 updatePublisherWithPages(publisher.id, pageInfos)
             } else {
-                pageInfos.push({name: page, adsperimage: data.adsperimage})
+                pageInfos.push({name: data.page, adsperimage: data.adsperimage})
                 updatePublisherWithPages(publisher.id, pageInfos)
             }
         } else {
             pageInfos = []
-            pageInfos.push({name: page, adsperimage: data.adsperimage})
+            pageInfos.push({name: data.page, adsperimage: data.adsperimage})
             updatePublisherWithPages(publisher.id, pageInfos)
         }
 
         if(publisher){
-            deleteRedisData(`${page}_`).then(() => {                 
+            deleteRedisData(`${data.page}_`).then(() => {                 
                 console.log(`All redis cache data deleted for publisher ${publisher.dataValues.hostname} for page ${data.page}`)
             }).catch(error => {
                 console.error(error, `Error deleting redis cache data for publisher${publisher.dataValues.hostname} for page ${data.page}`)
