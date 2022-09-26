@@ -91,22 +91,8 @@ exports.check = Controller(async(req, res) => {
                             createClientSession(sessionId, userId, rows[0].id, page, 5)
                         }
                     }
-
-                    const site = rows[0].name
-                    let extension = req.query.site.split(site)
-                    let imgs
                     
-                    if(rows[0].pages != null){
-                        if(JSON.parse(rows[0].pages)[1][extension[1]] != null){
-                            imgs = JSON.parse(rows[0].pages)[1][extension[1]]
-                        } else{
-                            imgs = -1 
-                        }
-                    } else{
-                        imgs = -1
-                    }
-                    
-                    return res.status(200).json({success: true, site: hostname, message: 'Site already registered', imgs: imgs})
+                    return res.status(200).json({success: true, site: hostname, message: 'Site already registered'})
             }
         } catch(err){
             console.log(`Error in registering site ${hostname}`)

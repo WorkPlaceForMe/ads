@@ -58,7 +58,22 @@ exports.getAds = Controller(async (req, res) => {
   }
 
   try {
+    let publisher = await cache.getAsync(`${hostname}-publisher`)
+
+    if(publisher){
+      publisher = JSON.parse(publisher)
+    } else {
+      publisher = await getPublisherByHostname(hostname)
+      cache.setAsync(`${hostname}-publisher`, JSON.stringify(publisher)).then()
+    }
+
     let cachedImg = await cache.getAsync(`${site}_${url}`)  
+
+    let img = await getImg(url, site)
+
+    if(!img){
+      img = await addImg(dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url, uid, site)
+    }
     
     if (cachedImg && cachedImg !== '{}' && cachedImg !== '[]'){
       const adsInfo = JSON.parse(cachedImg)
@@ -67,9 +82,11 @@ exports.getAds = Controller(async (req, res) => {
         adsInfo.forEach(element => {
           if(element.adsinfo && element.adsinfo.length > 0) {
             const idItem = element.adsinfo[0].id
-            addImagePublisherMetadata(url, site, hostname, idItem, uid, userId, sessionId).then().catch(err => {
-              console.error(err, 'Error occurred in client publisher data saving')
-            })
+            if(img && publisher && idItem && userId && sessionId){
+              createClientImgPublData(userId, sessionId, img.id, img.img, idItem, publisher.id).then().catch(err => {
+                console.error(err, 'Error occurred in client publisher data saving')
+              })
+            }
           }
         })
       }
@@ -93,16 +110,7 @@ exports.getAds = Controller(async (req, res) => {
               password: password
           },
           data: formData
-      }       
-
-      let publisher = await cache.getAsync(`${hostname}-publisher`)
-
-      if(publisher){
-        publisher = JSON.parse(publisher)
-      } else {
-        publisher = await getPublisherByHostname(hostname)
-        cache.setAsync(`${hostname}-publisher`, JSON.stringify(publisher)).then()
-      }
+      } 
 
       let limit = getAndSetAdsPerImage(publisher, site)
   
@@ -134,12 +142,15 @@ exports.getAds = Controller(async (req, res) => {
         sendingResults.forEach(element => {
           if(element.adsinfo && element.adsinfo.length > 0) {
             const idItem = element.adsinfo[0].id
-            addImagePublisherMetadata(url, site, hostname, idItem, uid, userId, sessionId).then().catch(err => {
-              console.error(err, 'Error occurred in client publisher data saving')
-            })
+
+            if(img && publisher && idItem && userId && sessionId){
+              createClientImgPublData(userId, sessionId, img.id, img.img, idItem, publisher.id).then().catch(err => {
+                console.error(err, 'Error occurred in client publisher data saving')
+              })
+            }
           }
         })
-      } 
+      }
     
       res.status(200).send({
         results: sendingResults
@@ -646,7 +657,7 @@ const object_Filler = (
         product_site_url: result[int]['Product_URL_Web_encoded'],
         product_image_url: result[int]['Image_URL'],
         product_main_category_name: result[int]['Main_Category_Name'],
-        vista_keywords: getVistaKeywords(obj.class)
+        vista_keywords: obj.class
       },
       serv: serv,
       size: { w: img_width, h: img_height },
@@ -789,7 +800,7 @@ const sport_makeup_Filler = (
             product_site_url: result[int]['Product_URL_Web_encoded'],
             product_image_url: result[int]['Image_URL'],
             product_main_category_name: result[int]['Main_Category_Name'],
-            vista_keywords: getVistaKeywords(obj.label)
+            vista_keywords: obj.label
           },
           serv: serv,
           size: { w: img_width, h: img_height },
@@ -841,43 +852,10 @@ const flatten = (ary) => {
   }, [])
 }
 
-const addImagePublisherMetadata = (imageURL, page, hostname, idItem, uid, userId, sessionId) => {
-  
-  return new Promise(async (resolve, reject) => {
-   
-    try {
-      let publisher = await cache.getAsync(`${hostname}-publisher`)
-
-      if(publisher){
-        publisher = JSON.parse(publisher)
-      } else {
-        publisher = await getPublisherByHostname(hostname)
-        cache.setAsync(`${hostname}-publisher`, JSON.stringify(publisher)).then()
-      }
-
-      let img = await getImg(imageURL, page)
-
-      if(!img){
-        img = await addImg(dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), imageURL, uid, page)
-      }
-
-      if(img && publisher && userId && sessionId){
-        await createClientImgPublData(userId, sessionId, img.id, img.img, idItem, publisher.id)
-      }
-      
-      resolve('success')
-    } catch(err) {
-        console.log(`Adding image publisher metadata failed for site ${hostname}`)
-        console.log(err)
-        reject(err)
-    }
-  })
-}
-
 const matchCategoryWithProductAliases = (category, productName) => {
 
   if(category && productName){
-    productName = productName.replaceAll(' ', '_')
+    productName = productName.replaceAll(' ', '_').replaceAll('\n', '')
     let aliases = productAliases[productName.toLowerCase()]
 
     if(!aliases){
@@ -894,24 +872,6 @@ const matchCategoryWithProductAliases = (category, productName) => {
   }
 
   return false
-}
-
-const getVistaKeywords = (productName) => {
-
-  if(productName){
-    productName = productName.replaceAll(' ', '_')
-    let aliases = productAliases[productName.toLowerCase()]
-
-    if(!aliases){
-      aliases = [productName.toLowerCase()]
-    }
-
-    if(aliases){
-      return aliases.join(',')
-    }
-  }
-
-  return null
 }
 
 const updateSessionData = (sessionId, duration) => {
