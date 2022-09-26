@@ -155,8 +155,8 @@ exports.getStats = Controller(async(req, res) => {
                                         cache.setAsync(`${getHostname(Object.keys(imgsGrouped)[i])}-publisher`, JSON.stringify(publisher)).then();
                                     } 
 
-                                    const init = new Date(req.query.init).toISOString()
-                                    const fin = new Date(req.query.fin).toISOString()
+                                    const init = req.query.init ? new Date(req.query.init).toISOString() : new Date().toISOString()
+                                    const fin = req.query.fin ? new Date(req.query.fin).toISOString() : new Date().toISOString()
                                     let rewards = {};
                                 
                                     try{
@@ -447,8 +447,8 @@ exports.getStatsUrl = Controller(async(req, res) => {
                                     }
                                     
                                     let rewards = {};
-                                    const init = new Date(req.query.init).toISOString();
-                                    const fin = new Date(req.query.fin).toISOString();
+                                    const init = req.query.init ? new Date(req.query.init).toISOString() : new Date().toISOString()
+                                    const fin = req.query.fin ? new Date(req.query.fin).toISOString() : new Date().toISOString()
                                     
                                     try{                              
                                         rewards = await cache.getAsync(`${init}_${fin}_${publisher.publisherId}`)
