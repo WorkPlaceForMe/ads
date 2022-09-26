@@ -227,7 +227,7 @@ exports.getStats = Controller(async(req, res) => {
 })
 
 exports.getStatsUrl = Controller(async(req, res) => {
-    const urlQuery = req.query.url
+    let urlQuery = getHostname(req.query.url)
     let ads = {},
     imagesWithAds = {},
     clicks = {},
