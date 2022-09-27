@@ -4,7 +4,7 @@ const verify = require('../middleware/verifyPubl')
 
 const router = express.Router()
 
-router.get('/api/report/getAllClientData', controllers.getAllClientData)
+router.get('/api/report/getAllClientSessionData', controllers.getAllClientSessionData)
 
 router.get('/api/session', controllers.sessionData)
 

@@ -893,7 +893,7 @@ const updateSessionData = (sessionId, duration) => {
   })
 }
 
-exports.getAllClientData = Controller(async (req, res) => {
+exports.getAllClientSessionData = Controller(async (req, res) => {
   const data = {}
   const cientImgPublDataList = await getAllCientImgPublData()
 
