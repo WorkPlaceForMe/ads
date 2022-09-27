@@ -922,7 +922,7 @@ exports.getAllSessionData = Controller(async (req, res) => {
 })
 
 exports.getAllClientData = Controller(async (req, res) => {
-  const data = {}
+  const clientData = []
   const clientImgPublDataList = await getAllCientImgPublData()
 
   if(clientImgPublDataList){
@@ -932,32 +932,20 @@ exports.getAllClientData = Controller(async (req, res) => {
       const imgUrl = elem.imgUrl
       const duration = elem.duration
       const publisherId = elem.publId
-      let clientData = data[clientId]
-
-      if(!clientData){
-        clientData = {}
-      }
-
-      let sessionData = clientData[sessionId]
-
-      if(!sessionData){
-        sessionData = []
-      }
-
-      sessionData.push({
+    
+      clientData.push({
+        clientId,
+        sessionId,
         imgUrl,
         publisherId,
         duration
       })
-
-      clientData[sessionId] = sessionData
-      data[clientId] = clientData
     })
   }
 
 
   res.status(200).send({
-    results: data
+    results: clientData
   })
 })
 
