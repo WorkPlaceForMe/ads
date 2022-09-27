@@ -558,6 +558,16 @@ export class DashboardComponent implements OnInit {
           type: 'string',
           filter: false,
         },
+        vista_keywords: {
+          title: 'Vista Keywords',
+          type: 'string',
+          filter: false,
+        },
+        category: {
+          title: 'Product Category',
+          type: 'string',
+          filter: false,
+        },
         usercount: {
           title: 'Unique Visitors Count',
           type: 'string',

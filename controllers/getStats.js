@@ -586,7 +586,9 @@ exports.getStatsAd = Controller(async(req, res) => {
     adIds = new Set(),
     usercount = {},
     duration = {},
-    ads = []
+    ads = [],
+    vista_keywords = [],
+    category = []
 
     if(site.endsWith('/')){
         site = site.substring(0, site.length - 1)
@@ -610,6 +612,8 @@ exports.getStatsAd = Controller(async(req, res) => {
                 views[id] = stat.views
                 adIcons[id] = stat['product_image_url']
                 adURL[id] = stat['product_site_url']
+                vista_keywords[id] = stat['vista_keywords'],
+                category[id] = stat['product_main_category_name']
       
                 if(!usercount[id]){
                   usercount[id] = new Set()
@@ -630,6 +634,8 @@ exports.getStatsAd = Controller(async(req, res) => {
                     views: views[adId],
                     clicks: clicks[adId],           
                     ctr: views[adId] == 0 ? 0.00 : Math.round((clicks[adId] / views[adId])*100)/100,
+                    vista_keywords: vista_keywords[adId],
+                    category: category[adId],
                     usercount: views[adId] == 0 ? 0 : usercount[adId].size,
                     duration: Math.round((duration[adId]/60.0)*100)/100                   
                 })
@@ -643,6 +649,8 @@ exports.getStatsAd = Controller(async(req, res) => {
                     views: 0,
                     clicks: 0,                           
                     ctr: 0,
+                    vista_keywords: '',
+                    category: '',
                     usercount: 0,
                     duration: 0
                 })
@@ -706,9 +714,9 @@ function getAdsListPerImg(site, callback){
 }
 
 function getAdsList(img, site, callback){
-    return db.query(`SELECT clps.id, clps.product_image_url, clps.product_site_url, clps.clientId, 
+    return db.query(`SELECT clps.id, clps.product_image_url, clps.product_site_url, clps.vista_keywords, clps.product_main_category_name, clps.clientId, 
     COALESCE(imps.clicks, 0) as clicks, COALESCE(imps.views, 0) as views, clps.duration FROM
-        (SELECT adpg.id, adpg.product_image_url, adpg.product_site_url, 
+        (SELECT adpg.id, adpg.product_image_url, adpg.product_site_url, adpg.vista_keywords, adpg.product_main_category_name,
         clip.clientId, sum(clip.duration) as duration FROM (SELECT climgpl.clientId, climgpl.sessionId, climgpl.idItem, climgpl.imgId, max(climgpl.duration) as duration from ${conf.get('database')}.clientimgpubl climgpl 
         group by climgpl.clientId, climgpl.sessionId, climgpl.idItem, climgpl.imgId) clip,
         ${conf.get('database')}.adspages adpg
