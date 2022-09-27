@@ -892,3 +892,47 @@ const updateSessionData = (sessionId, duration) => {
     }
   })
 }
+
+exports.getAllClientData = Controller(async (req, res) => {
+  const data = {}
+  const cientImgPublDataList = await getAllCientImgPublData()
+
+  if(cientImgPublDataList){
+    cientImgPublDataList.forEach((elem) => {
+      const clientId = elem.clientId
+      const sessionId = elem.sessionId
+      const imgUrl = elem.imgUrl
+      const duration = elem.duration
+      const publisherId = elem.publId
+      let clientData = data[clientId]
+
+      if(!clientData){
+        clientData = {}
+      }
+
+      let sessionData = clientData[sessionId]
+
+      if(!sessionData){
+        sessionData = []
+      }
+
+      sessionData.push({
+        imgUrl,
+        duration,
+        publisherId
+      })
+
+      clientData[sessionId] = sessionData
+      data[clientId] = clientData
+    })
+  }
+
+
+  res.status(200).send({
+    results: data
+  })
+})
+
+function getAllCientImgPublData(site) {
+  return db1.clientImgPubl.findAll();
+}

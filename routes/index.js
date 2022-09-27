@@ -4,6 +4,8 @@ const verify = require('../middleware/verifyPubl')
 
 const router = express.Router()
 
+router.get('/api/report/getAllClientData', controllers.getAllClientData)
+
 router.get('/api/session', controllers.sessionData)
 
 router.get('/api/v1/ads', controllers.getAds)
