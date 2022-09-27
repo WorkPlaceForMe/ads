@@ -900,13 +900,14 @@ exports.getAllSessionData = Controller(async (req, res) => {
   if(sessionDataList){
     sessionDataList.forEach((elem) => {
       const clientId = elem.clientId
-      const sessionId = elem.sessionId
+      const sessionId = elem.id
       const duration = elem.duration
       const site = elem.site
       const publisherId = elem.publId
 
       sessionData.push({
         clientId,
+        sessionId,
         sessionId,
         site,
         publisherId,
