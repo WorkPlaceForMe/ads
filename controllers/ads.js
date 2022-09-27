@@ -893,12 +893,39 @@ const updateSessionData = (sessionId, duration) => {
   })
 }
 
-exports.getAllClientSessionData = Controller(async (req, res) => {
-  const data = {}
-  const cientImgPublDataList = await getAllCientImgPublData()
+exports.getAllSessionData = Controller(async (req, res) => {
+  const sessionData = []
+  const sessionDataList = await getAllSessionData()
 
-  if(cientImgPublDataList){
-    cientImgPublDataList.forEach((elem) => {
+  if(sessionDataList){
+    sessionDataList.forEach((elem) => {
+      const clientId = elem.clientId
+      const sessionId = elem.sessionId
+      const duration = elem.duration
+      const site = elem.site
+      const publisherId = elem.publId
+
+      sessionData.push({
+        clientId,
+        sessionId,
+        site,
+        publisherId,
+        duration        
+      })
+    })
+  }
+
+  res.status(200).send({
+    results: sessionData
+  })
+})
+
+exports.getAllClientData = Controller(async (req, res) => {
+  const data = {}
+  const clientImgPublDataList = await getAllCientImgPublData()
+
+  if(clientImgPublDataList){
+    clientImgPublDataList.forEach((elem) => {
       const clientId = elem.clientId
       const sessionId = elem.sessionId
       const imgUrl = elem.imgUrl
@@ -918,8 +945,8 @@ exports.getAllClientSessionData = Controller(async (req, res) => {
 
       sessionData.push({
         imgUrl,
-        duration,
-        publisherId
+        publisherId,
+        duration
       })
 
       clientData[sessionId] = sessionData
@@ -933,6 +960,10 @@ exports.getAllClientSessionData = Controller(async (req, res) => {
   })
 })
 
-function getAllCientImgPublData(site) {
-  return db1.clientImgPubl.findAll();
+function getAllCientImgPublData() {
+  return db1.clientImgPubl.findAll()
+}
+
+function getAllSessionData() {
+  return db1.clientSession.findAll()
 }
