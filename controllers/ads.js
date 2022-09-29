@@ -71,7 +71,7 @@ exports.getAds = Controller(async (req, res) => {
 
     if(adsCountPerSession[sessionId] == undefined || adsCountPerSession[sessionId] >= adsPerPage){
       delete adsCountPerSession[sessionId] 
-      return res.status(500).json({ success: false, message: "Required no of ads already served" })
+      return res.status(400).json({ success: false, message: "Required no of ads already served" })
     }
 
     const cachedImg = await cache.getAsync(`${site}_${url}`)  
