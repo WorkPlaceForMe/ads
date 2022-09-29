@@ -33,6 +33,11 @@ module.exports = (sequelize, Sequelize) => {
             allowNull: true,
             defaultValue: 1
         },
+        adsperpage: {
+            type: Sequelize.INTEGER,
+            allowNull: true,
+            defaultValue: 1
+        }
     });
   
     return publishers;

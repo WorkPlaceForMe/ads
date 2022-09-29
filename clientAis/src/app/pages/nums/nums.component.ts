@@ -14,35 +14,33 @@ export class NumsComponent implements OnInit {
   @Input() value: string | number;
   @Input() rowData: any;
   @Output() save: EventEmitter<any> = new EventEmitter();
-  minPossibleAdsCount:number;
-  maxPossibleAdsCount:number;
+  minPossibleAdsCountPerPage:number;
   publisherId:string;
   page:string;
 
   ngOnInit() {
-    if(this.value == 'adsperimage'){
-      this.minPossibleAdsCount = this.rowData.minPossibleAdsCount
-      this.maxPossibleAdsCount = this.rowData.maxPossibleAdsCount
+    if(this.value == 'adsperpage'){
+      this.minPossibleAdsCountPerPage = this.rowData.minPossibleAdsCountPerImage
       this.publisherId = this.rowData.publisherId
       this.page = this.rowData.url
     }
   }
 
   updatePage(){
-    if(!this.rowData.adsperimage){
-      alert('Max ads per image no cannot be empty')
-    } else if(this.rowData.adsperimage < this.minPossibleAdsCount || this.rowData.adsperimage > this.maxPossibleAdsCount){
-      alert(`Wrong max ads per image no specified, it should be between ${this.minPossibleAdsCount} to ${this.maxPossibleAdsCount}`)
+    if(!this.rowData.adsperpage){
+      alert('Max ads per page no cannot be empty')
+    } else if(this.rowData.adsperpage < this.minPossibleAdsCountPerPage){
+      alert(`Wrong max ads per page no specified, it should be greater or equal to ${this.minPossibleAdsCountPerPage}`)
     } else {
-        this.face.updatePage({adsperimage: this.rowData.adsperimage, publisherId: this.publisherId, page: this.page}).subscribe(
+        this.face.updatePage({adsperpage: this.rowData.adsperpage, publisherId: this.publisherId, page: this.page}).subscribe(
         res => {
-          console.log('Page updated with latest max ads per image no')
+          console.log('Page updated with latest max ads per page no')
         },
         err => {
           if(err.error.mess){
             alert(err.error.mess)
           } else {
-            alert('There is some error in updating max ads per image no')
+            alert('There is some error in updating max ads per page no')
           }
         }
       )

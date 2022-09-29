@@ -1,29 +1,13 @@
 const db = require('../campaigns-db/database')
 const Publishers = db.publishers;
-const { Op } = require("sequelize");
+const { getHostname } = require('../helper/util')
 
 let checkDuplicatePubl = (req, res, next) => {
-  // Username
-  let name;
-  if(req.body.name.startsWith("http")){
-    name = req.body.name.split('http')[1]
-    if(name.includes("www.")){
-      name = name.split('www.')[1]
-    }else{
-      name = req.body.name.split('//')[1]
-    }
-  }else{
-    if(req.body.name.startsWith("www.")){
-      name = req.body.name.split('www.')[1]
-    }else{
-      name = req.body.name
-    }
-  }
+  let hostname = getHostname(req.body.name)
+  
   Publishers.findOne({
     where: {
-      name: {
-        [Op.substring]: name
-      }
+      hostname: hostname
     }
   }).then(user => {
     console.log(user)
@@ -39,27 +23,11 @@ let checkDuplicatePubl = (req, res, next) => {
 };
 
 let checkDuplicatePublEdit = (req, res, next) => {
-  // Username
-  let name;
-  if(req.body.name.startsWith("http")){
-    name = req.body.name.split('http')[1]
-    if(name.includes("www.")){
-      name = name.split('www.')[1]
-    }else{
-      name = req.body.name.split('//')[1]
-    }
-  }else{
-    if(req.body.name.startsWith("www.")){
-      name = req.body.name.split('www.')[1]
-    }else{
-      name = req.body.name
-    }
-  }
+  let hostname = getHostname(req.body.name)
+  
   Publishers.findOne({
     where: {
-      name: {
-        [Op.substring]: name
-      }
+      hostname: hostname
     }
   }).then(user => {
     if (user && user.dataValues.id != req.body.id) {

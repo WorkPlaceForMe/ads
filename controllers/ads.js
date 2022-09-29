@@ -8,7 +8,7 @@ const convert = require('../helper/convertObject').convert
 const dateFormat = require('dateformat')
 const auth = require('../helper/auth')
 const cache = require('../helper/cacheManager')
-const { getStrippedURL, shuffleArray, getHostname, getAndSetAdsPerImage } = require('../helper/util')
+const { getStrippedURL, shuffleArray, getHostname, getAndSetAdsPerPage, adsCountPerSession } = require('../helper/util')
 const { productAliases } = require('../helper/productAliases')
 const db1 = require('../campaigns-db/database')
 const imgsPage = db1.imgsPage
@@ -67,20 +67,35 @@ exports.getAds = Controller(async (req, res) => {
       cache.setAsync(`${hostname}-publisher`, JSON.stringify(publisher)).then()
     }
 
-    let cachedImg = await cache.getAsync(`${site}_${url}`)  
+    let adsPerPage = getAndSetAdsPerPage(publisher, site)
 
-    let img = await getImg(url, site)
-
-    if(!img){
-      img = await addImg(dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url, uid, site)
+    if(adsCountPerSession[sessionId] == undefined || adsCountPerSession[sessionId] >= adsPerPage){
+      delete adsCountPerSession[sessionId] 
+      return res.status(500).json({ success: false, message: "Required no of ads already served" })
     }
+
+    const cachedImg = await cache.getAsync(`${site}_${url}`)  
+    const newAdsInfo = []    
     
     if (cachedImg && cachedImg !== '{}' && cachedImg !== '[]'){
       const adsInfo = JSON.parse(cachedImg)
 
       if(adsInfo && adsInfo.length > 0 ) {
-        adsInfo.forEach(element => {
-          if(element.adsinfo && element.adsinfo.length > 0) {
+        let img = await getImg(url, site)
+
+        if(!img){
+          img = await addImg(dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url, uid, site)
+        }
+
+        for(element of adsInfo) {
+          if(adsCountPerSession[sessionId] && adsCountPerSession[sessionId] >= adsPerPage){
+            delete adsCountPerSession[sessionId]
+            break
+          }
+
+          if(adsCountPerSession[sessionId] >=0 && element.adsinfo && element.adsinfo.length > 0) {
+            adsCountPerSession[sessionId] += 1
+            newAdsInfo.push(element)
             const idItem = element.adsinfo[0].id
             if(img && publisher && idItem && userId && sessionId){
               createClientImgPublData(userId, sessionId, img.id, img.img, idItem, publisher.id).then().catch(err => {
@@ -88,11 +103,11 @@ exports.getAds = Controller(async (req, res) => {
               })
             }
           }
-        })
+        }
       }
 
       return res.status(200).send({
-          results: JSON.parse(cachedImg)
+          results: newAdsInfo
       })
     } else{
       let formData = new FormData()
@@ -112,7 +127,7 @@ exports.getAds = Controller(async (req, res) => {
           data: formData
       } 
 
-      let limit = getAndSetAdsPerImage(publisher, site)
+      let limit = publisher.adsperimage || 1
   
       console.log(`Sending request to Vista Server for image ${url}`)
       const response = await axios(request_config)
@@ -133,27 +148,40 @@ exports.getAds = Controller(async (req, res) => {
       if (flat.length > limit) {
         flat.length = limit
       }
-      
-      const sendingResults = await convert(flat)      
+
+      const sendingResults = await convert(flat)
+      const newAdsInfo = []     
       
       cache.setAsync(`${site}_${url}`, JSON.stringify(sendingResults))
 
       if(sendingResults && sendingResults.length > 0 ) {
-        sendingResults.forEach(element => {
-          if(element.adsinfo && element.adsinfo.length > 0) {
-            const idItem = element.adsinfo[0].id
+        let img = await getImg(url, site)
 
+        if(!img){
+          img = await addImg(dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"), url, uid, site)
+        }
+
+        for(element of sendingResults) {
+          if(adsCountPerSession[sessionId] && adsCountPerSession[sessionId] >= adsPerPage){
+            delete adsCountPerSession[sessionId]
+            break
+          }
+
+          if(adsCountPerSession[sessionId] >=0 && element.adsinfo && element.adsinfo.length > 0) {
+            adsCountPerSession[sessionId] += 1
+            newAdsInfo.push(element)
+            const idItem = element.adsinfo[0].id
             if(img && publisher && idItem && userId && sessionId){
               createClientImgPublData(userId, sessionId, img.id, img.img, idItem, publisher.id).then().catch(err => {
                 console.error(err, 'Error occurred in client publisher data saving')
               })
             }
           }
-        })
+        }
       }
     
       res.status(200).send({
-        results: sendingResults
+        results: newAdsInfo
       })
     } 
   } catch (err) {

@@ -21,9 +21,10 @@ export class AddComponent implements OnInit {
   @Input() onChange: Function;
   @Input() id: string;
   snippet: string;
-  minPossibleAdsCount: number = 1
-  maxPossibleAdsCount: number = 4
-  error: string = null
+  minPossibleAdsCountPerImage: number = 1
+  maxPossibleAdsCountPerImage: number = 4
+  genericError: string = null
+  namedError: string = null
   
   constructor(
     private formBuilder: FormBuilder,
@@ -38,31 +39,37 @@ export class AddComponent implements OnInit {
         .subscribe(
           res =>{
             console.log(res)           
-            this.minPossibleAdsCount = res['minPossibleAdsCount']
-            this.maxPossibleAdsCount = res['maxPossibleAdsCount']
+            this.minPossibleAdsCountPerImage = res['minPossibleAdsCountPerImage']
+            this.maxPossibleAdsCountPerImage = res['maxPossibleAdsCountPerImage']
             this.registerForm.controls['name'].setValue(res['publ'].name)
             this.registerForm.controls['nickname'].setValue(res['publ'].nickname)
             this.registerForm.controls['adsperimage'].setValue(res['publ'].adsperimage)
+            this.registerForm.controls['adsperpage'].setValue(res['publ'].adsperpage)
 
-            this.registerForm.controls['adsperimage'].setValidators([Validators.required, Validators.min(this.minPossibleAdsCount), Validators.max(this.maxPossibleAdsCount)])          },
+            this.registerForm.controls['adsperimage'].setValidators([Validators.required, Validators.min(this.minPossibleAdsCountPerImage), Validators.max(this.maxPossibleAdsCountPerImage)])
+            this.registerForm.controls['adsperpage'].setValidators([Validators.required, Validators.min(this.minPossibleAdsCountPerImage)])
+          },
           err => console.error(err)
       )
-    }else{
+    } else {
       this.facesService.getServer().subscribe(
         res =>  {
           this.snippet = `'<script type="text/javascript" src="${res['server']}/system/g3c.scan.image.sph.js"></script>'`
-          this.minPossibleAdsCount = res['minPossibleAdsCount']
-          this.maxPossibleAdsCount = res['maxPossibleAdsCount']
-          this.registerForm.controls['adsperimage'].setValue(this.minPossibleAdsCount)
+          this.minPossibleAdsCountPerImage = res['minPossibleAdsCountPerImage']
+          this.maxPossibleAdsCountPerImage = res['maxPossibleAdsCountPerImage']
+          this.registerForm.controls['adsperimage'].setValue(this.minPossibleAdsCountPerImage)
+          this.registerForm.controls['adsperpage'].setValue(this.minPossibleAdsCountPerImage)
 
-          this.registerForm.controls['adsperimage'].setValidators([Validators.required, Validators.min(this.minPossibleAdsCount), Validators.max(this.maxPossibleAdsCount)])
+          this.registerForm.controls['adsperimage'].setValidators([Validators.required, Validators.min(this.minPossibleAdsCountPerImage), Validators.max(this.maxPossibleAdsCountPerImage)])
+          this.registerForm.controls['adsperpage'].setValidators([Validators.required, Validators.min(this.minPossibleAdsCountPerImage)])
         }        
       )
     }
     
     this.registerForm = this.formBuilder.group({
       nickname: ['', [Validators.required]],
-      adsperimage: [this.minPossibleAdsCount, ],
+      adsperimage: [this.minPossibleAdsCountPerImage, ],
+      adsperpage: [this.minPossibleAdsCountPerImage, ],
       name: ['', [Validators.required]],
     });
   }
@@ -70,11 +77,13 @@ export class AddComponent implements OnInit {
   get f() { return this.registerForm.controls; }
 
   onSubmit() {
-  this.error = null
+  this.genericError = null
+  this.namedError = null
   this.submitted = true;
   this.values = {
     name: 'primary',
     adsperimage: 1,
+    adsperpage: 1,
     nickname: 'primary'
   }
   // stop here if form is invalid
@@ -100,16 +109,17 @@ export class AddComponent implements OnInit {
       if (err.error.repeated === 'name'){
           this.values.name = 'danger';
           this.registerForm.controls['name'].setErrors({cantMatch: true});
-      }
-
-      if(err.error.mess){
-        alert(err.error.mess)
+      } else if (err.error.name){
+        this.values[err.error.name] = 'danger';
+        this.registerForm.controls[err.error.name].setErrors({invalid: true});
+        this.namedError = err.error.mess
+      } else if(err.error.mess){
+        this.genericError = err.error.mess
       } else {
         alert('There is some error in creating the website')
       }
       
       this.is_saving = false
-      this.error = err.error.mess
     }
     )
   } else {
@@ -123,11 +133,19 @@ export class AddComponent implements OnInit {
       err => {
         console.log(err)
         this.is_saving = false
-        this.error = err.error.mess
+
+        if (err.error.name){
+          this.values[err.error.name] = 'danger';
+          this.registerForm.controls[err.error.name].setErrors({invalid: true});
+          this.namedError = err.error.mess
+        } else if(err.error.mess){
+          this.genericError = err.error.mess
+        } else {
+          alert('There is some error in creating the website')
+        }
       }
   );
   }
-
 }
 
 }

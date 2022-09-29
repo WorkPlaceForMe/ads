@@ -193,12 +193,12 @@ export class DashboardComponent implements OnInit {
       this.settings.columns.url.title = 'Webpage'
       this.face.getStatsUrl(params.url,this.range).subscribe(
         res => {
-          this.settings['columns']['adsperimage'] = {
-            title: 'Max Ads Per Image',
+          this.settings['columns']['adsperpage'] = {
+            title: 'Max Ads Per Page',
             type: 'custom',
             filter: false,
             valuePrepareFunction: (value, row, cell) => {
-              return 'adsperimage'
+              return 'adsperpage'
             },
             renderComponent: NumsComponent,
             onComponentInitFunction:(instance) => {

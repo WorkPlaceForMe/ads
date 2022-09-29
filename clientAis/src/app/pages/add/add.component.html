@@ -2,7 +2,7 @@
   <div class='col-md-12'>
     <nb-card>  
       <nb-card-body>
-        <span *ngIf="error" class="invalid-feedback" [ngStyle]="{'display': 'block', 'padding-bottom': '10px'}">{{error}}</span>
+        <span *ngIf="genericError" class="invalid-feedback" [ngStyle]="{'display': 'block', 'padding-bottom': '10px'}">{{genericError}}</span>
         
         <div *ngIf="!edit">
             <p><b>If the website already registered with Accesstrade please put the same registered website name in website field</b></p>
@@ -25,10 +25,20 @@
             </div>
             <div class="form-group">
               <label for="adsperimage" class="label">Max Ads Per Image</label>
-              <input type="number" min={{minPossibleAdsCount}} max={{maxPossibleAdsCount}} class="form-control" formControlName="adsperimage" [ngClass]="{ 'is-invalid': submitted && f.adsperimage.errors }" nbInput fullWidth id="adsperimage" [status]='values.adsperimage' />
+              <input type="number" min={{minPossibleAdsCountPerImage}} max={{maxPossibleAdsCountPerImage}} class="form-control" formControlName="adsperimage" [ngClass]="{ 'is-invalid': submitted && f.adsperimage.errors }" nbInput fullWidth id="adsperimage" [status]='values.adsperimage' />
               <div *ngIf="submitted && f.adsperimage.errors" class="invalid-feedback">
                 <div *ngIf="f.adsperimage.errors.required">Max Ads Per Image is required</div>
-                <div *ngIf="f.adsperimage.errors.min || f.adsperimage.errors.max">Max Ads Per Image value will be between {{minPossibleAdsCount}} to {{maxPossibleAdsCount}}</div>
+                <div *ngIf="f.adsperimage.errors.invalid">{{namedError}}</div>
+                <div *ngIf="f.adsperimage.errors.min || f.adsperimage.errors.max">Max Ads Per Image value will be between {{minPossibleAdsCountPerImage}} to {{maxPossibleAdsCountPerImage}}</div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="adsperpage" class="label">Default Max Ads Per Page</label>
+              <input type="number" min={{minPossibleAdsCountPerImage}} class="form-control" formControlName="adsperpage" [ngClass]="{ 'is-invalid': submitted && f.adsperpage.errors }" nbInput fullWidth id="adsperpage" [status]='values.adsperpage' />
+              <div *ngIf="submitted && f.adsperpage.errors" class="invalid-feedback">
+                <div *ngIf="f.adsperpage.errors.required">Default Max Ads Per Page is required</div>
+                <div *ngIf="f.adsperpage.errors.invalid">{{namedError}}</div>
+                <div *ngIf="f.adsperpage.errors.min">Default Max Ads Per Page value will be greater or equal to {{minPossibleAdsCountPerImage}}</div>
               </div>
             </div>
             <div class="form-group">

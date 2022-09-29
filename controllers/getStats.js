@@ -5,7 +5,7 @@ const cache = require('../helper/cacheManager')
 const conf = require('../middleware/prop')
 const db1 = require('../campaigns-db/database')
 const publishers = db1.publishers
-const { getHostname, getAndSetAdsPerImage } = require('../helper/util')
+const { getHostname, getAndSetAdsPerPage } = require('../helper/util')
 
 exports.getStats = Controller(async(req, res) => {
     let ads = {},
@@ -370,8 +370,8 @@ exports.getStatsUrl = Controller(async(req, res) => {
                                 if(err) {
                                     res.status(500).json(err);
                                 } else {
-                                    const minPossibleAdsCount = conf.get('min_possible_ads_count') || 1
-                                    const maxPossibleAdsCount = conf.get('max_possible_ads_count') || 4
+                                    const minPossibleAdsCountPerImage = conf.get('min_possible_ads_count_per_image') || 1
+                                    const maxPossibleAdsCountPerImage = conf.get('max_possible_ads_count_per_image') || 4
 
                                     for(let i = 0; i < Object.keys(imgsGrouped).length; i++){
                                         if(!clicksGrouped[Object.keys(imgsGrouped)[i]]){
@@ -404,7 +404,7 @@ exports.getStatsUrl = Controller(async(req, res) => {
                                             viewsPerAd = 0;
                                         }
                                  
-                                        let adsPerImage = getAndSetAdsPerImage(publisher, Object.keys(imgsGrouped)[i])
+                                        let adsPerPage = getAndSetAdsPerPage(publisher, Object.keys(imgsGrouped)[i])
                                         let imgPerPage = imagesWithAds[Object.keys(imgsGrouped)[i]]
                                         let totImgs = imgsGrouped[Object.keys(imgsGrouped)[i]]
         
@@ -432,9 +432,9 @@ exports.getStatsUrl = Controller(async(req, res) => {
                                             clicksPerAd: clicksPerAd,
                                             viewsPerAd : viewsPerAd,                         
                                             images: imgsGrouped[Object.keys(imgsGrouped)[i]],                                            
-                                            adsperimage: adsPerImage,
-                                            minPossibleAdsCount: minPossibleAdsCount,
-                                            maxPossibleAdsCount: maxPossibleAdsCount,
+                                            adsperpage: adsPerPage,
+                                            minPossibleAdsCountPerImage: minPossibleAdsCountPerImage,
+                                            maxPossibleAdsCountPerImage: maxPossibleAdsCountPerImage,
                                             imgNum: imgPerPage || 0,
                                             totImgs: totImgs,
                                             usercount: userDuration ? userDuration.usercount : 0, 
@@ -714,7 +714,8 @@ function getAdsListPerImg(site, callback){
 }
 
 function getAdsList(img, site, callback){
-    return db.query(`SELECT clps.id, clps.product_image_url, clps.product_site_url, clps.vista_keywords, clps.product_main_category_name, clps.clientId, 
+
+    let query = `SELECT clps.id, clps.product_image_url, clps.product_site_url, clps.vista_keywords, clps.product_main_category_name, clps.clientId, 
     COALESCE(imps.clicks, 0) as clicks, COALESCE(imps.views, 0) as views, clps.duration FROM
         (SELECT adpg.id, adpg.product_image_url, adpg.product_site_url, adpg.vista_keywords, adpg.product_main_category_name,
         clip.clientId, sum(clip.duration) as duration FROM (SELECT climgpl.clientId, climgpl.sessionId, climgpl.idItem, climgpl.imgId, max(climgpl.duration) as duration from ${conf.get('database')}.clientimgpubl climgpl 
@@ -733,7 +734,29 @@ function getAdsList(img, site, callback){
         and (imps.url = '${site}' OR imps.url = 'https://${site}' OR imps.url = 'https://www.${site}' 
         OR imps.url = 'http://${site}' OR imps.url = 'http://www.${site}')     
         group by clps.clientId, clps.id, clps.product_image_url, clps.product_site_url, imps.clicks, imps.views
-    `, callback)
+    `
+
+    if(!img) {
+        query = `SELECT clps.id, clps.product_image_url, clps.product_site_url, clps.vista_keywords, clps.product_main_category_name, clps.clientId, 
+    COALESCE(imps.clicks, 0) as clicks, COALESCE(imps.views, 0) as views, clps.duration FROM
+        (SELECT adpg.id, adpg.product_image_url, adpg.product_site_url, adpg.vista_keywords, adpg.product_main_category_name,
+        clip.clientId, sum(clip.duration) as duration FROM (SELECT climgpl.clientId, climgpl.sessionId, climgpl.idItem, climgpl.imgId, max(climgpl.duration) as duration from ${conf.get('database')}.clientimgpubl climgpl 
+        group by climgpl.clientId, climgpl.sessionId, climgpl.idItem, climgpl.imgId) clip,
+        ${conf.get('database')}.adspages adpg
+        where clip.imgId in(SELECT id from ${conf.get('database')}.imgspages ipg where
+        (ipg.site = '${site}' OR ipg.site = 'https://${site}' OR ipg.site = 'https://www.${site}' 
+        OR ipg.site = 'http://${site}' OR ipg.site = 'http://www.${site}'))
+        and clip.idItem = adpg.id
+        group by clip.idItem, clip.clientId) clps
+        left join (SELECT imp.idItem, imp.img, imp.url, COUNT( CASE WHEN type = '2' THEN 1 END ) AS clicks, COUNT( CASE WHEN type = '1' THEN 1 END ) 
+        AS views FROM ${conf.get('database')}.impressions imp group by imp.idItem, imp.img, imp.url) imps
+        ON clps.id = imps.idItem
+        and (imps.url = '${site}' OR imps.url = 'https://${site}' OR imps.url = 'https://www.${site}' 
+        OR imps.url = 'http://${site}' OR imps.url = 'http://www.${site}')     
+        group by clps.clientId, clps.id, clps.product_image_url, clps.product_site_url, imps.clicks, imps.views
+    `
+    }
+    return db.query(query, callback)
 }
 
 function getAdsClicksAndViews(img,site,callback){

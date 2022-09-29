@@ -4,7 +4,7 @@ const website = require('../helper/website')
 const { v4: uuidv4 } = require('uuid')
 const seq = require('../campaigns-db/database')
 const conf = require('../middleware/prop')
-const { getHostname } = require('../helper/util')
+const { getHostname, adsCountPerSession } = require('../helper/util')
 
 exports.auth = Controller(async(req, res) => {
 
@@ -65,8 +65,8 @@ exports.check = Controller(async(req, res) => {
                     }
 
                     console.log(`Adding site ${hostname} to system`)
-                    const minPossibleAdsCount = conf.get('min_possible_ads_count') || 1
-                    const publisherData = await addPublisher(locId, hostname, publisherId, minPossibleAdsCount)
+                    const minPossibleAdsCountPerImage = conf.get('min_possible_ads_count_per_image') || 1
+                    const publisherData = await addPublisher(locId, hostname, publisherId, minPossibleAdsCountPerImage, minPossibleAdsCountPerImage)
                     
                     cache.setAsync(`${publisherData.hostname}-publisher`, JSON.stringify(publisherData))
 
@@ -75,6 +75,8 @@ exports.check = Controller(async(req, res) => {
 
                         if(!clientSession && userId) {
                             createClientSession(sessionId, userId, publisherData.id, page, 5)
+                            delete adsCountPerSession[sessionId]
+                            adsCountPerSession[sessionId] = 0
                         }
                     }
                     return res.status(200).json({success: true, message: 'Site registered'})
@@ -83,16 +85,19 @@ exports.check = Controller(async(req, res) => {
                     if(rows[0].enabled != 'true'){
                         return res.status(200).json({success: false, site: hostname, message: 'Site Disabled'})
                     }
-                }
+
                     if(sessionId) {
                         const clientSession = await getClientSessionBySessionId(sessionId)
-
+    
                         if(!clientSession && userId) {
                             createClientSession(sessionId, userId, rows[0].id, page, 5)
+                            delete adsCountPerSession[sessionId]
+                            adsCountPerSession[sessionId] = 0
                         }
                     }
-                    
-                    return res.status(200).json({success: true, site: hostname, message: 'Site already registered'})
+                }               
+                
+                return res.status(200).json({success: true, site: hostname, message: 'Site already registered'})
             }
         } catch(err){
             console.log(`Error in registering site ${hostname}`)
@@ -126,7 +131,7 @@ function createClientSession(sessionId, clientId, publisherId, page, timeSlice) 
   })
 }
 
-function addPublisher(id, site, idAffiliate, minPossibleAdsCount){
+function addPublisher(id, site, idAffiliate, adsperimage, adsperpage){
     return seq.publishers.create({
         id: id,
         name: site,
@@ -134,7 +139,8 @@ function addPublisher(id, site, idAffiliate, minPossibleAdsCount){
         nickname: site,
         enabled: 'true',
         publisherId: idAffiliate,
-        adsperimage: minPossibleAdsCount
+        adsperimage: adsperimage,
+        adsperpage: adsperpage
     })
 }
 

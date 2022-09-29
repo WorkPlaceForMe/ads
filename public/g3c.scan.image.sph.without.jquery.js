@@ -561,25 +561,30 @@ $(document).on('click', '.closeBut', function () {
 		pe = window.location.href
 		
 		$(document).ready(function () {
-			if(!siteEnabled){
-				return false
-			}
 
-			var b = []
-			$('div, span').filter(function() {
-				return ($(this).css("backgroundImage") && $(this).css("backgroundImage") != 'none')
-			}).each(function() {
-				let imageURL = $(this).css("backgroundImage").replace('url(','').replace(')','').replace(/\"/gi, "")
-				b.push(new a.GM.IMLayer(imageURL, a(this)[0], $(this).width(), $(this).height()))
-			})
-			
-			a('img').each(function() {
-				b.push(new a.GM.IMLayer($(this).prop('src'), a(this)[0]))
-			})
-			
-			b.forEach(function (item) {
-				item.imageProcess()
-			})
+			setTimeout(() => {
+				if(!siteEnabled){
+					return false
+				}
+
+				var b = []
+				$('div:visible, span:visible').filter(function() {
+					return ($(this).css("backgroundImage") && $(this).css("backgroundImage") != 'none' && $(this).css("visibility") != 'hidden' )
+				}).each(function() {
+					let imageURL = $(this).css("backgroundImage").replace('url(','').replace(')','').replace(/\"/gi, "")
+					b.push(new a.GM.IMLayer(imageURL, a(this)[0], $(this).width(), $(this).height()))
+				})
+				
+				a('img:visible').filter(function() {
+					 return ($(this).css("visibility") != 'hidden')
+				}).each(function() {
+					b.push(new a.GM.IMLayer($(this).prop('src'), a(this)[0]))
+				})
+				
+				b.forEach(function (item) {
+					item.imageProcess()
+				})
+		}, 50)
 	})
 })(jQuery)
 

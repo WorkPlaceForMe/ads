@@ -6,7 +6,7 @@ const conf = require('../middleware/prop')
 const xlsx = require('node-xlsx').default
 var stream = require('stream')
 const db1 = require('../campaigns-db/database')
-const { getHostname, getAndSetAdsPerImage } = require('../helper/util')
+const { getHostname, getAndSetAdsPerPage } = require('../helper/util')
 const publishers = db1.publishers
 
 exports.generateReport = Controller(async (req, res) => {
@@ -519,7 +519,7 @@ const getStatsUrl = (req) => {
                       req.query.url = req.query.url.replace('www.', '')
                     }
                   
-                    let adsPerImage = getAndSetAdsPerImage(publisher, Object.keys(imgsGrouped)[i])
+                    let adsPerPage = getAndSetAdsPerPage(publisher, Object.keys(imgsGrouped)[i])
                     let imgPerPage = imgsGrouped[Object.keys(imgsGrouped)[i]]
 
                     let siteURL = Object.keys(imgsGrouped)[i]
@@ -545,7 +545,7 @@ const getStatsUrl = (req) => {
                       clicksPerAd: clicksPerAd,
                       viewsPerAd: viewsPerAd,                     
                       images: imgsGrouped[Object.keys(imgsGrouped)[i]],
-                      adsperimage: adsPerImage,
+                      adsperpage: adsPerPage,
                       imgNum: imgPerPage,
                       usercount: userDuration ? userDuration.usercount : 0, 
                       duration: userDuration ? Math.round((userDuration.duration/60.0)*100)/100 : 0.0
@@ -877,6 +877,7 @@ const excelColumnNames = {
   page: 'Page URL',
   ads: 'Total Number of Ads',
   adsperimage: 'Max Ads Per Image',
+  adsperpage: 'Max Ads Per Page',
   clicks: 'Total Ad Clicks',  
   clicksPerAd: 'Average Clicks Per Ad',
   clicksPerImg: 'Average Clicks Per Image',

@@ -248,8 +248,8 @@ export class DashboardComponent implements OnInit {
         type: 'string',
         filter: false,
       },
-      adsperimage: {
-        title: 'Max Ads Per Image',
+      adsperpage: {
+        title: 'Max Ads Per Page',
         type: 'string',
         filter: false,
       }

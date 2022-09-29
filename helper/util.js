@@ -121,7 +121,7 @@ exports.reloadPublisher = async (publisher) => {
     })
 }
 
-exports.getAndSetAdsPerImage = (publisher, page) => {
+exports.getAndSetAdsPerPage = (publisher, page) => {
   if(page && page.includes('://')){
     page = page.split('://')[1]
   }
@@ -135,29 +135,32 @@ exports.getAndSetAdsPerImage = (publisher, page) => {
   }
 
   let pageInfos = publisher.pages
-  let adsPerImage = publisher.adsperimage || 1
+  let adsPerPage = publisher.adsperpage || 1
 
   try {
     if(pageInfos && pageInfos.length >= 1){
-      let adsPerImageData = pageInfos.filter(item => item.name == page)
+      let adsPerPageData = pageInfos.filter(item => item.name == page)
 
-      if(adsPerImageData && adsPerImageData.length > 0){
-        adsPerImage = adsPerImageData[0].adsperimage
+      if(adsPerPageData && adsPerPageData.length > 0){
+        adsPerPage = adsPerPageData[0].adsperpage
       } else {
-        pageInfos.push({name: page, adsperimage: publisher.adsperimage})
+        pageInfos.push({name: page, adsperpage: publisher.adsperpage})
         updatePublisherWithPages(publisher.id, pageInfos)
       }
     } else {
       pageInfos = []
-      pageInfos.push({name: page, adsperimage: publisher.adsperimage})
+      pageInfos.push({name: page, adsperpage: publisher.adsperpage})
       updatePublisherWithPages(publisher.id, pageInfos)
     }
   } catch(err) {
-    console.log(`Error in getting adsPerImage count for ${page}`)
+    console.log(`Error in getting adsPerPage count for ${page}`)
   }
 
-  return adsPerImage
+  return adsPerPage
 }
+
+//Counter for ads cout per session
+exports.adsCountPerSession = {}
 
 const updatePublisherWithPages = exports.updatePublisherWithPages = (publisherId, pageInfos) => {
   publishers.findOne({

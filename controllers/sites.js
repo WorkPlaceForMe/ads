@@ -15,14 +15,22 @@ const readCsv = require('./readCsv')
 exports.register = Controller(async(req, res) => {
     const locId = uuidv4();
     const data = req.body
-    const minPossibleAdsCount = conf.get('min_possible_ads_count') || 1
-    const maxPossibleAdsCount = conf.get('max_possible_ads_count') || 4
+    const minPossibleAdsCountPerImage = conf.get('min_possible_ads_count_per_image') || 1
+    const maxPossibleAdsCountPerImage = conf.get('max_possible_ads_count_per_image') || 4
     
     try{       
         let publisherId = ''
         
-        if(data.adsperimage < minPossibleAdsCount || data.adsperimage > maxPossibleAdsCount){
-            return res.status(500).json({success: false, mess: `Wrong max ads per image no specified, it should be between ${minPossibleAdsCount} to ${maxPossibleAdsCount}`})
+        if(data.adsperimage < minPossibleAdsCountPerImage || data.adsperimage > maxPossibleAdsCountPerImage){
+            return res.status(500).json({success: false, name: 'adsperimage', mess: `Wrong max ads per image no specified, it should be between ${minPossibleAdsCountPerImage} to ${maxPossibleAdsCountPerImage}`})
+        }
+
+        if(data.adsperpage < minPossibleAdsCountPerImage){
+            return res.status(500).json({success: false, name: 'adsperpage', mess: `Wrong default max ads per page no specified, it should be greater or equal to ${minPossibleAdsCountPerImage}`})
+        }
+
+        if(data.adsperpage < data.adsperimage){
+            return res.status(500).json({success: false, name: 'adsperpage', mess: `Wrong default max ads per page no specified, it should be greater or equal to specified publisher max ads per image no ${data.adsperimage}`})
         }
 
         console.log(`Trying to register a new site ${data.name}`) 
@@ -41,7 +49,7 @@ exports.register = Controller(async(req, res) => {
         console.log(`Adding site ${data.name} to system`)
         
         if(publisherId) {
-            const newPublisher = await createPublisher(locId, data.name, getHostname(data.name), data.nickname, publisherId, data.adsperimage)
+            const newPublisher = await createPublisher(locId, data.name, getHostname(data.name), data.nickname, publisherId, data.adsperimage, data.adsperpage)
             cache.setAsync(`${newPublisher.dataValues.hostname}-publisher`, JSON.stringify(newPublisher))
 
             readCsv.readCsv(publisherId).then(() => {
@@ -63,13 +71,21 @@ exports.register = Controller(async(req, res) => {
 })
 
 exports.update = Controller(async(req, res) => {
-    const minPossibleAdsCount = conf.get('min_possible_ads_count') || 1
-    const maxPossibleAdsCount = conf.get('max_possible_ads_count') || 4
+    const minPossibleAdsCountPerImage = conf.get('min_possible_ads_count_per_image') || 1
+    const maxPossibleAdsCountPerImage = conf.get('max_possible_ads_count_per_image') || 4
     const data = req.body
     
     try{
-        if(data.adsperimage < minPossibleAdsCount || data.adsperimage > maxPossibleAdsCount){
-            return res.status(500).json({success: false, mess: `Wrong max ads per image no specified, it should be between ${minPossibleAdsCount} to ${maxPossibleAdsCount}`})
+        if(data.adsperimage < minPossibleAdsCountPerImage || data.adsperimage > maxPossibleAdsCountPerImage){
+            return res.status(500).json({success: false, name: 'adsperimage', mess: `Wrong max ads per image no specified, it should be between ${minPossibleAdsCountPerImage} to ${maxPossibleAdsCountPerImage}`})
+        }
+
+        if(data.adsperpage < minPossibleAdsCountPerImage){
+            return res.status(500).json({success: false, name: 'adsperpage', mess: `Wrong default max ads per page no specified, it should be greater or equal to ${minPossibleAdsCountPerImage}`})
+        }
+
+        if(data.adsperpage < data.adsperimage){
+            return res.status(500).json({success: false, name: 'adsperpage', mess: `Wrong default max ads per page no specified, it should be greater or equal to specified publisher max ads per image no ${data.adsperimage}`})
         }
 
         let oldAdsPerImage = 0
@@ -97,8 +113,7 @@ exports.update = Controller(async(req, res) => {
 })
 
 exports.updatePage = Controller(async(req, res) => {
-    const minPossibleAdsCount = conf.get('min_possible_ads_count') || 1
-    const maxPossibleAdsCount = conf.get('max_possible_ads_count') || 4
+    const minPossibleAdsCountPerPage = conf.get('min_possible_ads_count_per_image') || 1
     const data = req.body
 
     if(data.page && data.page.includes('://')){
@@ -114,8 +129,8 @@ exports.updatePage = Controller(async(req, res) => {
     }
     
     try{
-        if(data.adsperimage < minPossibleAdsCount || data.adsperimage > maxPossibleAdsCount){
-            return res.status(500).json({success: false, mess: `Wrong max ads per image no specified, it should be between ${minPossibleAdsCount} to ${maxPossibleAdsCount}`})
+        if(data.adsperpage < minPossibleAdsCountPerPage){
+            return res.status(500).json({success: false, mess: `Wrong max ads per page no specified, it should be greater or equal to ${minPossibleAdsCountPerPage}`})
         }        
 
         const publisher = await publishers.findOne({
@@ -125,32 +140,24 @@ exports.updatePage = Controller(async(req, res) => {
         let pageInfos = publisher.pages
 
         if(pageInfos && pageInfos.length >= 1){
-            let adsPerImageData = pageInfos.filter(item => item.name == data.page)
+            let adsPerPageData = pageInfos.filter(item => item.name == data.page)
 
-            if(adsPerImageData && adsPerImageData.length > 0){
-                if(data.adsperimage ==  adsPerImageData[0].adsperimage){
-                    return res.status(200).json({success: true, mess: 'Max Ads Per Image no has not changed, doing nothing'})
+            if(adsPerPageData && adsPerPageData.length > 0){
+                if(data.adsperpage ==  adsPerPageData[0].adsperpage){
+                    return res.status(200).json({success: true, mess: 'Max Ads Per Page no has not changed, doing nothing'})
                 }
 
-                let currentPageInfo = {name: data.page, adsperimage: data.adsperimage}
+                let currentPageInfo = {name: data.page, adsperpage: data.adsperpage}
                 pageInfos = pageInfos.map(item => item.name !== data.page ? item : currentPageInfo)
                 updatePublisherWithPages(publisher.id, pageInfos)
             } else {
-                pageInfos.push({name: data.page, adsperimage: data.adsperimage})
+                pageInfos.push({name: data.page, adsperpage: data.adsperpage})
                 updatePublisherWithPages(publisher.id, pageInfos)
             }
         } else {
             pageInfos = []
-            pageInfos.push({name: data.page, adsperimage: data.adsperimage})
+            pageInfos.push({name: data.page, adsperpage: data.adsperpage})
             updatePublisherWithPages(publisher.id, pageInfos)
-        }
-
-        if(publisher){
-            deleteRedisData(`${data.page}_`).then(() => {                 
-                console.log(`All redis cache data deleted for publisher ${publisher.dataValues.hostname} for page ${data.page}`)
-            }).catch(error => {
-                console.error(error, `Error deleting redis cache data for publisher${publisher.dataValues.hostname} for page ${data.page}`)
-            })
         }
 
         return res.status(200).json({success: true})
@@ -164,10 +171,10 @@ exports.get = Controller(async(req, res) => {
         where: { id: req.params.id }
     })
 
-    const minPossibleAdsCount = conf.get('min_possible_ads_count') || 1
-    const maxPossibleAdsCount = conf.get('max_possible_ads_count') || 4
+    const minPossibleAdsCountPerImage = conf.get('min_possible_ads_count_per_image') || 1
+    const maxPossibleAdsCountPerImage = conf.get('max_possible_ads_count_per_image') || 4
 
-    return res.status(200).json({success: true, publ: publ, minPossibleAdsCount: minPossibleAdsCount, maxPossibleAdsCount: maxPossibleAdsCount});
+    return res.status(200).json({success: true, publ: publ, minPossibleAdsCountPerImage: minPossibleAdsCountPerImage, maxPossibleAdsCountPerImage: maxPossibleAdsCountPerImage});
 })
 
 exports.getAll = Controller(async(req, res) => {
@@ -203,10 +210,10 @@ exports.reloadPublisher = Controller(async(req, res) => {
 
 exports.getServer = Controller(async(req, res) => {
     const server = conf.get('server')
-    const minPossibleAdsCount = conf.get('min_possible_ads_count') || 1
-    const maxPossibleAdsCount = conf.get('max_possible_ads_count') || 4
+    const minPossibleAdsCountPerImage = conf.get('min_possible_ads_count_per_image') || 1
+    const maxPossibleAdsCountPerImage = conf.get('max_possible_ads_count_per_image') || 4
     
-    return res.status(200).json({success: true, server: server, minPossibleAdsCount: minPossibleAdsCount, maxPossibleAdsCount: maxPossibleAdsCount});
+    return res.status(200).json({success: true, server: server, minPossibleAdsCountPerImage: minPossibleAdsCountPerImage, maxPossibleAdsCountPerImage: maxPossibleAdsCountPerImage});
 })
 
 exports.del = Controller(async(req, res) => {
@@ -268,7 +275,7 @@ exports.del = Controller(async(req, res) => {
     }
 })
 
-const createPublisher = async function(id, site, hostname, nickname, publisherId, adsperimage){
+const createPublisher = async function(id, site, hostname, nickname, publisherId, adsperimage, adsperpage){
     return publishers.create({
         id: id,
         name: site,
@@ -276,6 +283,7 @@ const createPublisher = async function(id, site, hostname, nickname, publisherId
         nickname: nickname,
         publisherId: publisherId,
         adsperimage: adsperimage,
+        adsperpage: adsperpage,
         enabled: 'true'
     })
 }
@@ -285,7 +293,7 @@ async function updatePublisher(body) {
         where: { id: body.id }
     })
     
-    await publ.update({name: body.name, nickname: body.nickname, name: body.name, adsperimage: body.adsperimage})
+    await publ.update({name: body.name, nickname: body.nickname, name: body.name, adsperimage: body.adsperimage, adsperpage: body.adsperpage})
     
     return publ
 }
