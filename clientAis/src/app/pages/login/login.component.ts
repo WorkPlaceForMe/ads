@@ -89,6 +89,9 @@ export class LoginComponent implements OnInit {
 
   public saveUser(user) {
     const USER_KEY = 'usr';
+    const TOKEN = 'auth-token';
+    localStorage.removeItem(TOKEN)
+    localStorage.setItem(TOKEN , user.accessToken)
     localStorage.removeItem(USER_KEY)
     localStorage.setItem(USER_KEY , JSON.stringify(user))
   }
