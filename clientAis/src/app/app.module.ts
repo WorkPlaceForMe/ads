@@ -17,6 +17,7 @@ import {
   NbToastrModule,
   NbWindowModule,
 } from '@nebular/theme';
+import { authInterceptorProviders } from './_helpers/auth.interceptor';
 
 @NgModule({
   declarations: [AppComponent],
@@ -38,6 +39,7 @@ import {
   ],
   providers: [
     FacesService,
+    authInterceptorProviders
   ],
   bootstrap: [AppComponent],
 })

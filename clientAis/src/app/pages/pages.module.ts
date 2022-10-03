@@ -42,6 +42,7 @@ import { NumsComponent } from './nums/nums.component';
 import { AddComponent } from './add/add.component';
 import { ReportComponent } from './report/report.component';
 import { LoginComponent } from './login/login.component';
+import { authInterceptorProviders } from '../_helpers/auth.interceptor';
 
 @NgModule({
   imports: [
@@ -101,6 +102,7 @@ import { LoginComponent } from './login/login.component';
   ],
   providers: [
     FacesService,
+    authInterceptorProviders
   ],
 })
 export class PagesModule {

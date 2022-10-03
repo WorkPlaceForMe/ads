@@ -2,6 +2,8 @@ const Controller = require('../helper/controller')
 const bcrypt = require('bcrypt')
 const db1 = require('../campaigns-db/database')
 const User = db1.users
+const jwt = require('jsonwebtoken')
+const conf = require('../middleware/prop')
 
 exports.login = Controller(async (req, res) => {
   const reqBody = req.body
@@ -30,7 +32,18 @@ exports.login = Controller(async (req, res) => {
     })
   }
 
+  const exp = 43200
+
+  const token = jwt.sign(
+    { id: user.id  },
+    conf.get('accesstrade_pass'),
+    {
+      expiresIn: exp // 12 hours
+    }
+  )
+
   delete user.dataValues.password
+  user.dataValues['accessToken'] = token
 
   res.status(200).json({
     success: true,

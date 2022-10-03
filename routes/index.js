@@ -1,12 +1,13 @@
 const express = require('express')
 const controllers = require('../controllers')
 const verify = require('../middleware/verifyPubl')
+const auth = require('../middleware/auth')
 
 const router = express.Router()
 
-router.get('/api/report/getAllClientData', controllers.getAllClientData)
+router.get('/api/report/getAllClientData', [auth.verifyToken], controllers.getAllClientData)
 
-router.get('/api/report/getAllSessionData', controllers.getAllSessionData)
+router.get('/api/report/getAllSessionData', [auth.verifyToken], controllers.getAllSessionData)
 
 router.get('/api/session', controllers.sessionData)
 
@@ -16,15 +17,15 @@ router.get('/api/modify/status/:id/:value', controllers.modify)
 
 router.post('/api/data', controllers.postData)
 
-router.get('/api/stats', controllers.getStats)
+router.get('/api/stats', [auth.verifyToken], controllers.getStats)
 
-router.get('/api/stats/url', controllers.getStatsUrl)
+router.get('/api/stats/url', [auth.verifyToken], controllers.getStatsUrl)
 
-router.get('/api/stats/url/img', controllers.getStatsImg)
+router.get('/api/stats/url/img', [auth.verifyToken], controllers.getStatsImg)
 
-router.get('/api/report', controllers.generateReport)
+router.get('/api/report', [auth.verifyToken], controllers.generateReport)
 
-router.get('/api/stats/url/img/ad', controllers.getStatsAd)
+router.get('/api/stats/url/img/ad', [auth.verifyToken], controllers.getStatsAd)
 
 router.get('/api/log/:id', controllers.auth)
 
