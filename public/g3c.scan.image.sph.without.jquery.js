@@ -569,14 +569,14 @@ $(document).on('click', '.closeBut', function () {
 
 				var b = []
 				$('div:visible, span:visible').filter(function() {
-					return ($(this).css("backgroundImage") && $(this).css("backgroundImage") != 'none' && $(this).css("visibility") != 'hidden' )
+					return ($(this).css("backgroundImage") && $(this).css("backgroundImage") != 'none' && $(this).css("visibility") != 'hidden' && isElementInViewPort(this))
 				}).each(function() {
 					let imageURL = $(this).css("backgroundImage").replace('url(','').replace(')','').replace(/\"/gi, "")
 					b.push(new a.GM.IMLayer(imageURL, a(this)[0], $(this).width(), $(this).height()))
 				})
 				
 				a('img:visible').filter(function() {
-					 return ($(this).css("visibility") != 'hidden')
+					 return ($(this).css("visibility") != 'hidden' && isElementInViewPort(this))
 				}).each(function() {
 					b.push(new a.GM.IMLayer($(this).prop('src'), a(this)[0]))
 				})
@@ -603,6 +603,17 @@ function iconAndSize(file, big){
 	}
 	const str = `${file}) no-repeat ${rep}% ${rep}%;background-size: ${size}px;`
 	return str
+}
+
+function isElementInViewPort(element){
+	let bounding = element.getBoundingClientRect()
+	const viewportWidth = window.innerWidth || document.documentElement.clientWidth
+	
+	if (bounding.top >= 0 && bounding.bottom > 0 && bounding.right <= viewportWidth) {
+		return true
+	} else {
+		return false
+	}
 }
 
 function getImageURL(element){

@@ -5,5 +5,5 @@
  */
 export const environment = {
   api: '/api',
-  production: true,
+  production: true
 };

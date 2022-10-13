@@ -8,9 +8,7 @@
 // `ng build --env=prod` then `environment.prod.ts` will be used instead.
 // The list of which env maps to which file can be found in `.angular-cli.json`.
 
-import { ip } from '../app/models/IpServer';
-
 export const environment = {
-  api: "http://" + ip + ":3309/api",
-  production: false,
+  api: '/api',
+  production: false
 };

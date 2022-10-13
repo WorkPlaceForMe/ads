@@ -17,3 +17,5 @@ index.html
 startDocker.sh
 oldDist
 test.js
+.vscode/settings.json
+.gitignore
