@@ -7,6 +7,7 @@ exports.productAliases = {
   cell_phone: ['phone', 'mobile', 'tab', 'tablet'],
   cellular: ['phone', 'mobile', 'tab', 'tablet'],
   running_shoe: ['shoe', 'footwear', 'foot wear', 'snikker', 'sneaker'],
+  sandal: ['shoe', 'footwear', 'foot wear', 'snikker', 'sneaker'],
   shoe: ['shoe', 'footwear', 'foot wear', 'snikker', 'sneaker'],
   reflex_camera: ['camera', 'camcorder', 'video recorder'],
   printer: ['printer', 'copier', 'printing machine', 'scanner'],

@@ -26,7 +26,19 @@ exports.readCsv = (publisherId) => {
     let productAndClothsData = []
       
     if (!cachedDown)  {
-      await cache.setAsync(`downloading-${publisherId}`, true)     
+      await cache.setAsync(`downloading-${publisherId}`, true) 
+      const productClothPromises = [];
+
+      productClothPromises.push(clothing.destroy({
+        where: { Page_ID: publisherId }
+      }))
+      
+      productClothPromises.push(products.destroy({
+        where: { Page_ID: publisherId }
+      }))
+      
+      await Promise.all(productClothPromises) 
+
       const downloadPromises = []     
       const providers = [       
         {
