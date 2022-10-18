@@ -58,8 +58,7 @@ export class LoginComponent implements OnInit {
     this.face.login(this.registerForm.value).subscribe(
       data => {
         this.saveUser(data.user);
-        this.router.navigate(['/pages/dashboard'])
-        this.isLoggedIn = true;
+        this.isLoggedIn = true
         window.location.reload()
       },
       err => {
