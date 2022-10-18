@@ -125,7 +125,7 @@ exports.readCsv = (publisherId) => {
     } else {
       productAndClothsData = await getProductClothData(publisherId)
     
-      if (productAndClothsData?.length > 0) {
+      if (productAndClothsData.length > 0) {
         resolve(productAndClothsData)
       }
     }
