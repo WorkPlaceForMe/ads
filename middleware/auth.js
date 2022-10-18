@@ -148,7 +148,7 @@ const isAvailable = (req, res, next) => {
 
   if (id === 'none') {
     res.status(202).send({
-      message: 'Existe'
+      message: 'Exists'
     })
   }
   next()
@@ -157,4 +157,5 @@ const isAvailable = (req, res, next) => {
 const authJwt = {
   verifyToken: verifyToken,
 }
+
 module.exports = authJwt

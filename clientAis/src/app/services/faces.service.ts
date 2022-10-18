@@ -13,10 +13,8 @@ const httpOptions = {
 })
 export class FacesService {
   API_URI = environment.api
-  public now_user;
   constructor(private http: HttpClient) {
-        this.now_user = JSON.parse(localStorage.getItem('usr'))
-   }
+  }
   
   getStats(range){
     return this.http.get(`${this.API_URI}/stats?init=${range.start}&fin=${range.end}`);
@@ -72,7 +70,7 @@ export class FacesService {
     }, httpOptions);
   }
   get isLoggedIn(): boolean {
-    return (this.now_user !== null) ? true : false;
+    return (localStorage.getItem('usr') !== null) ? true : false;
   }
   signOff(){
    const us = JSON.parse(localStorage.getItem('usr'))['username']

@@ -95,7 +95,8 @@ export class DashboardComponent implements OnInit {
           console.error(err);
           this.source = undefined
 
-          this.settings3['noDataMessage'] = 'No Data Found'
+          localStorage.removeItem('usr')
+          this.router.navigateByUrl('/pages/sign-in')
         }
       )
     }
@@ -115,7 +116,8 @@ export class DashboardComponent implements OnInit {
           console.error(err);
           this.source = undefined
          
-          this.settings2['noDataMessage'] = 'No Data Found'
+          localStorage.removeItem('usr')
+          this.router.navigateByUrl('/pages/sign-in')
         },
       )
     }
@@ -183,7 +185,8 @@ export class DashboardComponent implements OnInit {
           console.error(err);
           this.source = undefined;
 
-          this.settings['noDataMessage'] = 'No Data Found'
+          localStorage.removeItem('usr')
+          this.router.navigateByUrl('/pages/sign-in')
         },
       );
   }
@@ -218,7 +221,8 @@ export class DashboardComponent implements OnInit {
           console.error(err);
           this.source = undefined
         
-          this.settings['noDataMessage'] = 'No Data Found'
+          localStorage.removeItem('usr')
+          this.router.navigateByUrl('/pages/sign-in')
         }
     );
   }
@@ -328,7 +332,10 @@ export class DashboardComponent implements OnInit {
       },
       err => {
         console.error(err);
-        this.source = undefined;
+        this.source = undefined
+
+        localStorage.removeItem('usr')
+        this.router.navigateByUrl('/pages/sign-in')
       },
     );
   }

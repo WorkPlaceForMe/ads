@@ -15,8 +15,7 @@ export class OtherGuard implements CanActivate {
   next: ActivatedRouteSnapshot,
   state: RouterStateSnapshot): Observable<boolean> | Promise<boolean> | boolean {
       if(this.facesService.isLoggedIn !== true) {
-            // window.location.reload()
-            return this.router.navigate(['/pages/sign-in'])
+          return this.router.navigate(['/pages/sign-in'])
       } 
     return true;
     }
