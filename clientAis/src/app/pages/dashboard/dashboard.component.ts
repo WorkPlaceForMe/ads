@@ -95,8 +95,7 @@ export class DashboardComponent implements OnInit {
           console.error(err);
           this.source = undefined
 
-          localStorage.removeItem('usr')
-          this.router.navigateByUrl('/pages/sign-in')
+          this.face.signOff()
         }
       )
     }
@@ -116,8 +115,7 @@ export class DashboardComponent implements OnInit {
           console.error(err);
           this.source = undefined
          
-          localStorage.removeItem('usr')
-          this.router.navigateByUrl('/pages/sign-in')
+          this.face.signOff()
         },
       )
     }
@@ -185,8 +183,7 @@ export class DashboardComponent implements OnInit {
           console.error(err);
           this.source = undefined;
 
-          localStorage.removeItem('usr')
-          this.router.navigateByUrl('/pages/sign-in')
+          this.face.signOff()
         },
       );
   }
@@ -221,8 +218,7 @@ export class DashboardComponent implements OnInit {
           console.error(err);
           this.source = undefined
         
-          localStorage.removeItem('usr')
-          this.router.navigateByUrl('/pages/sign-in')
+          this.face.signOff()
         }
     );
   }
@@ -334,8 +330,7 @@ export class DashboardComponent implements OnInit {
         console.error(err);
         this.source = undefined
 
-        localStorage.removeItem('usr')
-        this.router.navigateByUrl('/pages/sign-in')
+        this.face.signOff()
       },
     );
   }
