@@ -249,7 +249,6 @@ const filler = (
   return new Promise((resolve) => {
     if (resultsVista.sport.length != 0) {
       for (const obj of resultsVista.sport) {
-        if(obj.confidence > 0.6) {
           const results = sport_makeup_Filler(
             true,
             obj,
@@ -266,7 +265,6 @@ const filler = (
           if (results.length != 0) {
             resultsAffiliate.push(results)
           }
-        }
       }
     } 
     
@@ -275,7 +273,7 @@ const filler = (
           if ((obj.label && (obj.label.toLowerCase().includes('lipstick') || obj.label.toLowerCase().includes('hair') 
           ||  obj.label.toLowerCase().includes('face')
           ||  obj.label.toLowerCase().includes('perfume') || obj.label.toLowerCase().includes('paintbrush')
-          ||  obj.IAB)) && obj.confidence > 0.6) {  
+          ||  obj.IAB))) {  
             const results = sport_makeup_Filler(
               false,
               obj,
@@ -300,30 +298,28 @@ const filler = (
       const gender = resultsVista.face[0].deep_gender.gender[0].label
 
       for (const obj of resultsVista['fashion']) {
-        if(obj.confidence > 0.6) {
-          const results = clothing_Filler(
-            obj,
-            gender,
-            objetos,
-            serv,
-            img_width,
-            img_height,
-            site,
-            url,
-            uid,
-            mobile,
-          )
-          
-          if (results.length != 0) {
-            resultsAffiliate.push(results)
-          }
+        const results = clothing_Filler(
+          obj,
+          gender,
+          objetos,
+          serv,
+          img_width,
+          img_height,
+          site,
+          url,
+          uid,
+          mobile,
+        )
+        
+        if (results.length != 0) {
+          resultsAffiliate.push(results)
         }
       }
     }
 
     if (resultsVista['Object'].length != 0) {
       for (const obj of resultsVista['Object']) {
-        if (obj.class != 'person' && obj.confidence > 0.6) {
+        if (obj.class != 'person') {
             const results = object_Filler(
               obj,
               objetos,
@@ -371,7 +367,7 @@ const clothing_Filler = (
   const resultsAffiliate_Temp = []
   
   if (gender == 'Male') {
-    if ((obj.class == 'person' || obj.class == 'upper') && obj.confidence > 0.6) {
+    if ((obj.class == 'person' || obj.class == 'upper')) {
       if (obj.deep_fashion_tf.sleeve_length[0].label == 'ExtraLongSleeves' ||
         obj.deep_fashion_tf.sleeve_length[0].label == 'LongSleeves') {
         const results = objetos.filter(
@@ -497,7 +493,7 @@ const clothing_Filler = (
         }
       }
     }
-    if (obj.class == 'lower' && obj.confidence > 0.6) {
+    if (obj.class == 'lower') {
       if (
         obj.deep_fashion_tf.pant_length[0].label == 'FullLength' ||
         obj.deep_fashion_tf.pant_length[0].label == 'CroppedPant' ||
@@ -536,7 +532,7 @@ const clothing_Filler = (
     }
   }
   if (gender == 'Female') {
-    if ((obj.class == 'person' || obj.class == 'upper') && obj.confidence > 0.6) {
+    if (obj.class == 'person' || obj.class == 'upper') {
       if (obj.deep_fashion_tf.sleeve_length[0].label == 'ExtraLongSleeves' ||
         obj.deep_fashion_tf.sleeve_length[0].label == 'LongSleeves'
       ) {
@@ -595,7 +591,7 @@ const clothing_Filler = (
         }
       }
     }
-    if (obj.class == 'lower' && obj.confidence > 0.6) {
+    if (obj.class == 'lower') {
       if (
         obj.deep_fashion_tf.pant_length[0].label == 'FullLength' ||
         obj.deep_fashion_tf.pant_length[0].label == 'CroppedPant' ||
