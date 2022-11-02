@@ -14,23 +14,23 @@ exports.readCsv = function(data, id) {
               if (csvrow[15] && 
                 csvrow[15].toLowerCase().toLowerCase().includes(element)
               ) {
-                const product = createProducts(csvrow, element, id)
+                const product = createProducts(csvrow, element, id, 'Lazada')
                 promises.push(product)
               } else if (csvrow[17] &&
                 csvrow[17].toLowerCase().includes(element)
               ) {
-                const product = createProducts(csvrow, element, id)
+                const product = createProducts(csvrow, element, id, 'Lazada')
                 promises.push(product)
               } else if (csvrow[13] &&
                 csvrow[13].toLowerCase().toLowerCase().includes(element)
               ) {
-                const product = createProducts(csvrow, element, id)
+                const product = createProducts(csvrow, element, id, 'Lazada')
                 promises.push(product)
               }
             }
             
             if (csvrow[13] && csvrow[13].toLowerCase().includes('beauty')){
-              const product = createProducts(csvrow, 'makeup', id)
+              const product = createProducts(csvrow, 'makeup', id, 'Lazada')
               promises.push(product)
             }
           } catch(err) {

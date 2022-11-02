@@ -14,17 +14,17 @@ exports.readCsv = function(data, id) {
               if (csvrow[15] && 
                 csvrow[15].toLowerCase().toLowerCase().includes(element)
               ) {
-                const product = createProducts(csvrow, element, id)
+                const product = createProducts(csvrow, element, id, 'Central Online')
                 promises.push(product)
               } else if (csvrow[17] &&
                 csvrow[17].toLowerCase().includes(element)
               ) {
-                const product = createProducts(csvrow, element, id)
+                const product = createProducts(csvrow, element, id, 'Central Online')
                 promises.push(product)
               } else if (csvrow[13] &&
                 csvrow[13].toLowerCase().toLowerCase().includes(element)
               ) {
-                const product = createProducts(csvrow, element, id)
+                const product = createProducts(csvrow, element, id, 'Central Online')
                 promises.push(product)
               }
             }
@@ -32,13 +32,13 @@ exports.readCsv = function(data, id) {
             if (csvrow[13] && ((csvrow[13].toLowerCase().includes('women') && csvrow[15].toLowerCase().includes('clothing'))
             || csvrow[13].toLowerCase().includes('women sportswear'))) {
               const gender = 'Female'
-              const garment = createClothing(csvrow, id, gender)
+              const garment = createClothing(csvrow, id, gender, 'Central Online')
               promises.push(garment)
             }
             
             if (csvrow[13] && (csvrow[13].toLowerCase().includes('men clothing') || csvrow[13].toLowerCase().includes('men sportswear'))) {
               const gender = 'Male'
-              const garment = createClothing(csvrow, id, gender)
+              const garment = createClothing(csvrow, id, gender, 'Central Online')
               promises.push(garment)
             }
             
@@ -46,18 +46,18 @@ exports.readCsv = function(data, id) {
               csvrow[13] && csvrow[13].toLowerCase().includes('sport') &&
               !csvrow[13].toLowerCase().includes('sportswear')
             ) {
-              const product = createProducts(csvrow, 'sport', id)
+              const product = createProducts(csvrow, 'sport', id, 'Central Online')
               promises.push(product)
             }
             
             if (csvrow[13] && (csvrow[13].toLowerCase().includes('beauty') || csvrow[13].toLowerCase().includes('makeup')
             || csvrow[13].toLowerCase().includes('make-up'))){
-              const product = createProducts(csvrow, 'makeup', id)
+              const product = createProducts(csvrow, 'makeup', id, 'Central Online')
               promises.push(product)
             }
   
             if (csvrow[15] && csvrow[15].toLowerCase().includes('mobile')) {
-              const product = createProducts(csvrow, 'cell_phone', id)
+              const product = createProducts(csvrow, 'cell_phone', id, 'Central Online')
               promises.push(product)
             }
           } catch(err) {

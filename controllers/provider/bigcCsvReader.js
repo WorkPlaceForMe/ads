@@ -14,17 +14,17 @@ exports.readCsv = function(data, id) {
               if (csvrow[15] && 
                 csvrow[15].toLowerCase().toLowerCase().includes(element)
               ) {
-                const product = createProducts(csvrow, element, id)
+                const product = createProducts(csvrow, element, id, 'Big C')
                 promises.push(product)
               } else if (csvrow[17] &&
                 csvrow[17].toLowerCase().includes(element)
               ) {
-                const product = createProducts(csvrow, element, id)
+                const product = createProducts(csvrow, element, id, 'Big C')
                 promises.push(product)
               } else if (csvrow[13] &&
                 csvrow[13].toLowerCase().toLowerCase().includes(element)
               ) {
-                const product = createProducts(csvrow, element, id)
+                const product = createProducts(csvrow, element, id, 'Big C')
                 promises.push(product)
               }
             }

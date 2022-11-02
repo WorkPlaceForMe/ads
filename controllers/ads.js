@@ -249,7 +249,7 @@ const filler = (
   return new Promise((resolve) => {
     if (resultsVista.sport.length != 0) {
       for (const obj of resultsVista.sport) {
-          const result = sport_makeup_Filler(
+          const results = sport_makeup_Filler(
             true,
             obj,
             objetos,
@@ -261,8 +261,9 @@ const filler = (
             uid,
             mobile,
           )
-          if (result.length != 0) {
-            resultsAffiliate.push(result)
+          
+          if (results.length != 0) {
+            resultsAffiliate.push(results)
           }
       }
     } 
@@ -273,7 +274,7 @@ const filler = (
           ||  obj.label.toLowerCase().includes('face')
           ||  obj.label.toLowerCase().includes('perfume') || obj.label.toLowerCase().includes('paintbrush')
           ||  obj.IAB))) {  
-            const result = sport_makeup_Filler(
+            const results = sport_makeup_Filler(
               false,
               obj,
               objetos,
@@ -285,8 +286,9 @@ const filler = (
               uid,
               mobile,
             )
-            if (result.length != 0) {
-              resultsAffiliate.push(result)
+            
+            if (results.length != 0) {
+              resultsAffiliate.push(results)
             }
           }
       }
@@ -296,7 +298,7 @@ const filler = (
       const gender = resultsVista.face[0].deep_gender.gender[0].label
 
       for (const obj of resultsVista['fashion']) {
-        const result = clothing_Filler(
+        const results = clothing_Filler(
           obj,
           gender,
           objetos,
@@ -309,8 +311,8 @@ const filler = (
           mobile,
         )
         
-        if (result.length != 0) {
-          resultsAffiliate.push(result)
+        if (results.length != 0) {
+          resultsAffiliate.push(results)
         }
       }
     }
@@ -318,7 +320,7 @@ const filler = (
     if (resultsVista['Object'].length != 0) {
       for (const obj of resultsVista['Object']) {
         if (obj.class != 'person') {
-            const result = object_Filler(
+            const results = object_Filler(
               obj,
               objetos,
               serv,
@@ -330,8 +332,8 @@ const filler = (
               mobile,
             )
             
-            if (result.length != 0) {
-              resultsAffiliate.push(result)
+            if (results.length != 0) {
+              resultsAffiliate.push(results)
             }
         }
       }
@@ -368,120 +370,126 @@ const clothing_Filler = (
     if ((obj.class == 'person' || obj.class == 'upper')) {
       if (obj.deep_fashion_tf.sleeve_length[0].label == 'ExtraLongSleeves' ||
         obj.deep_fashion_tf.sleeve_length[0].label == 'LongSleeves') {
-        const result = objetos.filter(
+        const results = objetos.filter(
           (obj2) =>
             obj2.Gender == gender && obj2.Sub_Category_Name.toLowerCase().includes('jacket')
         )
-        const count = result.length - 1
 
-        if(count >= 0){
-          let int = Math.floor(Math.random() * count)
-          resultsAffiliate_Temp.push({
-            vista: obj,
-            affiliate: result[int],
-            add: {
-              id: parseInt(result[int]['Merchant_Product_ID']),
-              site: site,
-              date: dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss'),
-              url: url,
-              uid: uid,
-              product_site_url: result[int]['Product_URL_Web_encoded'],
-              product_image_url: result[int]['Image_URL'],
-              product_main_category_name: result[int]['Main_Category_Name'],
-              vista_keywords: 'ExtraLongSleeves Upper,LongSleeves Upper'
-            },
-            serv: serv,
-            size: { w: img_width, h: img_height },
-            mobile: mobile,
-          })
+        if(results.length > 0){
+          for (let result of results) {
+            resultsAffiliate_Temp.push({
+              vista: obj,
+              affiliate: result,
+              add: {
+                id: parseInt(result['Merchant_Product_ID']),
+                site: site,
+                date: dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss'),
+                url: url,
+                uid: uid,
+                product_site_url: result['Product_URL_Web_encoded'],
+                product_image_url: result['Image_URL'],
+                product_main_category_name: result['Main_Category_Name'],
+                vista_keywords: 'ExtraLongSleeves Upper,LongSleeves Upper',
+                provider_name: result['Provider_Name']
+              },
+              serv: serv,
+              size: { w: img_width, h: img_height },
+              mobile: mobile
+            })
+          }
         }
       } else if (
         typeof obj.deep_fashion_neckline.neckline !== 'undefined' && obj.deep_fashion_neckline.neckline[0].label == 'shirtcollar'
       ) {
-        const result = objetos.filter(
+        const results = objetos.filter(
           (obj2) => obj2.Sub_Category_Name.toLowerCase().includes('shirts')
           && !obj2.Main_Category_Name.toLowerCase().includes('women')
         )
-        const count = result.length - 1
 
-        if(count >= 0){
-          let int = Math.floor(Math.random() * count)
-          resultsAffiliate_Temp.push({
-            vista: obj,
-            affiliate: result[int],
-            add: {
-              id: parseInt(result[int]['Merchant_Product_ID']),
-              site: site,
-              date: dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss'),
-              url: url,
-              uid: uid,
-              product_site_url: result[int]['Product_URL_Web_encoded'],
-              product_image_url: result[int]['Image_URL'],
-              product_main_category_name: result[int]['Main_Category_Name'],
-              vista_keywords: 'Shirtcollar'
-            },
-            serv: serv,
-            size: { w: img_width, h: img_height },
-            mobile: mobile,
-          })
+        if(results.length > 0){
+          for (let result of results) {
+            resultsAffiliate_Temp.push({
+              vista: obj,
+              affiliate: result,
+              add: {
+                id: parseInt(result['Merchant_Product_ID']),
+                site: site,
+                date: dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss'),
+                url: url,
+                uid: uid,
+                product_site_url: result['Product_URL_Web_encoded'],
+                product_image_url: result['Image_URL'],
+                product_main_category_name: result['Main_Category_Name'],
+                vista_keywords: 'Shirtcollar',
+                provider_name: result['Provider_Name']
+              },
+              serv: serv,
+              size: { w: img_width, h: img_height },
+              mobile: mobile,
+            })
+          }
         }
       } else if (
         typeof obj.deep_fashion_neckline.neckline !== 'undefined' && obj.deep_fashion_neckline.neckline[0].label == 'poloshirtcollar'
       ) {
-        const result = objetos.filter(
+        const results = objetos.filter(
           (obj2) =>
             obj2.Gender == gender && obj2.Sub_Category_Name.toLowerCase().includes('polos')
             && !obj2.Main_Category_Name.toLowerCase().includes('women')
         )
-        const count = result.length - 1
-        if(count >= 0){
-          let int = Math.floor(Math.random() * count)
-          resultsAffiliate_Temp.push({
-            vista: obj,
-            affiliate: result[int],
-            add: {
-              id: parseInt(result[int]['Merchant_Product_ID']),
-              site: site,
-              date: dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss'),
-              url: url,
-              uid: uid,
-              product_site_url: result[int]['Product_URL_Web_encoded'],
-              product_image_url: result[int]['Image_URL'],
-              product_main_category_name: result[int]['Main_Category_Name'],
-              vista_keywords: 'Poloshirtcollar'
-            },
-            serv: serv,
-            size: { w: img_width, h: img_height },
-            mobile: mobile,
-          })
+
+        if(results.length > 0){
+          for (let result of results) {
+            resultsAffiliate_Temp.push({
+              vista: obj,
+              affiliate: result,
+              add: {
+                id: parseInt(result['Merchant_Product_ID']),
+                site: site,
+                date: dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss'),
+                url: url,
+                uid: uid,
+                product_site_url: result['Product_URL_Web_encoded'],
+                product_image_url: result['Image_URL'],
+                product_main_category_name: result['Main_Category_Name'],
+                vista_keywords: 'Poloshirtcollar',
+                provider_name: result['Provider_Name']
+              },
+              serv: serv,
+              size: { w: img_width, h: img_height },
+              mobile: mobile,
+            })
+          }
         }
       } else {
-        const result = objetos.filter(
+        const results = objetos.filter(
           (obj2) => obj2.Gender == gender && (obj2.Sub_Category_Name.toLowerCase().includes('t-shirts') 
           || obj2.Sub_Category_Name.toLowerCase().includes('tshirts'))
           && !obj2.Main_Category_Name.toLowerCase().includes('women')
         )
-        const count = result.length - 1
-        if(count >= 0){
-          let int = Math.floor(Math.random() * count)
-          resultsAffiliate_Temp.push({
-            vista: obj,
-            affiliate: result[int],
-            add: {
-              id: parseInt(result[int]['Merchant_Product_ID']),
-              site: site,
-              date: dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss'),
-              url: url,
-              uid: uid,
-              product_site_url: result[int]['Product_URL_Web_encoded'],
-              product_image_url: result[int]['Image_URL'],
-              product_main_category_name: result[int]['Main_Category_Name'],
-              vista_keywords: 'T-shirts'
-            },
-            serv: serv,
-            size: { w: img_width, h: img_height },
-            mobile: mobile,
-          })
+
+        if(results.length > 0){
+          for (let result of results) {
+            resultsAffiliate_Temp.push({
+              vista: obj,
+              affiliate: result,
+              add: {
+                id: parseInt(result['Merchant_Product_ID']),
+                site: site,
+                date: dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss'),
+                url: url,
+                uid: uid,
+                product_site_url: result['Product_URL_Web_encoded'],
+                product_image_url: result['Image_URL'],
+                product_main_category_name: result['Main_Category_Name'],
+                vista_keywords: 'T-shirts',
+                provider_name: result['Provider_Name']
+              },
+              serv: serv,
+              size: { w: img_width, h: img_height },
+              mobile: mobile,
+            })
+          }
         }
       }
     }
@@ -491,33 +499,34 @@ const clothing_Filler = (
         obj.deep_fashion_tf.pant_length[0].label == 'CroppedPant' ||
         obj.deep_fashion_tf.pant_length[0].label == '3/4Length'
       ) {
-        const result = objetos.filter(
+        const results = objetos.filter(
           (obj2) => obj2.Gender == gender && (obj2.Sub_Category_Name.toLowerCase().includes('pants') 
           || obj2.Sub_Category_Name.toLowerCase().includes('bottoms')) 
           && !obj2.Main_Category_Name.toLowerCase().includes('women')
-        )
-        
-        const count = result.length - 1
-        if(count >= 0){
-          let int = Math.floor(Math.random() * count)
-          resultsAffiliate_Temp.push({
-            vista: obj,
-            affiliate: result[int],
-            add: {
-              id: parseInt(result[int]['Merchant_Product_ID']),
-              site: site,
-              date: dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss'),
-              url: url,
-              uid: uid,
-              product_site_url: result[int]['Product_URL_Web_encoded'],
-              product_image_url: result[int]['Image_URL'],
-              product_main_category_name: result[int]['Main_Category_Name'],
-              vista_keywords: 'FullLength Lower,CroppedPant Lower,3/4Length Lower'
-            },
-            serv: serv,
-            size: { w: img_width, h: img_height },
-            mobile: mobile,
-          })
+        )        
+
+        if(results.length > 0){
+          for (let result of results) {
+            resultsAffiliate_Temp.push({
+              vista: obj,
+              affiliate: result,
+              add: {
+                id: parseInt(result['Merchant_Product_ID']),
+                site: site,
+                date: dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss'),
+                url: url,
+                uid: uid,
+                product_site_url: result['Product_URL_Web_encoded'],
+                product_image_url: result['Image_URL'],
+                product_main_category_name: result['Main_Category_Name'],
+                vista_keywords: 'FullLength Lower,CroppedPant Lower,3/4Length Lower',
+                provider_name: result['Provider_Name']
+              },
+              serv: serv,
+              size: { w: img_width, h: img_height },
+              mobile: mobile,
+            })
+          }
         }
       }
     }
@@ -544,7 +553,8 @@ const clothing_Filler = (
               product_site_url: prendras[int]['Product_URL_Web_encoded'],
               product_image_url: prendras[int]['Image_URL'],
               product_main_category_name: prendras[int]['Main_Category_Name'],
-              vista_keywords: 'ExtraLongSleeves Upper,LongSleeves Upper'
+              vista_keywords: 'ExtraLongSleeves Upper,LongSleeves Upper',
+              provider_name: result['Provider_Name']
             },
             serv: serv,
             size: { w: img_width, h: img_height },
@@ -571,7 +581,8 @@ const clothing_Filler = (
               product_site_url: prendras[int]['Product_URL_Web_encoded'],
               product_image_url: prendras[int]['Image_URL'],
               product_main_category_name: prendras[int]['Main_Category_Name'],
-              vista_keywords: 'Tops'
+              vista_keywords: 'Tops',
+              provider_name: result['Provider_Name']
             },
             serv: serv,
             size: { w: img_width, h: img_height },
@@ -586,64 +597,66 @@ const clothing_Filler = (
         obj.deep_fashion_tf.pant_length[0].label == 'CroppedPant' ||
         obj.deep_fashion_tf.pant_length[0].label == '3/4Length'
       ) {
-        const result = objetos.filter(
+        const results = objetos.filter(
           (obj2) =>
             obj2.Gender == gender && (obj2.Sub_Category_Name.toLowerCase().includes('pants') 
             || obj2.Sub_Category_Name.toLowerCase().includes('bottoms'))
             && !obj2.Main_Category_Name.toLowerCase().includes('men')
         )
-        const count = result.length - 1
 
-        if(count >= 0){
-          let int = Math.floor(Math.random() * count)
-          resultsAffiliate_Temp.push({
-            vista: obj,
-            affiliate: result[int],
-            add: {
-              id: parseInt(result[int]['Merchant_Product_ID']),
-              site: site,
-              date: dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss'),
-              url: url,
-              uid: uid,
-              product_site_url: result[int]['Product_URL_Web_encoded'],
-              product_image_url: result[int]['Image_URL'],
-              product_main_category_name: result[int]['Main_Category_Name'],
-              vista_keywords: 'FullLength Lower,CroppedPant Lower,3/4Length Lower'
-            },
-            serv: serv,
-            size: { w: img_width, h: img_height },
-            mobile: mobile,
-          })
+        if(results.length > 0){
+          for (let result of results) {
+            resultsAffiliate_Temp.push({
+              vista: obj,
+              affiliate: result,
+              add: {
+                id: parseInt(result['Merchant_Product_ID']),
+                site: site,
+                date: dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss'),
+                url: url,
+                uid: uid,
+                product_site_url: result['Product_URL_Web_encoded'],
+                product_image_url: result['Image_URL'],
+                product_main_category_name: result['Main_Category_Name'],
+                vista_keywords: 'FullLength Lower,CroppedPant Lower,3/4Length Lower',
+                provider_name: result['Provider_Name']
+              },
+              serv: serv,
+              size: { w: img_width, h: img_height },
+              mobile: mobile,
+            })
+          }
         }
       } else {
-        const result = objetos.filter(
+        const results = objetos.filter(
           (obj2) =>
             obj2.Gender == gender && (obj2.Sub_Category_Name.toLowerCase().includes('pants')
             || obj2.Sub_Category_Name.toLowerCase().includes('leggings'))
             && !obj2.Main_Category_Name.toLowerCase().includes('men')
         )
-        const count = result.length - 1
 
-        if(count >= 0){
-          let int = Math.floor(Math.random() * count)
-          resultsAffiliate_Temp.push({
-            vista: obj,
-            affiliate: result[int],
-            add: {
-              id: parseInt(result[int]['Merchant_Product_ID']),
-              site: site,
-              date: dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss'),
-              url: url,
-              uid: uid,
-              product_site_url: result[int]['Product_URL_Web_encoded'],
-              product_image_url: result[int]['Image_URL'],
-              product_main_category_name: result[int]['Main_Category_Name'],
-              vista_keywords: 'Pants,Leggings'
-            },
-            serv: serv,
-            size: { w: img_width, h: img_height },
-            mobile: mobile,
-          })
+        if(results.length > 0){
+          for (let result of results) {
+            resultsAffiliate_Temp.push({
+              vista: obj,
+              affiliate: result,
+              add: {
+                id: parseInt(result['Merchant_Product_ID']),
+                site: site,
+                date: dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss'),
+                url: url,
+                uid: uid,
+                product_site_url: result['Product_URL_Web_encoded'],
+                product_image_url: result['Image_URL'],
+                product_main_category_name: result['Main_Category_Name'],
+                vista_keywords: 'Pants,Leggings',
+                provider_name: result['Provider_Name']
+              },
+              serv: serv,
+              size: { w: img_width, h: img_height },
+              mobile: mobile,
+            })
+          }
         }
       }
     }
@@ -664,33 +677,34 @@ const object_Filler = (
   mobile,
 ) => {
   const resultsAffiliate_Temp = []  
-  const result = objetos.filter(
+  const results = objetos.filter(
     (obj2) => 
       matchCategoryWithProductAliases(obj2.Sub_Category_Name, obj.class) &&
       obj2.Type == 'products'
   )
-  const count = result.length - 1
 
-  if(count >= 0){
-    const int = Math.floor(Math.random() * count)
-    resultsAffiliate_Temp.push({
-      vista: obj,
-      affiliate: result[int],
-      add: {
-        id: parseInt(result[int]['Merchant_Product_ID']),
-        site: site,
-        date: dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss'),
-        url: url,
-        uid: uid,
-        product_site_url: result[int]['Product_URL_Web_encoded'],
-        product_image_url: result[int]['Image_URL'],
-        product_main_category_name: result[int]['Main_Category_Name'],
-        vista_keywords: obj.class
-      },
-      serv: serv,
-      size: { w: img_width, h: img_height },
-      mobile: mobile,
-    })
+  if(results.length > 0){
+    for (let result of results) {
+      resultsAffiliate_Temp.push({
+        vista: obj,
+        affiliate: result,
+        add: {
+          id: parseInt(result['Merchant_Product_ID']),
+          site: site,
+          date: dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss'),
+          url: url,
+          uid: uid,
+          product_site_url: result['Product_URL_Web_encoded'],
+          product_image_url: result['Image_URL'],
+          product_main_category_name: result['Main_Category_Name'],
+          vista_keywords: obj.class,
+          provider_name: result['Provider_Name']
+        },
+        serv: serv,
+        size: { w: img_width, h: img_height },
+        mobile: mobile,
+      })
+    }
   }
 
   return resultsAffiliate_Temp
@@ -712,36 +726,37 @@ const sport_makeup_Filler = (
  
   if (bool) {
     if (obj.class && obj.class.toLowerCase().includes('beauty')) {
-      const result = objetos.filter(
+      const results = objetos.filter(
         (obj2) => (obj2.Main_Category_Name.toLowerCase().includes('beauty') || obj2.Main_Category_Name.toLowerCase().includes('makeup') || obj2.Main_Category_Name.toLowerCase().includes('make-up'))
          && obj2.Type == 'products'
       )
-      const count = result.length - 1
 
-      if(count >= 0){
-        let int = Math.floor(Math.random() * count)
-        resultsAffiliate_Temp.push({
-          vista: obj,
-          affiliate: result[int],
-          add: {
-            id: parseInt(result[int]['Merchant_Product_ID']),
-            site: site,
-            date: dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss'),
-            url: url,
-            uid: uid,
-            product_site_url: result[int]['Product_URL_Web_encoded'],
-            product_image_url: result[int]['Image_URL'],
-            product_main_category_name: result[int]['Main_Category_Name'],
-            vista_keywords: 'Beauty,Makeup'
-          },
-          serv: serv,
-          size: { w: img_width, h: img_height },
-          mobile: mobile,
-        })
+      if(results.length > 0){
+        for (let result of results) {
+          resultsAffiliate_Temp.push({
+            vista: obj,
+            affiliate: result,
+            add: {
+              id: parseInt(result['Merchant_Product_ID']),
+              site: site,
+              date: dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss'),
+              url: url,
+              uid: uid,
+              product_site_url: result['Product_URL_Web_encoded'],
+              product_image_url: result['Image_URL'],
+              product_main_category_name: result['Main_Category_Name'],
+              vista_keywords: 'Beauty,Makeup',
+              provider_name: result['Provider_Name']
+            },
+            serv: serv,
+            size: { w: img_width, h: img_height },
+            mobile: mobile,
+          })
+        }
       }
     }
     if (obj.class && obj.class.toLowerCase().includes('sport')) {
-      const result = objetos.filter(
+      const results = objetos.filter(
         (obj2) => obj2.Category_Name
         && obj2.Category_Name.toLowerCase().includes('sport')
         && !obj2.Category_Name.toLowerCase().includes('sportswear')
@@ -749,91 +764,93 @@ const sport_makeup_Filler = (
         && obj2.label.toLowerCase().includes('sport')        
         && obj2.Type == 'products'
       )
-      const count = result.length - 1
 
-      if(count >= 0){
-        let int = Math.floor(Math.random() * count)
-        resultsAffiliate_Temp.push({
-          vista: obj,
-          affiliate: result[int],
-          add: {
-            id: parseInt(result[int]['Merchant_Product_ID']),
-            site: site,
-            date: dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss'),
-            url: url,
-            uid: uid,
-            product_site_url: result[int]['Product_URL_Web_encoded'],
-            product_image_url: result[int]['Image_URL'],
-            product_main_category_name: result[int]['Main_Category_Name'],
-            vista_keywords: 'Sport'
-          },
-          serv: serv,
-          size: { w: img_width, h: img_height },
-          mobile: mobile,
-        })
+      if(results.length > 0){
+        for (let result of results) {
+          resultsAffiliate_Temp.push({
+            vista: obj,
+            affiliate: result,
+            add: {
+              id: parseInt(result['Merchant_Product_ID']),
+              site: site,
+              date: dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss'),
+              url: url,
+              uid: uid,
+              product_site_url: result['Product_URL_Web_encoded'],
+              product_image_url: result['Image_URL'],
+              product_main_category_name: result['Main_Category_Name'],
+              vista_keywords: 'Sport',
+              provider_name: result['Provider_Name']
+            },
+            serv: serv,
+            size: { w: img_width, h: img_height },
+            mobile: mobile,
+          })
+        }
       }
     }
   }
 
   if (obj.label && (obj.label.toLowerCase().includes('lipstick') || obj.label.toLowerCase().includes('hair') || obj.label.toLowerCase().includes('face')
        ||  obj.label.toLowerCase().includes('perfume') || obj.label.toLowerCase().includes('paintbrush'))) {
-      const result = objetos.filter(
+      const results = objetos.filter(
         (obj2) => (obj2.Main_Category_Name.toLowerCase().includes('beauty') || obj2.Main_Category_Name.toLowerCase().includes('makeup') || obj2.Main_Category_Name.toLowerCase().includes('make-up'))
           && obj2.Type == 'products'
       )
-      const count = result.length - 1
       
-      if(count >= 0){
-        let int = Math.floor(Math.random() * count)
-        resultsAffiliate_Temp.push({
-          vista: obj,
-          affiliate: result[int],
-          add: {
-            id: parseInt(result[int]['Merchant_Product_ID']),
-            site: site,
-            date: dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss'),
-            url: url,
-            uid: uid,
-            product_site_url: result[int]['Product_URL_Web_encoded'],
-            product_image_url: result[int]['Image_URL'],
-            product_main_category_name: result[int]['Main_Category_Name'],
-            vista_keywords: 'Lipstick,Hair,Perfume,Paintbrush'
-          },
-          serv: serv,
-          size: { w: img_width, h: img_height },
-          mobile: mobile,
-        })
+      if(results.length > 0){
+        for (let result of results) {
+          resultsAffiliate_Temp.push({
+            vista: obj,
+            affiliate: result,
+            add: {
+              id: parseInt(result['Merchant_Product_ID']),
+              site: site,
+              date: dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss'),
+              url: url,
+              uid: uid,
+              product_site_url: result['Product_URL_Web_encoded'],
+              product_image_url: result['Image_URL'],
+              product_main_category_name: result['Main_Category_Name'],
+              vista_keywords: 'Lipstick,Hair,Perfume,Paintbrush',
+              provider_name: result['Provider_Name']
+            },
+            serv: serv,
+            size: { w: img_width, h: img_height },
+            mobile: mobile,
+          })
+        }
       }
     }
 
     if (obj.IAB && obj.label) {
-      let result = objetos.filter(
+      let results = objetos.filter(
           (obj2) => (matchCategoryWithProductAliases(obj2.Sub_Category_Name, obj.label)   
           && obj2.Type == 'products')
         )
 
-      const count = result.length - 1
-      let int = Math.floor(Math.random() * count)
-
-      if(count >= 0){
-        resultsAffiliate_Temp.push({
-          vista: obj,
-          affiliate: result[int],
-          add: {
-            id: parseInt(result[int]['Merchant_Product_ID']),
-            site: site,
-            date: dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss'),
-            url: url,
-            uid: uid,
-            product_site_url: result[int]['Product_URL_Web_encoded'],
-            product_image_url: result[int]['Image_URL'],
-            product_main_category_name: result[int]['Main_Category_Name'],
-            vista_keywords: obj.label
-          },
-          serv: serv,
-          size: { w: img_width, h: img_height },
-          mobile: mobile,
-        })
+      if(results.length > 0){
+        for (let result of results) {
+          resultsAffiliate_Temp.push({
+            vista: obj,
+            affiliate: result,
+            add: {
+              id: parseInt(result['Merchant_Product_ID']),
+              site: site,
+              date: dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss'),
+              url: url,
+              uid: uid,
+              product_site_url: result['Product_URL_Web_encoded'],
+              product_image_url: result['Image_URL'],
+              product_main_category_name: result['Main_Category_Name'],
+              vista_keywords: obj.label,
+              provider_name: result['Provider_Name']
+            },
+            serv: serv,
+            size: { w: img_width, h: img_height },
+            mobile: mobile,
+          })
+        }
       }
     }
 

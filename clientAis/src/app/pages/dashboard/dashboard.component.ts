@@ -570,6 +570,11 @@ export class DashboardComponent implements OnInit {
           type: 'string',
           filter: false,
         },
+        provider_name: {
+          title: 'Provider Name',
+          type: 'string',
+          filter: false,
+        },
         usercount: {
           title: 'Unique Visitors Count',
           type: 'string',

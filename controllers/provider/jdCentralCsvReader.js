@@ -14,17 +14,17 @@ exports.readCsv = function(data, id) {
               if (csvrow[15] && 
                 csvrow[15].toLowerCase().toLowerCase().includes(element)
               ) {
-                const product = createProducts(csvrow, element, id)
+                const product = createProducts(csvrow, element, id, 'JD Central')
                 promises.push(product)
               } else if (csvrow[17] &&
                 csvrow[17].toLowerCase().includes(element)
               ) {
-                const product = createProducts(csvrow, element, id)
+                const product = createProducts(csvrow, element, id, 'JD Central')
                 promises.push(product)
               } else if (csvrow[13] &&
                 csvrow[13].toLowerCase().toLowerCase().includes(element)
               ) {
-                const product = createProducts(csvrow, element, id)
+                const product = createProducts(csvrow, element, id, 'JD Central')
                 promises.push(product)
               }
             }
@@ -33,7 +33,7 @@ exports.readCsv = function(data, id) {
               csvrow[13] && csvrow[13].toLowerCase().includes('sport') &&
               !csvrow[15].toLowerCase().includes('sportswear')
             ) {
-              const product = createProducts(csvrow, 'sport', id)
+              const product = createProducts(csvrow, 'sport', id, 'JD Central')
               promises.push(product)
             }
           } catch(err) {

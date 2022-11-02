@@ -2,7 +2,7 @@ const db = require('../../campaigns-db/database')
 const products = db.products
 const clothing = db.clothing
 
-exports.createProducts = (csvrow, element, id) => {
+exports.createProducts = (csvrow, element, id, providerName) => {
     const objects = products.create({
       Merchant_Product_Name: csvrow[1],
       Image_URL: csvrow[2],
@@ -19,11 +19,12 @@ exports.createProducts = (csvrow, element, id) => {
       Page_ID: id,
       label: element,
       Type: 'products',
+      Provider_Name: providerName
     })
     return objects
   }
   
-  exports.createClothing = (csvrow, id, gender) => {
+  exports.createClothing = (csvrow, id, gender, providerName) => {
     const garment = clothing.create({
       Merchant_Product_Name: csvrow[1],
       Image_URL: csvrow[2],
@@ -40,6 +41,7 @@ exports.createProducts = (csvrow, element, id) => {
       Page_ID: id,
       Gender: gender,
       Type: 'clothing',
+      Provider_Name: providerName
     })
     return garment
   }

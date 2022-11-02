@@ -41,6 +41,10 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.BIGINT(11),
             allowNull: true
         },
+        provider_name: {
+            type: Sequelize.STRING,
+            allowNull: true
+        } 
     },{
         freezeTableName: true
     });

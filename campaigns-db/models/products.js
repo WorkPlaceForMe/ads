@@ -64,8 +64,12 @@ module.exports = (sequelize, Sequelize) => {
   Type:{
     type: Sequelize.STRING,
     allowNull: true
+  },
+  Provider_Name:{
+    type: Sequelize.STRING,
+    allowNull: true
   }
-    });
+  });
   
     return products;
   };

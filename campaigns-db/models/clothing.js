@@ -64,8 +64,11 @@ const clothing = sequelize.define("clothing", {
       Type:{
         type: Sequelize.STRING,
         allowNull: true
-      }
-      
+      },
+      Provider_Name:{
+        type: Sequelize.STRING,
+        allowNull: true
+      }      
     });
   
     return clothing;
