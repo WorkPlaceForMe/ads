@@ -1,0 +1,30 @@
+<html>
+  <head>
+    <script
+      type="text/javascript"
+      src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"
+    ></script>
+  </head>
+  <body>
+    <script type="text/javascript">
+      let sourceJS = new URL(document.URL);
+      let serv = sourceJS.origin;
+      const userId = localStorage.getItem("userId");
+
+      $.ajax({
+        url: `${serv}/api/iframe`,
+        type: "GET",
+        async: false,
+        data: `userId=${userId}`,
+        dataType: "json",
+        success: function (data) {
+          localStorage.setItem("userId", data.userId);
+          window.parent.postMessage({ type: 'userData', userId: data.userId, sessionId: data.sessionId }, '*')
+        },
+        error: function (e) {
+          console.error(e);
+        },
+      });
+    </script>
+  </body>
+</html>

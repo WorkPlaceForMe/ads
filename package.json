@@ -1,0 +1,59 @@
+{
+  "name": "graymatics-adscope",
+  "version": "2.3.4",
+  "private": true,
+  "scripts": {
+    "start": "node -max-old-space-size=10240 app.js",
+    "dev": "nodemon app.js",
+    "test": "node benchmark.js"
+  },
+  "authors": {
+    "author": "Alex Kaiser",
+    "co-author": "Rodrigo Garcia"
+  },
+  "dependencies": {
+    "ansi-regex": "^5.0.1",
+    "autocannon": "^7.9.0",
+    "axios": "^0.21.2",
+    "axios-retry": "^3.3.1",
+    "bcrypt": "^5.0.1",
+    "bluebird": "^3.7.2",
+    "cookie-parser": "~1.4.4",
+    "cors": "^2.8.5",
+    "crypto-js": "^4.0.0",
+    "csv-parse": "^4.16.3",
+    "csv-parser": "^3.0.0",
+    "csv-writer": "^1.6.0",
+    "dateformat": "^4.5.1",
+    "debug": "~2.6.9",
+    "express": "~4.16.1",
+    "follow-redirects": "^1.14.8",
+    "form-data": "^4.0.0",
+    "fs": "^0.0.1-security",
+    "http-errors": "~1.6.3",
+    "https": "^1.0.0",
+    "jade": "^0.29.0",
+    "json-schema": "^0.4.0",
+    "jsonwebtoken": "^8.5.1",
+    "jsprim": "^2.0.2",
+    "morgan": "~1.9.1",
+    "mysql": "^2.18.1",
+    "mysql2": "^2.3.0",
+    "node-xlsx": "^0.21.0",
+    "progress": "^2.0.3",
+    "properties-reader": "^2.2.0",
+    "redis": "^3.1.2",
+    "request": "^2.88.2",
+    "request-progress": "^3.0.0",
+    "sequelize": "^6.9.0",
+    "sequelize-cli": "^6.3.0",
+    "shelljs": "^0.8.5",
+    "stream": "^0.0.2",
+    "util": "^0.12.3",
+    "uuid": "^3.4.0"
+  },
+  "devDependencies": {
+    "eslint": "^7.31.0",
+    "nodemon": "^2.0.7"
+  }
+}

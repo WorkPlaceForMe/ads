@@ -1,0 +1,61 @@
+<div class="row">
+  <div class='col-md-12'>
+    <nb-card>  
+      <nb-card-body>
+        <span *ngIf="genericError" class="invalid-feedback" [ngStyle]="{'display': 'block', 'padding-bottom': '10px'}">{{genericError}}</span>
+        
+        <div *ngIf="!edit">
+            <p><b>If the website already registered with Accesstrade please put the same registered website name in website field</b></p>
+            <br />
+            <p><b>If the website does not exist in Accesstrade it will be registered in Accesstrade too</b></p>
+            <br />
+            <p><b>To add a new site please add this snippet into the head of the website that is being added:</b></p>
+            <p><b>{{snippet}}</b></p>
+        </div>
+
+        <form [formGroup]="registerForm" (ngSubmit)='onSubmit()'>
+            <div class="form-group">
+              <label for="nickname" class="label">Publisher Nick Name</label>
+              <input *ngIf="!edit" type="text" class="form-control" formControlName="nickname" [ngClass]="{ 'is-invalid': submitted && f.nickname.errors }" nbInput fullWidth id="nickname" autofocus placeholder="Website Nick Name" [status]='values.nickname' />
+              <input *ngIf="edit" type="text" class="form-control" formControlName="nickname" [ngClass]="{ 'is-invalid': submitted && f.nickname.errors }" nbInput fullWidth id="nickname" autofocus placeholder="Website Nick Name" [status]='values.nickname' [value]='values.nickname'/>
+              <div *ngIf="submitted && f.nickname.errors" class="invalid-feedback">
+                <div *ngIf="f.nickname.errors.required">Nick Name is required</div>
+                <div *ngIf="f.nickname.errors.pattern">Nick Name can not contain numbers or special characters.</div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="adsperimage" class="label">Max Ads Per Image</label>
+              <input type="number" min={{minPossibleAdsCountPerImage}} max={{maxPossibleAdsCountPerImage}} class="form-control" formControlName="adsperimage" [ngClass]="{ 'is-invalid': submitted && f.adsperimage.errors }" nbInput fullWidth id="adsperimage" [status]='values.adsperimage' />
+              <div *ngIf="submitted && f.adsperimage.errors" class="invalid-feedback">
+                <div *ngIf="f.adsperimage.errors.required">Max Ads Per Image is required</div>
+                <div *ngIf="f.adsperimage.errors.invalid">{{namedError}}</div>
+                <div *ngIf="f.adsperimage.errors.min || f.adsperimage.errors.max">Max Ads Per Image value will be between {{minPossibleAdsCountPerImage}} to {{maxPossibleAdsCountPerImage}}</div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="adsperpage" class="label">Default Max Ads Per Page</label>
+              <input type="number" min={{minPossibleAdsCountPerImage}} class="form-control" formControlName="adsperpage" [ngClass]="{ 'is-invalid': submitted && f.adsperpage.errors }" nbInput fullWidth id="adsperpage" [status]='values.adsperpage' />
+              <div *ngIf="submitted && f.adsperpage.errors" class="invalid-feedback">
+                <div *ngIf="f.adsperpage.errors.required">Default Max Ads Per Page is required</div>
+                <div *ngIf="f.adsperpage.errors.invalid">{{namedError}}</div>
+                <div *ngIf="f.adsperpage.errors.min">Default Max Ads Per Page value will be greater or equal to {{minPossibleAdsCountPerImage}}</div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="name" class="label">Publisher Website</label>
+              <input *ngIf="edit" type="text" class="form-control" formControlName="name" [ngClass]="{ 'is-invalid': submitted && f.name.errors }" nbInput fullWidth id="name" autofocus placeholder="Website Name" [status]='values.name' disabled="disabled" [value]='values.name' />
+              <input *ngIf="!edit" type="text" class="form-control" formControlName="name" [ngClass]="{ 'is-invalid': submitted && f.name.errors }" nbInput fullWidth id="name" autofocus placeholder="Website Name" [status]='values.name' />
+              <div *ngIf="submitted && f.name.errors" class="invalid-feedback">
+                <div *ngIf="f.name.errors.cantMatch">Publisher has been registered, try another one</div>
+                <div *ngIf="f.name.errors.required">Publisher Website is required</div>
+                <div *ngIf="f.name.errors.pattern">Enter valid website name</div>
+              </div>
+            </div>
+
+    <button [status]="'success'" nbButton class="btn-block" *ngIf="!is_saving">Save</button>
+    <button [status]="'success'" nbButton class="btn-block" *ngIf="is_saving" [nbSpinner]="is_saving" nbSpinnerSize="medium" nbSpinnerStatus="primary">&nbsp;</button>
+    </form>
+      </nb-card-body>
+      </nb-card>
+  </div>
+</div>
